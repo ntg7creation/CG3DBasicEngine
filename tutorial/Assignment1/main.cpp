@@ -11,11 +11,12 @@ int main(int argc,char *argv[])
 	const float FAR = 120.0f;
 	const int infoIndx = 2; 
 	std::list<int> x, y;
+	x.push_back(DISPLAY_WIDTH/2);
 	x.push_back(DISPLAY_WIDTH);
 	y.push_back(DISPLAY_HEIGHT);
     Display disp = Display(DISPLAY_WIDTH, DISPLAY_HEIGHT, "OPENGL");
     igl::opengl::glfw::imgui::ImGuiMenu* menu = new igl::opengl::glfw::imgui::ImGuiMenu();
-    Renderer* rndr = new Renderer(CAMERA_ANGLE, (float)DISPLAY_WIDTH/(float)DISPLAY_HEIGHT, NEAR, FAR);
+    Renderer* rndr = new Renderer(CAMERA_ANGLE, (float)DISPLAY_WIDTH/(float)DISPLAY_HEIGHT/2, NEAR, FAR);
 	Assignment1 *scn = new Assignment1();  //initializing scene
 	
     Init(disp,menu); //adding callback functions
@@ -23,17 +24,11 @@ int main(int argc,char *argv[])
     rndr->Init(scn,x,y,1,menu); // adding scene and viewports to the renderer
     disp.SetRenderer(rndr);
 
-	rndr->AddViewport(0, 0, DISPLAY_WIDTH, DISPLAY_HEIGHT);
-	rndr->AddViewport(0, 0, DISPLAY_WIDTH, DISPLAY_HEIGHT);
-	rndr->AddDraw(2, 0, 3, 0, rndr->inAction2 | rndr->scissorTest | rndr->blend ); // for picking
-	rndr->AddDraw(2, 0, 3, 0, rndr->inAction2 | rndr->stencilTest ); // for stencil
-	rndr->CopyDraw(0,rndr->viewport,2);  // for writing to stencil
-	rndr->SetDrawFlag(4, rndr->scaleAbit | rndr->stencil2);
-	rndr->ClearDrawFlag(4, rndr->depthTest | rndr->passStencil | rndr->toClear);
     disp.launch_rendering(rndr);
 
 	delete scn;
 	delete rndr;
+	delete menu;
 	
 	return 0;
 }

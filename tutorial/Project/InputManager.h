@@ -12,9 +12,6 @@
 			Renderer* rndr = (Renderer*)glfwGetWindowUserPointer(window);
 			Project* scn = (Project*)rndr->GetScene();
 			double x2, y2;
-			rndr->ClearPickedShapes(2);
-			if(button == GLFW_MOUSE_BUTTON_RIGHT && !rndr->IsMany())
-				rndr->Pressed();
 			
 			glfwGetCursorPos(window, &x2, &y2);
 			rndr->UpdatePress(x2, y2);
@@ -33,33 +30,7 @@
 		else
 		{
 			Renderer* rndr = (Renderer*)glfwGetWindowUserPointer(window);
-
-			if (button == GLFW_MOUSE_BUTTON_RIGHT)
-			{
-				if (rndr->IsPicked())
-				{
-					rndr->Pressed();
-					rndr->UnPick(2);
-				}
-				else if (rndr->IsPressed())
-				{
-					
-					rndr->PickMany(2);
-					if(rndr->IsPicked())
-						rndr->OutLine();
-					
-					rndr->Pressed();
-				}
-			}
-			else
-			{
-				if(rndr->IsPressed())
-					rndr->Pressed();
-
-				rndr->UnPick(2);
-				
-				
-			}
+			rndr->UnPick(2);
 		}
 	}
 	
@@ -72,15 +43,11 @@
 		{
 			rndr->UpdateZpos((int)yoffset);
 			rndr->MouseProccessing(GLFW_MOUSE_BUTTON_MIDDLE);
-			rndr->OutLine();
 		}
 		else
 		{
 			rndr->MoveCamera(0, rndr->zTranslate, (float)yoffset);
-			rndr->OutLine();
 		}
-		//rndr->FreeShapes(2);
-		//scn->ShapeTransformation(scn->zTranslate,(float)yoffset);
 		
 	}
 	
@@ -105,7 +72,7 @@
 			}
 			else if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_RELEASE && rndr->IsPicked() && rndr->IsMany())
 					rndr->MouseProccessing(GLFW_MOUSE_BUTTON_RIGHT);
-//			rndr->OutLine(); // create a bug for calling draw before loading all meshes
+
 		}
 	}
 
@@ -138,52 +105,41 @@
 				break;
 
 			case GLFW_KEY_UP:
-				rndr->MoveCamera(0, scn->xRotate, 1.0f);
-				rndr->OutLine();
+				rndr->MoveCamera(0, scn->xRotate, 0.05f);
+				
 				break;
 			case GLFW_KEY_DOWN:
 				//scn->shapeTransformation(scn->xGlobalRotate,-5.f);
 				//cout<< "down: "<<endl;
-				rndr->MoveCamera(0, scn->xRotate, -1.0f);
-				rndr->OutLine();
+				rndr->MoveCamera(0, scn->xRotate, -0.05f);
 				break;
 			case GLFW_KEY_LEFT:
-				rndr->MoveCamera(0, scn->yRotate, 1.0f);
-				rndr->OutLine();
+				rndr->MoveCamera(0, scn->yRotate, 0.05f);
 				break;
 			case GLFW_KEY_RIGHT:
 				//scn->shapeTransformation(scn->xGlobalRotate,-5.f);
 				//cout<< "down: "<<endl;
-				rndr->MoveCamera(0, scn->yRotate, -1.0f);
-				rndr->OutLine();
+				rndr->MoveCamera(0, scn->yRotate, -0.05f);
 				break;
 			case GLFW_KEY_U:
 				rndr->MoveCamera(0, scn->yTranslate, 0.25f);
-				rndr->OutLine();
 				break;
-				
 			case GLFW_KEY_D:
 				rndr->MoveCamera(0, scn->yTranslate, -0.25f);
-				rndr->OutLine();
 				break;
-			
 			case GLFW_KEY_L:
 				rndr->MoveCamera(0, scn->xTranslate, -0.25f);
-				rndr->OutLine();
 				break;
 			
 			case GLFW_KEY_R:
 				rndr->MoveCamera(0, scn->xTranslate, 0.25f);
-				rndr->OutLine();
 				break;
 			
 			case GLFW_KEY_B:
 				rndr->MoveCamera(0, scn->zTranslate, 0.5f);
-				rndr->OutLine();
 				break;
 			case GLFW_KEY_F:
 				rndr->MoveCamera(0, scn->zTranslate, -0.5f);
-				rndr->OutLine();
 				break;
 			default:
 				break;

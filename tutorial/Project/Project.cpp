@@ -48,9 +48,9 @@ void Project::Init()
     AddShape(Tethrahedron, 1, LINE_LOOP);
 
 //    AddShape(Cube, -1, TRIANGLES);
-	AddShapeFromFile("data/monkey3.obj", -1, TRIANGLES);
+	AddShapeFromFile("data/sphere.obj", -1, TRIANGLES);
 	//AddShapeFromFile("../res/objs/Cat_v1.obj", -1, TRIANGLES);
-	AddShape(Plane, -2, TRIANGLES,2);
+	AddShape(Plane, -2, TRIANGLES,3);
 
 	SetShapeShader(1, 2);
 	SetShapeShader(2, 2);
@@ -67,8 +67,6 @@ void Project::Init()
 	pickedShape = 1;
 	ShapeTransformation(xTranslate, 10,0);
 
-	pickedShape = 4;
-	ShapeTransformation(xTranslate, 10,0);
 	pickedShape = 5;
 	ShapeTransformation(xTranslate, -10,0);
 	pickedShape = 6;
