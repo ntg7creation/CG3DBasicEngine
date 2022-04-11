@@ -53,9 +53,9 @@ void Assignment1::Init()
 	//pickedShape = -1;
 	SetShapeStatic(0);
 	coeffs[0] = 1;
-	coeffs[1] = 1;
-	coeffs[2] = 1;
-	coeffs[3] = 1;
+	coeffs[1] = 0;
+	coeffs[2] = 0;
+	coeffs[3] = -1;
 	roots = FindCubicRoots();
 	std::cout << "the roots are:\n" << roots << std::endl;
 	//std::cout << "first " << coeffs[0] * roots[0] * roots[0] * roots[0] + coeffs[1] * roots[0] * roots[0] + coeffs[2] * roots[0] + coeffs[3] << std::endl;
@@ -91,31 +91,50 @@ void Assignment1::Update(const Eigen::Matrix4f& Proj, const Eigen::Matrix4f& Vie
 	int g = ((shapeIndx + 1) & 0x0000FF00) >> 8;
 	int b = ((shapeIndx + 1) & 0x00FF0000) >> 16;
 
-	s->SetUniform1f("ScreenScaleX", 10);
-	s->SetUniform1f("ScreenScaleY", 10);
+	s->SetUniform1f("ScreenScaleX", 4);
+	s->SetUniform1f("ScreenScaleY", 4);
 
 	s->SetUniform1f("offsetx", -0.5f);
 	s->SetUniform1f("offsety", -0.5f);
 
-	
+	/*
 	s->SetUniform1f("root1_x", roots[0].real());
 	s->SetUniform1f("root2_x", roots[1].real());
 	s->SetUniform1f("root3_x", roots[2].real());
 	s->SetUniform1f("root1_y", roots[0].imag());
 	s->SetUniform1f("root2_y", roots[1].imag());
 	s->SetUniform1f("root3_y", roots[2].imag());
-	/*
-	s->SetUniform1f("root1_x", -0.25);
-	s->SetUniform1f("root2_x", 0.0);
-	s->SetUniform1f("root3_x", 0.25);
-	s->SetUniform1f("root1_y", -0.25);
-	s->SetUniform1f("root2_y", 0.25);
-	s->SetUniform1f("root3_y", -0.25);
 	*/
-	s->SetUniform1f("a", coeffs[0].real());
-	s->SetUniform1f("b", coeffs[1].real());
-	s->SetUniform1f("c", coeffs[2].real());
-	s->SetUniform1f("d", coeffs[3].real());
+	
+	//s->SetUniform1f("root1_x", 0.0);
+	//s->SetUniform1f("root1_y", -1.0);
+
+	//s->SetUniform1f("root2_x", 0.0);
+	//s->SetUniform1f("root2_y", 1.0);
+
+	//s->SetUniform1f("root3_x", -1.0);
+	//s->SetUniform1f("root3_y", 0.0);
+
+
+		
+	s->SetUniform1f("root1_x", -0.5);
+	s->SetUniform1f("root1_y", -sqrt(3)/2);
+
+	s->SetUniform1f("root2_x", -0.5);
+	s->SetUniform1f("root2_y", sqrt(3)/2);
+
+	s->SetUniform1f("root3_x", 1.0);
+	s->SetUniform1f("root3_y", 0.0);
+	
+	//s->SetUniform1f("a", coeffs[0].real());
+	//s->SetUniform1f("b", coeffs[1].real());
+	//s->SetUniform1f("c", coeffs[2].real());
+	//s->SetUniform1f("d", coeffs[3].real());
+
+	s->SetUniform1f("a", 1);
+	s->SetUniform1f("b", 0);
+	s->SetUniform1f("c", 0);
+	s->SetUniform1f("d", -1);
 	
 	s->SetUniform1f("n", iteration);
 
