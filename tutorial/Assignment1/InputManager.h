@@ -105,13 +105,16 @@
 				break;
 
 			case GLFW_KEY_UP:
-				rndr->MoveCamera(0, scn->xRotate, 0.05f);
+				scn->iteration ++;
+				//rndr->MoveCamera(0, scn->xRotate, 0.05f);
 				
 				break;
 			case GLFW_KEY_DOWN:
+				if (scn->iteration > 0)
+					scn->iteration--;
 				//scn->shapeTransformation(scn->xGlobalRotate,-5.f);
 				//cout<< "down: "<<endl;
-				rndr->MoveCamera(0, scn->xRotate, -0.05f);
+				//rndr->MoveCamera(0, scn->xRotate, -0.05f);
 				break;
 			case GLFW_KEY_LEFT:
 				rndr->MoveCamera(0, scn->yRotate, 0.05f);
