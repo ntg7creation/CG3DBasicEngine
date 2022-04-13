@@ -97,14 +97,14 @@ void Assignment1::Update(const Eigen::Matrix4f& Proj, const Eigen::Matrix4f& Vie
 	s->SetUniform1f("offsetx", -0.5f);
 	s->SetUniform1f("offsety", -0.5f);
 
-	/*
+	
 	s->SetUniform1f("root1_x", roots[0].real());
 	s->SetUniform1f("root2_x", roots[1].real());
 	s->SetUniform1f("root3_x", roots[2].real());
 	s->SetUniform1f("root1_y", roots[0].imag());
 	s->SetUniform1f("root2_y", roots[1].imag());
 	s->SetUniform1f("root3_y", roots[2].imag());
-	*/
+	
 	
 	//s->SetUniform1f("root1_x", 0.0);
 	//s->SetUniform1f("root1_y", -1.0);
@@ -117,14 +117,14 @@ void Assignment1::Update(const Eigen::Matrix4f& Proj, const Eigen::Matrix4f& Vie
 
 
 		
-	s->SetUniform1f("root1_x", -0.5);
-	s->SetUniform1f("root1_y", -sqrt(3)/2);
+	//s->SetUniform1f("root1_x", -0.5);
+	//s->SetUniform1f("root1_y", -sqrt(3)/2);
 
-	s->SetUniform1f("root2_x", -0.5);
-	s->SetUniform1f("root2_y", sqrt(3)/2);
+	//s->SetUniform1f("root2_x", -0.5);
+	//s->SetUniform1f("root2_y", sqrt(3)/2);
 
-	s->SetUniform1f("root3_x", 1.0);
-	s->SetUniform1f("root3_y", 0.0);
+	//s->SetUniform1f("root3_x", 1.0);
+	//s->SetUniform1f("root3_y", 0.0);
 	
 	//s->SetUniform1f("a", coeffs[0].real());
 	//s->SetUniform1f("b", coeffs[1].real());
