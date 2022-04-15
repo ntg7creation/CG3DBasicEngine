@@ -3,6 +3,8 @@ build
 external
 
 # Files
+!out/build/x64-Debug/shaders/myShader.glsl
+!out/build/x64-Debug/shaders/myShader.vs
 
 .vs/CG3DBasicEngine/v17/ipch/AutoPCH/a11ecbd18ada7abb/ASSIGNMENT1.ipch
 

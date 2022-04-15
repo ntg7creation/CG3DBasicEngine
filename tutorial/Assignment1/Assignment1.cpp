@@ -1,6 +1,7 @@
 #include "Assignment1.h"
 #include <iostream>
 
+using namespace std;
 
 static void printMat(const Eigen::Matrix4d& mat)
 {
@@ -13,10 +14,12 @@ static void printMat(const Eigen::Matrix4d& mat)
 	}
 }
 
-Assignment1::Assignment1()
+Assignment1::Assignment1() : COEFF_INC(0.01)
 {
 	time = 0;
 	coeffs = Eigen::Vector4cf::Zero();
+
+	iterationNum = 10;
 }
 
 //Assignment1::Assignment1(float angle ,float relationWH, float near, float far) : Scene(angle,relationWH,near,far)
@@ -47,64 +50,72 @@ void Assignment1::Init()
 	SetShapeMaterial(myscreen, 0);
 	data_list[0]->MyScale(Eigen::Vector3d(4, 4, 4));
 	
-
 	//pickedShape = 0;
 	//ShapeTransformation(xTranslate,3,0);
 	//pickedShape = -1;
+
 	SetShapeStatic(0);
+
 	coeffs[0] = 1;
 	coeffs[1] = 0;
 	coeffs[2] = 0;
 	coeffs[3] = -1;
+
 	roots = FindCubicRoots();
 	std::cout << "the roots are:\n" << roots << std::endl;
-	//std::cout << "first " << coeffs[0] * roots[0] * roots[0] * roots[0] + coeffs[1] * roots[0] * roots[0] + coeffs[2] * roots[0] + coeffs[3] << std::endl;
-	//std::cout << "second " << coeffs[0] * roots[1] * roots[1] * roots[1] + coeffs[1] * roots[1] * roots[1] + coeffs[2] * roots[1] + coeffs[3] << std::endl;
-	//std::cout << "third " << coeffs[0] * roots[2] * roots[2] * roots[2] + coeffs[1] * roots[2] * roots[2] + coeffs[2] * roots[2] + coeffs[3] << std::endl;
 
 	std::cout << "first " <<  roots[0]  << std::endl;
 	std::cout << "second " << roots[1] << std::endl;
-	std::cout << "third " <<roots[2] << std::endl;
+	std::cout << "third " << roots[2] << std::endl;
 
-	root1_x = (coeffs[0] * roots[0] * roots[0] * roots[0] + coeffs[1] * roots[0] * roots[0] + coeffs[2] * roots[0] + coeffs[3]).real();
-	root1_y = (coeffs[0] * roots[0] * roots[0] * roots[0] + coeffs[1] * roots[0] * roots[0] + coeffs[2] * roots[0] + coeffs[3]).imag();
-
-	root2_x = (coeffs[0] * roots[1] * roots[1] * roots[1] + coeffs[1] * roots[1] * roots[1] + coeffs[2] * roots[1] + coeffs[3]).real();
-	root2_y = (coeffs[0] * roots[1] * roots[1] * roots[1] + coeffs[1] * roots[1] * roots[1] + coeffs[2] * roots[1] + coeffs[3]).imag();
-
-	root3_x = (coeffs[0] * roots[2] * roots[2] * roots[2] + coeffs[1] * roots[2] * roots[2] + coeffs[2] * roots[2] + coeffs[3]).real();
-	root3_y = (coeffs[0] * roots[2] * roots[2] * roots[2] + coeffs[1] * roots[2] * roots[2] + coeffs[2] * roots[2] + coeffs[3]).imag();
-
-
-
+	root1_x = roots[0].real(); // (coeffs[0] * roots[0] * roots[0] * roots[0] + coeffs[1] * roots[0] * roots[0] + coeffs[2] * roots[0] + coeffs[3]).real();
+	root1_y = roots[0].imag(); // (coeffs[0] * roots[0] * roots[0] * roots[0] + coeffs[1] * roots[0] * roots[0] + coeffs[2] * roots[0] + coeffs[3]).imag();
+			  				   
+	root2_x = roots[1].real(); // (coeffs[0] * roots[1] * roots[1] * roots[1] + coeffs[1] * roots[1] * roots[1] + coeffs[2] * roots[1] + coeffs[3]).real();
+	root2_y = roots[1].imag(); // (coeffs[0] * roots[1] * roots[1] * roots[1] + coeffs[1] * roots[1] * roots[1] + coeffs[2] * roots[1] + coeffs[3]).imag();
+			  				   
+	root3_x = roots[2].real(); // (coeffs[0] * roots[2] * roots[2] * roots[2] + coeffs[1] * roots[2] * roots[2] + coeffs[2] * roots[2] + coeffs[3]).real();
+	root3_y = roots[2].imag(); // (coeffs[0] * roots[2] * roots[2] * roots[2] + coeffs[1] * roots[2] * roots[2] + coeffs[2] * roots[2] + coeffs[3]).imag();
 
 	//SetShapeViewport(6, 1);
-//	ReadPixel(); //uncomment when you are reading from the z-buffer
+	//	ReadPixel(); //uncomment when you are reading from the z-buffer
 }
 
 void Assignment1::Update(const Eigen::Matrix4f& Proj, const Eigen::Matrix4f& View, const Eigen::Matrix4f& Model, unsigned int  shaderIndx, unsigned int shapeIndx)
 {
-
-
 	Shader* s = shaders[shaderIndx];
 	int r = ((shapeIndx + 1) & 0x000000FF) >> 0;
 	int g = ((shapeIndx + 1) & 0x0000FF00) >> 8;
 	int b = ((shapeIndx + 1) & 0x00FF0000) >> 16;
 
-	s->SetUniform1f("ScreenScaleX", 4);
-	s->SetUniform1f("ScreenScaleY", 4);
+	// s->SetUniform1f("ScreenScaleX", 4);
+	// s->SetUniform1f("ScreenScaleY", 4);
 
-	s->SetUniform1f("offsetx", -0.5f);
-	s->SetUniform1f("offsety", -0.5f);
+	//s->SetUniform1f("offsetx", -0.5f);
+	//s->SetUniform1f("offsety", -0.5f);
 
 	
 	s->SetUniform1f("root1_x", roots[0].real());
-	s->SetUniform1f("root2_x", roots[1].real());
-	s->SetUniform1f("root3_x", roots[2].real());
 	s->SetUniform1f("root1_y", roots[0].imag());
+
+	s->SetUniform1f("root2_x", roots[1].real());
 	s->SetUniform1f("root2_y", roots[1].imag());
+
+	s->SetUniform1f("root3_x", roots[2].real());
 	s->SetUniform1f("root3_y", roots[2].imag());
 	
+
+	s->SetUniform1f("a", coeffs[0].real());
+	s->SetUniform1f("b", coeffs[1].real());
+	s->SetUniform1f("c", coeffs[2].real());
+	s->SetUniform1f("d", coeffs[3].real());
+
+
+	s->SetUniform1i("iterationNum", iterationNum);
+
+
+	//s->SetUniform1f("time", time);
+	//s->SetUniform1f("y", y);
 	
 	//s->SetUniform1f("root1_x", 0.0);
 	//s->SetUniform1f("root1_y", -1.0);
@@ -130,17 +141,6 @@ void Assignment1::Update(const Eigen::Matrix4f& Proj, const Eigen::Matrix4f& Vie
 	//s->SetUniform1f("b", coeffs[1].real());
 	//s->SetUniform1f("c", coeffs[2].real());
 	//s->SetUniform1f("d", coeffs[3].real());
-
-	s->SetUniform1f("a", 1);
-	s->SetUniform1f("b", 0);
-	s->SetUniform1f("c", 0);
-	s->SetUniform1f("d", -1);
-	
-	s->SetUniform1f("n", iteration);
-
-	s->SetUniform1f("time", time);
-
-	s->SetUniform1f("y", y);
 
 
 	s->Bind();
@@ -197,6 +197,8 @@ void Assignment1::ScaleAllShapes(float amt, int viewportIndx)
 		}
 	}
 }
+
+
 Eigen::Vector3cf Assignment1::FindCubicRoots()
 {
 	Eigen::Vector2cf reduceCoeffs = Eigen::Vector2cf::Zero();
@@ -221,6 +223,7 @@ Eigen::Vector3cf Assignment1::FindCubicRoots()
 
 	return roots;
 }
+
 
 std::complex<float> Assignment1::NewtonCubicRoot(std::complex<float> num)
 {
@@ -247,6 +250,8 @@ std::complex<float> Assignment1::NewtonCubicRoot(std::complex<float> num)
 	return root;
 }
 
+
+
 Eigen::Vector3cf Assignment1::FindRootsOfReduceEquation(Eigen::Vector2cf reduceCoeffs)
 {
 	Eigen::Vector3cf roots = Eigen::Vector3cf::Zero();
@@ -258,6 +263,38 @@ Eigen::Vector3cf Assignment1::FindRootsOfReduceEquation(Eigen::Vector2cf reduceC
 	roots[2] = -p * std::complex<float>(std::cosf(1.0f * 3.14159f / 3.0f), std::sinf(1 * 3.14159f / 3.0f)) + n * std::complex<float>(std::cosf(2.0f * 3.14159f / 3.0f), std::sinf(2 * 3.14159f / 3.0f));
 	return roots;
 }
+
+
 Assignment1::~Assignment1(void)
 {
+}
+
+
+void Assignment1::increaseIterationNum(void)
+{
+	++iterationNum;
+	cout << "incrementing iterationNum, now: " << iterationNum << endl;
+}
+
+
+void Assignment1::decreaseIterationNum(void)
+{
+	if (iterationNum > 0) {
+		--iterationNum;
+		cout << "decrementing iterationNum, now: " << iterationNum << endl;
+	}
+}
+
+
+void Assignment1::incrementCoefficient(SelectedCoefficient sc)
+{
+	coeffs[sc] += COEFF_INC; // 0.01;
+	cout << "incrementing coeff[" << sc << "], now: " << coeffs[sc] << endl;
+}
+
+
+void Assignment1::decrementCoefficient(SelectedCoefficient sc)
+{
+	coeffs[sc] -= COEFF_INC; // 0.01;
+	cout << "decrementing coeff[" << sc << "], now: " << coeffs[sc] << endl;
 }

@@ -14,8 +14,8 @@ int main(int argc,char *argv[])
 	//x.push_back(DISPLAY_WIDTH);
 	x.push_back(DISPLAY_WIDTH);
 	y.push_back(DISPLAY_HEIGHT);
-    Display disp = Display(DISPLAY_WIDTH, DISPLAY_HEIGHT, "OPENGL");
-    igl::opengl::glfw::imgui::ImGuiMenu* menu = new igl::opengl::glfw::imgui::ImGuiMenu();
+    Display disp = Display(DISPLAY_WIDTH, DISPLAY_HEIGHT, "Assignment 1");
+	igl::opengl::glfw::imgui::ImGuiMenu* menu = nullptr; //new igl::opengl::glfw::imgui::ImGuiMenu();
     Renderer* rndr = new Renderer(CAMERA_ANGLE, (float)DISPLAY_WIDTH/(float)DISPLAY_HEIGHT/2, NEAR, FAR);
 	Assignment1 *scn = new Assignment1();  //initializing scene
 	

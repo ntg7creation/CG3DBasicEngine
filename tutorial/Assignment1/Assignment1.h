@@ -1,13 +1,28 @@
 #pragma once
 #include "igl/opengl/glfw/Viewer.h"
 
+enum SelectedCoefficient {
+	A = 0,
+	B,
+	C,
+	D,
+	NONE
+};
+
 class Assignment1 : public igl::opengl::glfw::Viewer
 {
 	float time;
 	Eigen::Vector3cf FindRootsOfReduceEquation(Eigen::Vector2cf reduceCoeffs);
 	std::complex<float> Assignment1::NewtonCubicRoot(std::complex<float> num);
+	size_t iterationNum;
+	const float COEFF_INC;
 
 public:
+	void increaseIterationNum(void);
+	void decreaseIterationNum(void);
+
+	void incrementCoefficient(SelectedCoefficient sc);
+	void decrementCoefficient(SelectedCoefficient sc);
 
 	Eigen::Vector4cf coeffs;
 	float root1_x, root1_y, root2_x, root2_y, root3_x, root3_y;
