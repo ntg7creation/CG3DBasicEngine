@@ -42,67 +42,58 @@ vec2 trueRoot2 = vec2(root2_x,root2_y);
 vec2 trueRoot3 = vec2(root3_x,root3_y);
 
 
+const float thresholdDistanceFromRoot = 0.3;//length(vec2(1,1));
+
+
 bool isntTrueRoot(vec2 z) {
 	return 
-		z != trueRoot1 &&
-		z != trueRoot2 &&
-		z != trueRoot3;
+		length(z - trueRoot1) >= thresholdDistanceFromRoot &&
+		length(z - trueRoot2) >= thresholdDistanceFromRoot &&
+		length(z - trueRoot3) >= thresholdDistanceFromRoot;
 }
 
 
 vec3 newton_raphson(vec2 z, int iterationNum) {
-	int k = 1;
-	vec2 z0 = z;
+	int k = 0;
 
-	for( ;k<=iterationNum;k++)
+	for( ; k < iterationNum && isntTrueRoot(z); k++)
 	{
-	
-		//z0= z0 -
-		//x^3 - 3xy *a
-		//x^2-y^2 * b
-		//xc
-		
-		//yi
-		//3x^2y - y^3 * a
-		//2yx *b
-		//yc
-		vec2 z_f = vec2(	//x
-				a * (z0.x*z0.x*z0.x -3*z0.x*z0.y*z0.y) + 
-				b * (z0.x*z0.x -z0.y*z0.y) +
-				c * (z0.x)+
-				d
-				,
-				//yi
-				a * (3*z0.x*z0.x*z0.y - z0.y*z0.y*z0.y)+
-				b * (2*z0.y*z0.x) +
-				c * (z0.y));
-				
-				//xcords - 3ax^2 - 3ay^2 +2bx +c  
-				// ycords - 6ayx + 2by +c				
+		float x = z.x;
+		float y = z.y;
+
+		vec2 z_f = vec2(
+			a * (x*x*x -3*x*y*y) + 
+			b * (x*x -y*y) +
+			c * x +
+			d,
+
+			a * (3*x*x*y -y*y*y) + 
+			b * (2*x*y) +
+			c * y
+		);	
 				  
-		vec2 z_f_tag = vec2(	
-						//x
-						3*a*(z0.x*z0.x - z0.y*z0.y)+
-						2*b*(z0.x)+
-						c
-						,
-						//yi
-						6*a*z0.y*z0.x+
-						2*b* z0.y +
-						c);
-		
+		vec2 z_f_tag = vec2(
+			3*a * (x*x -y*y) +
+			2*b * x +
+			c,
+
+			3*a * (2*x*y) +
+			2*b * y
+		);
+
+		vec2 z1 = z_f;
+		vec2 z2 = z_f_tag;
+		float z2_abs = (z2.x*z2.x + z2.y*z2.y);
+
 		vec2 z_div = vec2(
-						(z_f.x*z_f_tag.x + z_f.y*z_f_tag.y)/
-						(z_f_tag.x*z_f_tag.x + z_f_tag.y*z_f_tag.y)
-						,
-						(z_f.y*z_f_tag.x - z_f.x*z_f_tag.y)/
-						(z_f_tag.x*z_f_tag.x + z_f_tag.y*z_f_tag.y)
-						); 
+			(z1.x*z2.x + z1.y*z2.y)/z2_abs,
+			(z1.y*z2.x - z1.x*z2.y)/z2_abs
+		);
 		
-		z0 = z0 - z_div;
+		z = z - z_div;
 	}
 
-	return vec3(z0.x, z0.y, k);
+	return vec3(z.x, z.y, k);
 }
 
 
@@ -117,7 +108,7 @@ void setColorFromNewtonRaphson(vec2 z_k, int k) {
 	if(distToRoot3 < distToRoot2 && distToRoot3 < distToRoot1)
 		Color = color3;
 
-	Color *= clamp(pow(0.95, k), 0.75,1);
+	Color *= clamp(pow(0.9, floor(k)), 0.5, 1);
 }
 
 

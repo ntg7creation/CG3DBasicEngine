@@ -115,9 +115,9 @@ void Assignment1::Update(const Eigen::Matrix4f& Proj, const Eigen::Matrix4f& Vie
 	s->SetUniform1f("c", coeffs[2].real());
 	s->SetUniform1f("d", coeffs[3].real());
 
-	// s->SetUniform4f("color1", 1, 0, 0, 0);
-	// s->SetUniform4f("color2", 0, 1, 0, 0);
-	// s->SetUniform4f("color3", 0, 0, 1, 0);
+	/*s->SetUniform4f("color1", 1, 0, 0, 0);
+	s->SetUniform4f("color2", 0, 1, 0, 0);
+	s->SetUniform4f("color3", 0, 0, 1, 0);*/
 	s->SetUniform4f("color1", 15 / 255.0f, 32 / 255.0f, 67 / 255.0f, 0);
 	s->SetUniform4f("color2", 122 / 255.0f, 207 / 255.0f, 221 / 255.0f, 0);
 	s->SetUniform4f("color3", 213 / 255.0f, 164 / 255.0f, 88 / 255.0f, 0);

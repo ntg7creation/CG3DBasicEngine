@@ -97,7 +97,7 @@ void glfw_scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 	else
 	{
 		scn->zoomScreen( -yoffset );
-		//rndr->MoveCamera(0, rndr->zTranslate, (float)yoffset);
+		////rndr->MoveCamera(0, rndr->zTranslate, (float)yoffset);
 	}
 		
 }
