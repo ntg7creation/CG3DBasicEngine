@@ -14,12 +14,19 @@ static void printMat(const Eigen::Matrix4d& mat)
 	}
 }
 
-Assignment1::Assignment1() : COEFF_INC(0.01)
+Assignment1::Assignment1(float _width, float _height) : COEFF_INC(0.01), screenWidth(_width), screenHeight(_height)
 {
 	time = 0;
 	coeffs = Eigen::Vector4cf::Zero();
 
-	iterationNum = 10;
+	iterationNum = 0;
+	screenMod.scaling = 2;
+	screenMod.xOffset = -0.5;
+	screenMod.yOffset = -0.5;
+
+	// screenMod.scaling = 1;
+	// screenMod.xOffset = 0;
+	// screenMod.yOffset = 0;
 }
 
 //Assignment1::Assignment1(float angle ,float relationWH, float near, float far) : Scene(angle,relationWH,near,far)
@@ -91,6 +98,11 @@ void Assignment1::Update(const Eigen::Matrix4f& Proj, const Eigen::Matrix4f& Vie
 	// s->SetUniform1f("ScreenScaleX", 4);
 	// s->SetUniform1f("ScreenScaleY", 4);
 
+	s->SetUniform1f("screenScaling", screenMod.scaling);
+	s->SetUniform1f("xOffset", screenMod.xOffset);
+	s->SetUniform1f("yOffset", screenMod.yOffset);
+
+
 	//s->SetUniform1f("offsetx", -0.5f);
 	//s->SetUniform1f("offsety", -0.5f);
 
@@ -110,6 +122,14 @@ void Assignment1::Update(const Eigen::Matrix4f& Proj, const Eigen::Matrix4f& Vie
 	s->SetUniform1f("c", coeffs[2].real());
 	s->SetUniform1f("d", coeffs[3].real());
 
+
+	// s->SetUniform4f("color1", 1, 0, 0, 0);
+	// s->SetUniform4f("color2", 0, 1, 0, 0);
+	// s->SetUniform4f("color3", 0, 0, 1, 0);
+
+	s->SetUniform4f("color1", 15 / 255.0f, 32 / 255.0f, 67 / 255.0f, 0);
+	s->SetUniform4f("color2", 122 / 255.0f, 207 / 255.0f, 221 / 255.0f, 0);
+	s->SetUniform4f("color3", 213 / 255.0f, 164 / 255.0f, 88 / 255.0f, 0);
 
 	s->SetUniform1i("iterationNum", iterationNum);
 
@@ -269,6 +289,23 @@ Assignment1::~Assignment1(void)
 {
 }
 
+
+void Assignment1::zoomScreen(double offset)
+{
+	double newVal = screenMod.scaling + offset/20;
+
+	if (newVal > 0) {
+		screenMod.scaling = (float)newVal;
+	}
+
+	cout << "screenZoom called, offset=" << offset << ", now scaling by : " << screenMod.scaling << endl;
+}
+
+void Assignment1::setScreenOffset(double xoffset, double yoffset)
+{
+	screenMod.xOffset = (float)(xoffset / screenWidth);
+	screenMod.yOffset = (float)(yoffset / screenHeight);
+}
 
 void Assignment1::increaseIterationNum(void)
 {

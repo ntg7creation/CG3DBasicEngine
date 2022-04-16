@@ -9,6 +9,13 @@ enum SelectedCoefficient {
 	NONE
 };
 
+struct ScreenModification {
+	float xOffset;
+	float yOffset;
+	float scaling;
+};
+
+
 class Assignment1 : public igl::opengl::glfw::Viewer
 {
 	float time;
@@ -16,8 +23,14 @@ class Assignment1 : public igl::opengl::glfw::Viewer
 	std::complex<float> Assignment1::NewtonCubicRoot(std::complex<float> num);
 	size_t iterationNum;
 	const float COEFF_INC;
-
+	ScreenModification screenMod;
+	float screenHeight;
+	float screenWidth;
+	
 public:
+	void zoomScreen(double offset);
+	void setScreenOffset(double xoffset, double yoffset);
+
 	void increaseIterationNum(void);
 	void decreaseIterationNum(void);
 
@@ -29,7 +42,7 @@ public:
 	int iteration =0;
 	Eigen::Vector3cf roots;
 	float x, y;
-	Assignment1();
+	Assignment1(float _width, float _height);
 	//	Assignment1(float angle,float relationWH,float near, float far);
 	void Init();
 	void Update(const Eigen::Matrix4f& Proj, const Eigen::Matrix4f& View, const Eigen::Matrix4f& Model, unsigned int  shaderIndx, unsigned int shapeIndx);

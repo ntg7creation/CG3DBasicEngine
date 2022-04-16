@@ -5,9 +5,16 @@
 #include "imgui/imgui.h"
 
 
+using namespace std;
+
+
 SelectedCoefficient selectedCoefficient = NONE;
 
-using namespace std;
+struct ScreenCoordinates {
+	double x;
+	double y;
+} startingMousePosition;
+
 
 void glfw_mouse_callback(GLFWwindow* window,int button, int action, int mods)
 {	
@@ -21,20 +28,59 @@ void glfw_mouse_callback(GLFWwindow* window,int button, int action, int mods)
 		rndr->UpdatePress(x2, y2);
 		if (rndr->Picking((int)x2, (int)y2))
 		{
+			//cout << "[glfw_mouse_callback] if" << endl;
+
 			rndr->UpdatePosition(x2, y2);
 			if(button == GLFW_MOUSE_BUTTON_LEFT)
 				rndr->Pressed();
 		}
 		else
 		{
+			startingMousePosition.x = x2;
+			startingMousePosition.y = y2;
+
+			cout << "[glfw_mouse_callback] started holding mouse at coords: " << startingMousePosition.x << "," << startingMousePosition.y << endl;
+
+
 			rndr->UnPick(2);
 		}
 		
 	}
 	else
 	{
+		cout << "[glfw_mouse_callback] stopped holding mouse" << endl;
+
 		Renderer* rndr = (Renderer*)glfwGetWindowUserPointer(window);
 		rndr->UnPick(2);
+	}
+}
+
+void glfw_cursor_position_callback(GLFWwindow* window, double xpos, double ypos)
+{
+	Renderer* rndr = (Renderer*)glfwGetWindowUserPointer(window);
+	Assignment1* scn = (Assignment1*)rndr->GetScene();
+
+	rndr->UpdatePosition((float)xpos, (float)ypos);
+
+	if (rndr->CheckViewport(xpos, ypos, 0))
+	{
+		if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS)
+		{
+			rndr->MouseProccessing(GLFW_MOUSE_BUTTON_RIGHT);
+		}
+		else if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
+		{
+			scn->setScreenOffset(xpos - startingMousePosition.x, -(ypos - startingMousePosition.y));
+			cout << "[glfw_cursor_position_callback] moving while holding left mouse, offset is: " << (xpos - startingMousePosition.x) << "," << (ypos - startingMousePosition.y) << endl;
+
+			rndr->MouseProccessing(GLFW_MOUSE_BUTTON_LEFT);
+		}
+		else if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_RELEASE && rndr->IsPicked() && rndr->IsMany()) {
+
+			//cout << "[glfw_cursor_position_callback] ELIF2" << endl;
+			rndr->MouseProccessing(GLFW_MOUSE_BUTTON_RIGHT);
+		}
+
 	}
 }
 	
@@ -50,34 +96,10 @@ void glfw_scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 	}
 	else
 	{
-		rndr->MoveCamera(0, rndr->zTranslate, (float)yoffset);
+		scn->zoomScreen( -yoffset );
+		//rndr->MoveCamera(0, rndr->zTranslate, (float)yoffset);
 	}
 		
-}
-	
-void glfw_cursor_position_callback(GLFWwindow* window, double xpos, double ypos)
-{
-	Renderer* rndr = (Renderer*)glfwGetWindowUserPointer(window);
-	Assignment1* scn = (Assignment1*)rndr->GetScene();
-
-	rndr->UpdatePosition((float)xpos,(float)ypos);
-
-	if (rndr->CheckViewport(xpos,ypos, 0))
-	{
-		if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS)
-		{
-
-			rndr->MouseProccessing(GLFW_MOUSE_BUTTON_RIGHT);
-		}
-		else if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
-		{
-				
-			rndr->MouseProccessing(GLFW_MOUSE_BUTTON_LEFT);
-		}
-		else if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_RELEASE && rndr->IsPicked() && rndr->IsMany())
-				rndr->MouseProccessing(GLFW_MOUSE_BUTTON_RIGHT);
-
-	}
 }
 
 void glfw_window_size_callback(GLFWwindow* window, int width, int height)
