@@ -208,7 +208,6 @@ Eigen::Vector3cf Assignment1::FindCubicRoots()
 	return roots;
 }
 
-
 std::complex<float> Assignment1::NewtonCubicRoot(std::complex<float> num)
 {
 	std::complex<float> root = num;
@@ -234,8 +233,6 @@ std::complex<float> Assignment1::NewtonCubicRoot(std::complex<float> num)
 	return root;
 }
 
-
-
 Eigen::Vector3cf Assignment1::FindRootsOfReduceEquation(Eigen::Vector2cf reduceCoeffs)
 {
 	Eigen::Vector3cf roots = Eigen::Vector3cf::Zero();
@@ -256,7 +253,7 @@ Assignment1::~Assignment1(void)
 
 void Assignment1::zoomScreen(double offset)
 {
-	double newVal = screenMod.scaling + offset/10;
+	double newVal = screenMod.scaling + offset;
 
 	if (newVal > 0) {
 		screenMod.scaling = (float)newVal;
