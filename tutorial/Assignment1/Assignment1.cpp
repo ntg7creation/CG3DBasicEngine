@@ -24,6 +24,9 @@ Assignment1::Assignment1(float _width, float _height) : COEFF_INC(0.01), screenW
 	screenMod.xOffset = -0.5;
 	screenMod.yOffset = -0.5;
 
+	screenMod.xTempOffset = 0;
+	screenMod.yTempOffset = 0;
+
 	// screenMod.scaling = 1;
 	// screenMod.xOffset = 0;
 	// screenMod.yOffset = 0;
@@ -55,7 +58,7 @@ void Assignment1::Init()
 
 	SetShapeShader(myscreen, myshader);
 	SetShapeMaterial(myscreen, 0);
-	data_list[0]->MyScale(Eigen::Vector3d(4, 4, 4));
+	//data_list[0]->MyScale(Eigen::Vector3d(4, 4, 4));
 	
 	//pickedShape = 0;
 	//ShapeTransformation(xTranslate,3,0);
@@ -95,73 +98,34 @@ void Assignment1::Update(const Eigen::Matrix4f& Proj, const Eigen::Matrix4f& Vie
 	int g = ((shapeIndx + 1) & 0x0000FF00) >> 8;
 	int b = ((shapeIndx + 1) & 0x00FF0000) >> 16;
 
-	// s->SetUniform1f("ScreenScaleX", 4);
-	// s->SetUniform1f("ScreenScaleY", 4);
 
 	s->SetUniform1f("screenScaling", screenMod.scaling);
-	s->SetUniform1f("xOffset", screenMod.xOffset);
-	s->SetUniform1f("yOffset", screenMod.yOffset);
-
-
-	//s->SetUniform1f("offsetx", -0.5f);
-	//s->SetUniform1f("offsety", -0.5f);
-
+	s->SetUniform1f("xOffset", screenMod.xOffset + screenMod.xTempOffset);
+	s->SetUniform1f("yOffset", screenMod.yOffset + screenMod.yTempOffset);
 	
 	s->SetUniform1f("root1_x", roots[0].real());
 	s->SetUniform1f("root1_y", roots[0].imag());
-
 	s->SetUniform1f("root2_x", roots[1].real());
 	s->SetUniform1f("root2_y", roots[1].imag());
-
 	s->SetUniform1f("root3_x", roots[2].real());
 	s->SetUniform1f("root3_y", roots[2].imag());
-	
 
 	s->SetUniform1f("a", coeffs[0].real());
 	s->SetUniform1f("b", coeffs[1].real());
 	s->SetUniform1f("c", coeffs[2].real());
 	s->SetUniform1f("d", coeffs[3].real());
 
-
 	// s->SetUniform4f("color1", 1, 0, 0, 0);
 	// s->SetUniform4f("color2", 0, 1, 0, 0);
 	// s->SetUniform4f("color3", 0, 0, 1, 0);
-
 	s->SetUniform4f("color1", 15 / 255.0f, 32 / 255.0f, 67 / 255.0f, 0);
 	s->SetUniform4f("color2", 122 / 255.0f, 207 / 255.0f, 221 / 255.0f, 0);
 	s->SetUniform4f("color3", 213 / 255.0f, 164 / 255.0f, 88 / 255.0f, 0);
 
 	s->SetUniform1i("iterationNum", iterationNum);
 
-
 	//s->SetUniform1f("time", time);
 	//s->SetUniform1f("y", y);
-	
-	//s->SetUniform1f("root1_x", 0.0);
-	//s->SetUniform1f("root1_y", -1.0);
-
-	//s->SetUniform1f("root2_x", 0.0);
-	//s->SetUniform1f("root2_y", 1.0);
-
-	//s->SetUniform1f("root3_x", -1.0);
-	//s->SetUniform1f("root3_y", 0.0);
-
-
-		
-	//s->SetUniform1f("root1_x", -0.5);
-	//s->SetUniform1f("root1_y", -sqrt(3)/2);
-
-	//s->SetUniform1f("root2_x", -0.5);
-	//s->SetUniform1f("root2_y", sqrt(3)/2);
-
-	//s->SetUniform1f("root3_x", 1.0);
-	//s->SetUniform1f("root3_y", 0.0);
-	
-	//s->SetUniform1f("a", coeffs[0].real());
-	//s->SetUniform1f("b", coeffs[1].real());
-	//s->SetUniform1f("c", coeffs[2].real());
-	//s->SetUniform1f("d", coeffs[3].real());
-
 
 	s->Bind();
 	s->SetUniformMat4f("Proj", Proj);
@@ -292,20 +256,32 @@ Assignment1::~Assignment1(void)
 
 void Assignment1::zoomScreen(double offset)
 {
-	double newVal = screenMod.scaling + offset/20;
+	double newVal = screenMod.scaling + offset/10;
 
 	if (newVal > 0) {
 		screenMod.scaling = (float)newVal;
 	}
 
-	cout << "screenZoom called, offset=" << offset << ", now scaling by : " << screenMod.scaling << endl;
+	cout << "zoomScreen called, offset=" << offset << ", now scaling by : " << screenMod.scaling << endl;
 }
 
-void Assignment1::setScreenOffset(double xoffset, double yoffset)
+
+void Assignment1::setTempScreenOffset(double xoffset, double yoffset)
 {
-	screenMod.xOffset = (float)(xoffset / screenWidth);
-	screenMod.yOffset = (float)(yoffset / screenHeight);
+	screenMod.xTempOffset = (float)(xoffset / screenWidth);
+	screenMod.yTempOffset = (float)(yoffset / screenHeight);
 }
+
+
+void Assignment1::lockScreenOffset(void)
+{
+	screenMod.xOffset += screenMod.xTempOffset;
+	screenMod.yOffset += screenMod.yTempOffset;
+
+	screenMod.xTempOffset = 0;
+	screenMod.yTempOffset = 0;
+}
+
 
 void Assignment1::increaseIterationNum(void)
 {

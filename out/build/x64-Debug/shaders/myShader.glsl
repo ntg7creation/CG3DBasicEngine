@@ -105,7 +105,7 @@ void setColorFromNewtonRaphson(vec2 z_k, int k) {
 	if(distToRoot3 < distToRoot2 && distToRoot3 < distToRoot1)
 		Color = color3;
 
-	Color *= clamp(pow(0.8, k), 0.8,1);
+	Color *= clamp(pow(0.97, k), 0.8,1);
 }
 
 

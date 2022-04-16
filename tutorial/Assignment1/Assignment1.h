@@ -13,6 +13,9 @@ struct ScreenModification {
 	float xOffset;
 	float yOffset;
 	float scaling;
+
+	float xTempOffset;
+	float yTempOffset;
 };
 
 
@@ -29,7 +32,8 @@ class Assignment1 : public igl::opengl::glfw::Viewer
 	
 public:
 	void zoomScreen(double offset);
-	void setScreenOffset(double xoffset, double yoffset);
+	void setTempScreenOffset(double xoffset, double yoffset);
+	void lockScreenOffset(void);
 
 	void increaseIterationNum(void);
 	void decreaseIterationNum(void);

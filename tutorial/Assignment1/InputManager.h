@@ -11,17 +11,17 @@ using namespace std;
 SelectedCoefficient selectedCoefficient = NONE;
 
 struct ScreenCoordinates {
-	double x;
-	double y;
+	float x;
+	float y;
 } startingMousePosition;
 
 
 void glfw_mouse_callback(GLFWwindow* window,int button, int action, int mods)
-{	
+{
+	Renderer* rndr = (Renderer*)glfwGetWindowUserPointer(window);
+	Assignment1* scn = (Assignment1*)rndr->GetScene();
 	if (action == GLFW_PRESS)
 	{
-		Renderer* rndr = (Renderer*)glfwGetWindowUserPointer(window);
-		Assignment1* scn = (Assignment1*)rndr->GetScene();
 		double x2, y2;
 			
 		glfwGetCursorPos(window, &x2, &y2);
@@ -41,13 +41,13 @@ void glfw_mouse_callback(GLFWwindow* window,int button, int action, int mods)
 
 			cout << "[glfw_mouse_callback] started holding mouse at coords: " << startingMousePosition.x << "," << startingMousePosition.y << endl;
 
-
 			rndr->UnPick(2);
 		}
 		
 	}
 	else
 	{
+		scn->lockScreenOffset();
 		cout << "[glfw_mouse_callback] stopped holding mouse" << endl;
 
 		Renderer* rndr = (Renderer*)glfwGetWindowUserPointer(window);
@@ -70,7 +70,7 @@ void glfw_cursor_position_callback(GLFWwindow* window, double xpos, double ypos)
 		}
 		else if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
 		{
-			scn->setScreenOffset(xpos - startingMousePosition.x, -(ypos - startingMousePosition.y));
+			scn->setTempScreenOffset(xpos - startingMousePosition.x, -(ypos - startingMousePosition.y));
 			cout << "[glfw_cursor_position_callback] moving while holding left mouse, offset is: " << (xpos - startingMousePosition.x) << "," << (ypos - startingMousePosition.y) << endl;
 
 			rndr->MouseProccessing(GLFW_MOUSE_BUTTON_LEFT);
@@ -141,7 +141,6 @@ void glfw_key_callback(GLFWwindow* window, int key, int scancode, int action, in
 			break;
 
 		case GLFW_KEY_UP:
-
 			if (selectedCoefficient != NONE) {
 				scn->incrementCoefficient(selectedCoefficient);
 			}
@@ -151,7 +150,6 @@ void glfw_key_callback(GLFWwindow* window, int key, int scancode, int action, in
 			break;
 
 		case GLFW_KEY_DOWN:
-
 			if (selectedCoefficient != NONE) {
 				scn->decrementCoefficient(selectedCoefficient);
 			}
@@ -164,7 +162,6 @@ void glfw_key_callback(GLFWwindow* window, int key, int scancode, int action, in
 			break;
 
 		case GLFW_KEY_LEFT:
-
 			scn->decreaseIterationNum();
 
 			//rndr->MoveCamera(0, scn->yRotate, 0.05f);
@@ -184,35 +181,35 @@ void glfw_key_callback(GLFWwindow* window, int key, int scancode, int action, in
 			glfwSetWindowShouldClose(window, GLFW_TRUE);
 			break;
 				
-		case GLFW_KEY_SPACE:
-			if (scn->IsActive())
-				scn->Deactivate();
-			else
-				scn->Activate();
-			break;
+		//case GLFW_KEY_SPACE:
+		//	if (scn->IsActive())
+		//		scn->Deactivate();
+		//	else
+		//		scn->Activate();
+		//	break;
 
-		case GLFW_KEY_U:
-			//rndr->MoveCamera(0, scn->yTranslate, 0.25f);
+		//case GLFW_KEY_U:
+		//	//rndr->MoveCamera(0, scn->yTranslate, 0.25f);
 
-			break;
-		case GLFW_KEY_D:
-			//rndr->MoveCamera(0, scn->yTranslate, -0.25f);
+		//	break;
+		//case GLFW_KEY_D:
+		//	//rndr->MoveCamera(0, scn->yTranslate, -0.25f);
 
-			break;
-		case GLFW_KEY_L:
-			rndr->MoveCamera(0, scn->xTranslate, -0.25f);
-			break;
-			
-		case GLFW_KEY_R:
-			rndr->MoveCamera(0, scn->xTranslate, 0.25f);
-			break;
-			
-		case GLFW_KEY_B:
-			rndr->MoveCamera(0, scn->zTranslate, 0.5f);
-			break;
-		case GLFW_KEY_F:
-			rndr->MoveCamera(0, scn->zTranslate, -0.5f);
-			break;
+		//	break;
+		//case GLFW_KEY_L:
+		//	rndr->MoveCamera(0, scn->xTranslate, -0.25f);
+		//	break;
+		//	
+		//case GLFW_KEY_R:
+		//	rndr->MoveCamera(0, scn->xTranslate, 0.25f);
+		//	break;
+		//	
+		//case GLFW_KEY_B:
+		//	rndr->MoveCamera(0, scn->zTranslate, 0.5f);
+		//	break;
+		//case GLFW_KEY_F:
+		//	rndr->MoveCamera(0, scn->zTranslate, -0.5f);
+		//	break;
 		default:
 			break;
 
