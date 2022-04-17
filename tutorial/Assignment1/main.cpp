@@ -17,7 +17,7 @@ int main(int argc,char *argv[])
     Display disp = Display(DISPLAY_WIDTH, DISPLAY_HEIGHT, "Assignment 1");
 	igl::opengl::glfw::imgui::ImGuiMenu* menu = nullptr; //new igl::opengl::glfw::imgui::ImGuiMenu();
     Renderer* rndr = new Renderer(CAMERA_ANGLE, (float)DISPLAY_WIDTH/(float)DISPLAY_HEIGHT/*/2*/, NEAR, FAR);
-	Assignment1 *scn = new Assignment1(DISPLAY_WIDTH, DISPLAY_HEIGHT, disp.window);  //initializing scene
+	Assignment1 *scn = new Assignment1(disp.window);  //initializing scene
 	
     Init(disp,menu); //adding callback functions
 	scn->Init();    //adding shaders, textures, shapes to scene

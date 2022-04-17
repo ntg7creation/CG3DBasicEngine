@@ -25,12 +25,13 @@ class Assignment1 : public igl::opengl::glfw::Viewer
 	float time;
 	Eigen::Vector3cf FindRootsOfReduceEquation(Eigen::Vector2cf reduceCoeffs);
 	std::complex<float> Assignment1::NewtonCubicRoot(std::complex<float> num);
-	size_t iterationNum;
+	int iterationNum;
 	const float COEFF_INC;
 	ScreenModification screenMod;
-	float screenHeight;
-	float screenWidth;
+	int screenHeight;
+	int screenWidth;
 	void updateWindowTitle(void);
+	void updateRoots(void);
 	GLFWwindow *window;
 	
 public:
@@ -49,7 +50,7 @@ public:
 	int iteration =0;
 	Eigen::Vector3cf roots;
 	float x, y;
-	Assignment1(float _width, float _height, GLFWwindow *_window);
+	Assignment1(GLFWwindow *_window);
 	//	Assignment1(float angle,float relationWH,float near, float far);
 	void Init();
 	void Update(const Eigen::Matrix4f& Proj, const Eigen::Matrix4f& View, const Eigen::Matrix4f& Model, unsigned int  shaderIndx, unsigned int shapeIndx);

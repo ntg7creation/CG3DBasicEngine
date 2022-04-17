@@ -10,8 +10,12 @@ out vec4 Color;
 
 
 //uniform sampler2D sampler1;
+//uniform sampler2D sampler2;
 // uniform vec4 lightDirection;
 // uniform vec4 lightColor;
+
+uniform float screenHeight;
+uniform float screenWidth;
 
 uniform float screenScaling;
 uniform float xOffset;
@@ -41,16 +45,23 @@ vec2 trueRoot1 = vec2(root1_x,root1_y);
 vec2 trueRoot2 = vec2(root2_x,root2_y);
 vec2 trueRoot3 = vec2(root3_x,root3_y);
 
-// vec2 coords = 2 * (texCoord0 + vec2(-0.5, -0.5));
-
-const float thresholdDistanceFromRoot = 0.001;//length(vec2(0.1,0.1));
+vec2 coords = vec2(position0.x, position0.y);
 
 
-bool closeEnoughToTrueRoot(vec2 z) {
+bool closeEnoughToTrueRoot(vec2 z, int k) {
+	float thresholdDistanceFromRoot = pow(length(vec2(1.0/screenWidth, 1.0/screenHeight)*screenScaling), 0.5);
+
 	return 
-		length(z - trueRoot1) <= thresholdDistanceFromRoot ||
-		length(z - trueRoot2) <= thresholdDistanceFromRoot ||
-		length(z - trueRoot3) <= thresholdDistanceFromRoot;
+		length(z - trueRoot1) <= k * thresholdDistanceFromRoot ||
+		length(z - trueRoot2) <= k * thresholdDistanceFromRoot ||
+		length(z - trueRoot3) <= k * thresholdDistanceFromRoot;
+		//abs(z.x - trueRoot1.x) <= thresholdDistanceFromRoot &&
+		//abs(z.y - trueRoot1.y) <= thresholdDistanceFromRoot ||
+		//abs(z.x - trueRoot2.x) <= thresholdDistanceFromRoot &&
+		//abs(z.y - trueRoot2.y) <= thresholdDistanceFromRoot ||
+		//abs(z.x - trueRoot3.x) <= thresholdDistanceFromRoot &&
+		//abs(z.y - trueRoot3.y) <= thresholdDistanceFromRoot;
+
 }
 
 
@@ -98,16 +109,19 @@ vec2 df(vec2 z) {
 
 vec3 newton_raphson(vec2 z, int iterationNum) {
 	int k = 0;
+	int k_coloring = 0;
 
-	for( ; k < iterationNum && !closeEnoughToTrueRoot(z); k++) {
+	for( ; k < iterationNum; k++) {
+		if ( ! closeEnoughToTrueRoot(z, k + 1)) {
+			k_coloring++;
+		}
+
 		vec2 z_f = f(z);
-				  
 		vec2 z_df = df(z);
-		
 		z = z - divideComplex(z_f, z_df);
 	}
 
-	return vec3(z.x, z.y, k);
+	return vec3(z.x, z.y, k_coloring);
 }
 
 
@@ -122,12 +136,12 @@ void setColorFromNewtonRaphson(vec2 z_k, int k) {
 	if(distToRoot3 < distToRoot2 && distToRoot3 < distToRoot1)
 		Color = color3;
 
-	Color *= clamp(pow(0.95, k), 0.45, 1);
+	Color *= clamp(pow(0.95, k), 0, 1);
 }
 
 
 void main() {
-	vec2 z0 = vec2(position0.x,position0.y)*screenScaling + 2*vec2(-xOffset ,yOffset);
+	vec2 z0 = coords*screenScaling + 2*vec2(-xOffset ,yOffset);
 
 	vec3 retVal = newton_raphson(z0, iterationNum);
 

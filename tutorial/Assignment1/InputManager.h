@@ -144,72 +144,26 @@ void glfw_key_callback(GLFWwindow* window, int key, int scancode, int action, in
 			if (selectedCoefficient != NONE) {
 				scn->incrementCoefficient(selectedCoefficient);
 			}
-
-			//scn->iteration++;
-			//rndr->MoveCamera(0, scn->xRotate, 0.05f);
 			break;
 
 		case GLFW_KEY_DOWN:
 			if (selectedCoefficient != NONE) {
 				scn->decrementCoefficient(selectedCoefficient);
 			}
-
-			//if (scn->iteration > 0)
-			//	scn->iteration--;
-			//scn->shapeTransformation(scn->xGlobalRotate,-5.f);
-			//cout<< "down: "<<endl;
-			//rndr->MoveCamera(0, scn->xRotate, -0.05f);
 			break;
 
 		case GLFW_KEY_LEFT:
 			scn->decreaseIterationNum();
-
-			//rndr->MoveCamera(0, scn->yRotate, 0.05f);
 			break;
 
 		case GLFW_KEY_RIGHT:
-
 			scn->increaseIterationNum();
-
-			//scn->shapeTransformation(scn->xGlobalRotate,-5.f);
-			//cout<< "down: "<<endl;
-			//rndr->MoveCamera(0, scn->yRotate, -0.05f);
 			break;
 
-
-		case GLFW_KEY_ESCAPE:
+		/*case GLFW_KEY_ESCAPE:
 			glfwSetWindowShouldClose(window, GLFW_TRUE);
-			break;
-				
-		//case GLFW_KEY_SPACE:
-		//	if (scn->IsActive())
-		//		scn->Deactivate();
-		//	else
-		//		scn->Activate();
-		//	break;
+			break;*/
 
-		//case GLFW_KEY_U:
-		//	//rndr->MoveCamera(0, scn->yTranslate, 0.25f);
-
-		//	break;
-		//case GLFW_KEY_D:
-		//	//rndr->MoveCamera(0, scn->yTranslate, -0.25f);
-
-		//	break;
-		//case GLFW_KEY_L:
-		//	rndr->MoveCamera(0, scn->xTranslate, -0.25f);
-		//	break;
-		//	
-		//case GLFW_KEY_R:
-		//	rndr->MoveCamera(0, scn->xTranslate, 0.25f);
-		//	break;
-		//	
-		//case GLFW_KEY_B:
-		//	rndr->MoveCamera(0, scn->zTranslate, 0.5f);
-		//	break;
-		//case GLFW_KEY_F:
-		//	rndr->MoveCamera(0, scn->zTranslate, -0.5f);
-		//	break;
 		default:
 			break;
 
