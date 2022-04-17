@@ -39,7 +39,7 @@ void glfw_mouse_callback(GLFWwindow* window,int button, int action, int mods)
 			startingMousePosition.x = x2;
 			startingMousePosition.y = y2;
 
-			cout << "[glfw_mouse_callback] started holding mouse at coords: " << startingMousePosition.x << "," << startingMousePosition.y << endl;
+			//cout << "[glfw_mouse_callback] started holding mouse at coords: " << startingMousePosition.x << "," << startingMousePosition.y << endl;
 
 			rndr->UnPick(2);
 		}
@@ -48,7 +48,7 @@ void glfw_mouse_callback(GLFWwindow* window,int button, int action, int mods)
 	else
 	{
 		scn->lockScreenOffset();
-		cout << "[glfw_mouse_callback] stopped holding mouse" << endl;
+		//cout << "[glfw_mouse_callback] stopped holding mouse" << endl;
 
 		Renderer* rndr = (Renderer*)glfwGetWindowUserPointer(window);
 		rndr->UnPick(2);
@@ -70,8 +70,8 @@ void glfw_cursor_position_callback(GLFWwindow* window, double xpos, double ypos)
 		}
 		else if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
 		{
-			scn->setTempScreenOffset(xpos - startingMousePosition.x, -(ypos - startingMousePosition.y));
-			cout << "[glfw_cursor_position_callback] moving while holding left mouse, offset is: " << (xpos - startingMousePosition.x) << "," << (ypos - startingMousePosition.y) << endl;
+			scn->setTempScreenOffset(xpos - startingMousePosition.x, ypos - startingMousePosition.y);
+			//cout << "[glfw_cursor_position_callback] moving while holding left mouse, offset is: " << (xpos - startingMousePosition.x) << "," << (ypos - startingMousePosition.y) << endl;
 
 			rndr->MouseProccessing(GLFW_MOUSE_BUTTON_LEFT);
 		}
@@ -122,22 +122,22 @@ void glfw_key_callback(GLFWwindow* window, int key, int scancode, int action, in
 		{
 		case GLFW_KEY_1:
 			selectedCoefficient = A;
-			cout << "selected coeff A" << endl;
+			//cout << "selected coeff A" << endl;
 			break;
 
 		case GLFW_KEY_2:
 			selectedCoefficient = B;
-			cout << "selected coeff B" << endl;
+			//cout << "selected coeff B" << endl;
 			break;
 
 		case GLFW_KEY_3:
 			selectedCoefficient = C;
-			cout << "selected coeff C" << endl;
+			//cout << "selected coeff C" << endl;
 			break;
 
 		case GLFW_KEY_4:
 			selectedCoefficient = D;
-			cout << "selected coeff D" << endl;
+			//cout << "selected coeff D" << endl;
 			break;
 
 		case GLFW_KEY_UP:

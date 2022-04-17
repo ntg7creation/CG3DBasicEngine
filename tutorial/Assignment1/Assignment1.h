@@ -1,5 +1,6 @@
 #pragma once
 #include "igl/opengl/glfw/Viewer.h"
+#include "GLFW/glfw3.h"
 
 enum SelectedCoefficient {
 	A = 0,
@@ -29,6 +30,8 @@ class Assignment1 : public igl::opengl::glfw::Viewer
 	ScreenModification screenMod;
 	float screenHeight;
 	float screenWidth;
+	void updateWindowTitle(void);
+	GLFWwindow *window;
 	
 public:
 	void zoomScreen(double offset);
@@ -46,7 +49,7 @@ public:
 	int iteration =0;
 	Eigen::Vector3cf roots;
 	float x, y;
-	Assignment1(float _width, float _height);
+	Assignment1(float _width, float _height, GLFWwindow *_window);
 	//	Assignment1(float angle,float relationWH,float near, float far);
 	void Init();
 	void Update(const Eigen::Matrix4f& Proj, const Eigen::Matrix4f& View, const Eigen::Matrix4f& Model, unsigned int  shaderIndx, unsigned int shapeIndx);

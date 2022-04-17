@@ -1,5 +1,8 @@
 #include "Assignment1.h"
 #include <iostream>
+#include <imgui_impl_win32.h>
+#include <GLFW/glfw3.h>
+#include <string>
 
 using namespace std;
 
@@ -14,22 +17,22 @@ static void printMat(const Eigen::Matrix4d& mat)
 	}
 }
 
-Assignment1::Assignment1(float _width, float _height) : COEFF_INC(0.01), screenWidth(_width), screenHeight(_height)
+
+Assignment1::Assignment1(float _width, float _height, GLFWwindow* _window) : COEFF_INC(0.01), screenWidth(_width), screenHeight(_height), window(_window)
 {
 	time = 0;
 	coeffs = Eigen::Vector4cf::Zero();
 
 	iterationNum = 0;
-	screenMod.scaling = 2;
-	screenMod.xOffset = -0.5;
-	screenMod.yOffset = -0.5;
+
+	screenMod.scaling = 1;
+	screenMod.xOffset = 0;
+	screenMod.yOffset = 0;
 
 	screenMod.xTempOffset = 0;
 	screenMod.yTempOffset = 0;
-
-	// screenMod.scaling = 1;
-	// screenMod.xOffset = 0;
-	// screenMod.yOffset = 0;
+	
+	updateWindowTitle();
 }
 
 //Assignment1::Assignment1(float angle ,float relationWH, float near, float far) : Scene(angle,relationWH,near,far)
@@ -72,8 +75,7 @@ void Assignment1::Init()
 	coeffs[3] = -1;
 
 	roots = FindCubicRoots();
-	std::cout << "the roots are:\n" << roots << std::endl;
-
+	std::cout << "the roots are:" << std::endl;
 	std::cout << "first " <<  roots[0]  << std::endl;
 	std::cout << "second " << roots[1] << std::endl;
 	std::cout << "third " << roots[2] << std::endl;
@@ -94,9 +96,9 @@ void Assignment1::Init()
 void Assignment1::Update(const Eigen::Matrix4f& Proj, const Eigen::Matrix4f& View, const Eigen::Matrix4f& Model, unsigned int  shaderIndx, unsigned int shapeIndx)
 {
 	Shader* s = shaders[shaderIndx];
-	int r = ((shapeIndx + 1) & 0x000000FF) >> 0;
+	/*int r = ((shapeIndx + 1) & 0x000000FF) >> 0;
 	int g = ((shapeIndx + 1) & 0x0000FF00) >> 8;
-	int b = ((shapeIndx + 1) & 0x00FF0000) >> 16;
+	int b = ((shapeIndx + 1) & 0x00FF0000) >> 16;*/
 
 
 	s->SetUniform1f("screenScaling", screenMod.scaling);
@@ -109,7 +111,7 @@ void Assignment1::Update(const Eigen::Matrix4f& Proj, const Eigen::Matrix4f& Vie
 	s->SetUniform1f("root2_y", roots[1].imag());
 	s->SetUniform1f("root3_x", roots[2].real());
 	s->SetUniform1f("root3_y", roots[2].imag());
-
+	
 	s->SetUniform1f("a", coeffs[0].real());
 	s->SetUniform1f("b", coeffs[1].real());
 	s->SetUniform1f("c", coeffs[2].real());
@@ -136,10 +138,12 @@ void Assignment1::Update(const Eigen::Matrix4f& Proj, const Eigen::Matrix4f& Vie
 		//		materials[shapes[pickedShape]->GetMaterial()]->Bind(textures);
 		BindMaterial(s, data_list[shapeIndx]->GetMaterial());
 	}
-	if (shaderIndx == 0)
-		s->SetUniform4f("lightColor", r / 255.0f, g / 255.0f, b / 255.0f, 0.0f);
-	else
-		s->SetUniform4f("lightColor", time / 10.0f, 60 / 100.0f, 99 / 100.0f, 0.5f);
+	if (shaderIndx == 0) {
+		//s->SetUniform4f("lightColor", r / 255.0f, g / 255.0f, b / 255.0f, 0.0f);
+	}
+	else {
+		//s->SetUniform4f("lightColor", time / 10.0f, 60 / 100.0f, 99 / 100.0f, 0.5f);
+	}
 	//textures[0]->Bind(0);
 
 
@@ -190,7 +194,7 @@ Eigen::Vector3cf Assignment1::FindCubicRoots()
 	std::complex<float> bOver3a = (coeffs[1] / coeffs[0]) / 3.0f;
 	reduceCoeffs[0] = coeffs[2] / coeffs[0] - 3.0f * bOver3a * bOver3a;
 	reduceCoeffs[1] = coeffs[2] / coeffs[0] * bOver3a - coeffs[3] / coeffs[0] - 2.0f * bOver3a * bOver3a * bOver3a;
-	std::cout << "reduced\n" << reduceCoeffs << std::endl;
+	//std::cout << "reduced\n" << reduceCoeffs << std::endl;
 	if (reduceCoeffs.norm() > 0.000001)
 	{
 		roots = FindRootsOfReduceEquation(reduceCoeffs);
@@ -253,20 +257,22 @@ Assignment1::~Assignment1(void)
 
 void Assignment1::zoomScreen(double offset)
 {
-	double newVal = screenMod.scaling + offset;
+	float scaling = screenMod.scaling;
 
-	if (newVal > 0) {
-		screenMod.scaling = (float)newVal;
-	}
+	screenMod.scaling = scaling + scaling * 0.1 * offset;
+	//screenMod.scaling = min(max(scaling + scaling * 0.1 * offset, 0.025), 20000000.0);
 
-	cout << "zoomScreen called, offset=" << offset << ", now scaling by : " << screenMod.scaling << endl;
+	//cout << "zoomScreen called, offset=" << offset << ", now scaling by : " << screenMod.scaling << endl;
+	updateWindowTitle();
 }
 
 
 void Assignment1::setTempScreenOffset(double xoffset, double yoffset)
 {
-	screenMod.xTempOffset = (float)(xoffset / screenWidth);
-	screenMod.yTempOffset = (float)(yoffset / screenHeight);
+	screenMod.xTempOffset = (float)(xoffset * screenMod.scaling / screenWidth);
+	screenMod.yTempOffset = (float)(yoffset * screenMod.scaling / screenHeight);
+
+	updateWindowTitle();
 }
 
 
@@ -277,13 +283,17 @@ void Assignment1::lockScreenOffset(void)
 
 	screenMod.xTempOffset = 0;
 	screenMod.yTempOffset = 0;
+
+	//updateWindowTitle();
 }
 
 
 void Assignment1::increaseIterationNum(void)
 {
 	++iterationNum;
-	cout << "incrementing iterationNum, now: " << iterationNum << endl;
+	//cout << "incrementing iterationNum, now: " << iterationNum << endl;
+
+	updateWindowTitle();
 }
 
 
@@ -291,20 +301,53 @@ void Assignment1::decreaseIterationNum(void)
 {
 	if (iterationNum > 0) {
 		--iterationNum;
-		cout << "decrementing iterationNum, now: " << iterationNum << endl;
+		//cout << "decrementing iterationNum, now: " << iterationNum << endl;
 	}
+
+	updateWindowTitle();
 }
 
 
 void Assignment1::incrementCoefficient(SelectedCoefficient sc)
 {
 	coeffs[sc] += COEFF_INC; // 0.01;
-	cout << "incrementing coeff[" << sc << "], now: " << coeffs[sc] << endl;
+	//cout << "incrementing coeff[" << sc << "], now: " << coeffs[sc] << endl;
+
+	updateWindowTitle();
 }
 
 
 void Assignment1::decrementCoefficient(SelectedCoefficient sc)
 {
 	coeffs[sc] -= COEFF_INC; // 0.01;
-	cout << "decrementing coeff[" << sc << "], now: " << coeffs[sc] << endl;
+	//cout << "decrementing coeff[" << sc << "], now: " << coeffs[sc] << endl;
+
+	updateWindowTitle();
+}
+
+
+string zs[] = {
+	"F(z) = (",
+	u8")z³ + (",
+	u8")z² + ",
+	u8"z + (",
+	")"
+};
+string title;
+
+void Assignment1::updateWindowTitle(void) {
+	title = zs[0] +
+		to_string(coeffs[0].real()) +
+		zs[1] +
+		to_string(coeffs[1].real()) +
+		zs[2] +
+		to_string(coeffs[2].real()) +
+		zs[3] +
+		to_string(coeffs[3].real()) +
+		zs[4] +
+		" ; N-R Iterations = " + to_string(iterationNum) +
+		" ; SCALE: x" + to_string(screenMod.scaling) +
+		" ; OFFSET = (" + to_string(screenMod.xOffset + screenMod.xTempOffset) + "," + to_string(screenMod.yOffset + screenMod.yTempOffset) + ")";
+
+	glfwSetWindowTitle(window, title.c_str());
 }

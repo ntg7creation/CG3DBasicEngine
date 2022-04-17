@@ -4,8 +4,8 @@
 
 int main(int argc,char *argv[])
 {
-	const int DISPLAY_WIDTH = 800;//1200;
-	const int DISPLAY_HEIGHT = 800;//800;
+	const int DISPLAY_WIDTH = 900;//1200;
+	const int DISPLAY_HEIGHT = 900;//800;
 	const float CAMERA_ANGLE = 0;//45.0f;
 	const float NEAR = 1.0f;
 	const float FAR = 120.0f;
@@ -17,7 +17,7 @@ int main(int argc,char *argv[])
     Display disp = Display(DISPLAY_WIDTH, DISPLAY_HEIGHT, "Assignment 1");
 	igl::opengl::glfw::imgui::ImGuiMenu* menu = nullptr; //new igl::opengl::glfw::imgui::ImGuiMenu();
     Renderer* rndr = new Renderer(CAMERA_ANGLE, (float)DISPLAY_WIDTH/(float)DISPLAY_HEIGHT/*/2*/, NEAR, FAR);
-	Assignment1 *scn = new Assignment1(DISPLAY_WIDTH, DISPLAY_HEIGHT);  //initializing scene
+	Assignment1 *scn = new Assignment1(DISPLAY_WIDTH, DISPLAY_HEIGHT, disp.window);  //initializing scene
 	
     Init(disp,menu); //adding callback functions
 	scn->Init();    //adding shaders, textures, shapes to scene
