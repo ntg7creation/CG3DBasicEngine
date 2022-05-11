@@ -15,7 +15,7 @@ static void printMat(const Eigen::Matrix4d& mat)
 
 Assignment2::Assignment2()
 {
-	SceneParser("data/scenes/scene1.txt",&scnData);
+	SceneParser("../../../tutorial/data/scenes/myScene.txt",&scnData);
 	xResolution = 800;
 	yResolution = 800;
 	//x = 0.5f;
@@ -35,8 +35,14 @@ void Assignment2::Init()
 	unsigned int texIDs[3] = { 0 , 1, 2};
 	unsigned int slots[3] = { 0 , 1, 2 };
 
-	AddShader("shaders/pickingShader");
-	AddShader("shaders/raytracingShader");
+	//AddShader("shaders/raytracingShader"); // TODO
+	AddShader("shaders/pickingShader"); // TODO
+	AddShader("shaders/myShader"); // TODO
+
+
+
+	//AddShader("shaders/myShader"); // TODO
+	//AddShader("shaders/raytracingShader"); // TODO
 	
 	AddTexture("textures/box0.bmp",2);
 	AddTexture("textures/grass.bmp", 2);
