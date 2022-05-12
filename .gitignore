@@ -1,3 +1,7 @@
 *
 
 !tutorial/**
+
+!build/shaders/**
+
+!build/data/scenes/**
