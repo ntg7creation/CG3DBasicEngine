@@ -5,22 +5,6 @@ in vec3 normal0;
 in vec3 color0;
 in vec3 position0;
 
-// uniform vec4 lightColor;
-// uniform sampler2D sampler1;
-// uniform vec4 lightDirection;
-
-// uniform vec4 Proj;
-// uniform vec4 View;
-// uniform vec4 Model;
-
-// uniform vec4 eye;
-// uniform vec4 ambient;
-// uniform vec4 objects;
-// uniform vec4 objColors;
-// uniform vec4 lightsPosition;
-// uniform vec4 lightsDirection;
-// uniform vec4 lightsIntensity;
-
 uniform vec4 eye;
 uniform vec4 ambient;
 uniform vec4[20] objects;
@@ -48,10 +32,14 @@ vec3 calculateDiffuseColor(vec3 pointOnObject, int objectId, int lightSourceId);
 vec3 calculateSpecularColor(vec3 pointOnObject, int objectId, int lightSourceId);
 vec3 calculateReflectRay(vec3 pointOnObject, int objectId, int lightSourceId);
 
-vec3 calculateNormalToSurface(vec3 pointOnObject, int objectId);
-bool lightReachesObject(int lightSourceId, vec3 pointOnObject, int objectIndex);
-float objectShininessFactor(int objectId);
+bool lightReachesObject(int lightSourceId, vec3 pointOnObject, int objectIndex); // FIXME implement to combine directional and spotlight
+bool directionalLightReachesObject(int lightDirectionIndex, vec3 pointOnObject, int objectId);
+bool spotlightReachesObject(int lightDirectionIndex, int lightPositionIndex, vec3 pointOnObject, int objectId);
+bool lightIsSpotlight(int lightDirectionIndex);
 bool lightIsDirectional(int lightSourceId);
+
+vec3 calculateNormalToSurface(vec3 pointOnObject, int objectId);
+float objectShininessFactor(int objectId);
 bool objectIsSphere(int objectId);
 vec3 centerOfSphere(vec4 sphere);
 float radiusOfSphere(vec4 sphere);
@@ -65,9 +53,12 @@ void assert(bool condition, vec4 colorOnTrue);
 
 
 void main() {
+	
+
+	// discard;
 	Color = WHITE; // FIXME : incase not hitting anything (infinity)
 
-	vec3 normalizedRayDirection = normalize(vec3(position0.x, position0.y, 1) - eyeCoordinates); // TODO : figure out why it's negative
+	vec3 normalizedRayDirection = normalize(position0 - eyeCoordinates); // TODO : figure out why it's negative
 	int numOfObjects = sizes[0];
 
 	vec4 res; // FIXME : remove?
@@ -113,28 +104,40 @@ vec3 getPointOnPlane(vec4 plane) {
 
 
 vec3 calculatePixelColor(vec3 pointOnObject, int objectId) {
-
 	// TODO separate calculation of color based on object type: sphere or plane 
 	// 			(sphere has multiplication by normal, planes have multiplication by normal and colored squares)
 
 	vec3 color = ambient.xyz * objColors[objectId].xyz; // FIXME : uncomment ambient color
 	
 	int numOfLights = sizes[1];
-	for (int lightSourceId = 0; lightSourceId < numOfLights; ++lightSourceId) {
+	for (int lightDirectionIndex = 0, lightPositionIndex = 0; lightDirectionIndex < numOfLights; ++lightDirectionIndex) {
 		// if light from source reaches the point on the object (if ray from point on object hits light source first without interruptions)
-		if (lightReachesObject(lightSourceId, pointOnObject, objectId)) {
-			color += calculateDiffuseColor(pointOnObject, objectId, lightSourceId)
-				+ calculateSpecularColor(pointOnObject, objectId, lightSourceId);
-
-			// FIXME : remove debug
-			// if (!objectIsSphere(objectId)) {
-			// 	return RED.xyz;
-			// }
+		// if (!lightIsDirectional(lightSourceId)) // FIXME remove debug
+		if (lightIsDirectional(lightDirectionIndex) && directionalLightReachesObject(lightDirectionIndex, pointOnObject, objectId)) {
+			// FIXME split light type check to count spotlights
+			color += calculateDiffuseColor(pointOnObject, objectId, lightDirectionIndex)
+				+ calculateSpecularColor(pointOnObject, objectId, lightDirectionIndex); //FIXME uncomment specular
 		}
+		if (lightIsSpotlight(lightDirectionIndex) && spotlightReachesObject(lightDirectionIndex, lightPositionIndex, pointOnObject, objectId)) {
+			color += calculateDiffuseColor(pointOnObject, objectId, lightDirectionIndex)
+				+ calculateSpecularColor(pointOnObject, objectId, lightDirectionIndex); //FIXME uncomment specular
+			++lightPositionIndex;
+		}
+		// if (lightReachesObject(lightDirectionIndex, lightPositionIndex, pointOnObject, objectId)) {
+			
+		// 	// if (!lightIsDirectional(lightSourceId)) {return RED.xyz;} // FIXME remove DEBUG
+
+
+		// 	// FIXME : remove debug
+		// 	// if (!objectIsSphere(objectId)) {
+		// 	// 	return RED.xyz;
+		// 	// }
+		// }
 		// TODO : else, need shadow?
 	}
 
-	return clamp(color, 0, 1);
+	return clamp(color, 0, 1); //FIXME uncomment use of clamp
+	// return color;  //FIXME remove debug
 }
 
 
@@ -172,7 +175,8 @@ vec3 calculateDiffuseColor(vec3 pointOnObject, int objectId, int lightSourceId) 
 			normalize(lightsDirection[lightSourceId].xyz)
 		); // FIXME : direction is not entirely correct for spot lights
 
-	return clamp(color, 0, 1);
+	return clamp(color, 0, 1); //FIXME uncomment use of clamp
+	// return color;  //FIXME remove debug
 }
 
 
@@ -180,17 +184,18 @@ vec3 calculateSpecularColor(vec3 pointOnObject, int objectId, int lightSourceId)
 
 	// TODO: divide the implementation between directional light and a spot light
 	vec3 color = objectSpecularValue
+		* lightsIntensity[lightSourceId].xyz
 		* pow(
 				max(0, dot(
 						normalize(pointOnObject - eye.xyz),
 						normalize(calculateReflectRay(pointOnObject, objectId, lightSourceId))
 					)), // TODO check if should use max(0, V*R)
 				objectShininessFactor(objectId)
-		)
-		* lightsIntensity[lightSourceId].xyz; // FIXME
+		); // FIXME
 
 		
-	return clamp(color, 0, 1);
+	return clamp(color, 0, 1); //FIXME uncomment use of clamp
+	// return color;  //FIXME remove debug
 }
 
 
@@ -218,6 +223,7 @@ vec3 calculateReflectRay(vec3 pointOnObject, int objectId, int lightSourceId) {
 
 
 /// [x] INTERSECTION calculations
+
 vec4 rayObjectIntersection(vec3 originPoint, vec3 normalizedDirection, int objectIndex) {
 	if (objectIsSphere(objectIndex)) {
 		return raySphereIntersection(originPoint, normalizedDirection, objects[objectIndex]);
@@ -226,6 +232,7 @@ vec4 rayObjectIntersection(vec3 originPoint, vec3 normalizedDirection, int objec
 		return rayPlaneIntersection(originPoint, normalizedDirection, objects[objectIndex]);
 	}
 }
+
 
 // calculates nearest point of intersection of ray from origin with sphere
 vec4 raySphereIntersection(vec3 originPoint, vec3 normalizedDirection, vec4 sphere) {
@@ -295,57 +302,87 @@ vec3 calculateNormalToSurface(vec3 pointOnObject, int objectId) {
 }
 
 
-bool lightReachesObject(int lightSourceId, vec3 pointOnObject, int objectId) {
-	// FIXME consider reflection of light from mirror surface???
-	vec3 normalizedLightDirection = normalize(lightsDirection[lightSourceId].xyz);
-	
-	// if light is directional, return true if not hitting ANY objects on the opposite direction of the light
+bool directionalLightReachesObject(int lightDirectionIndex, vec3 pointOnObject, int objectId) {
+	vec3 normalizedLightDirection = normalize(lightsDirection[lightDirectionIndex].xyz);
 	int numOfObjects = sizes[0];
-	if (lightIsDirectional(lightSourceId)) {
-		for (int objectIndex = 0; objectIndex < numOfObjects; ++objectIndex) {
-			if (objectId != objectIndex
-				&& rayObjectIntersection(pointOnObject, -normalizedLightDirection, objectIndex)[3] > 0) {
+	
+	for (int objectIndex = 0; objectIndex < numOfObjects; ++objectIndex) {
+		if (objectId != objectIndex
+			&& rayObjectIntersection(pointOnObject, -normalizedLightDirection, objectIndex)[3] > 0) {
 
-				return false;
-			}
-		}
-	}
-	else { // light is a spot light
-		// if angle between (light direction) and (ray from point to it) is bigger than cut-off-angle, then false
-		vec3 rayFromPointToSP = pointOnObject - lightsPosition[lightSourceId].xyz;
-		float cosCutoffAngle = lightsPosition[lightSourceId].w;
-		
-		float cosAngle = dot(-normalizedLightDirection, rayFromPointToSP)
-					/*/ dot(lightDirection,lightDirection)*/
-					/ dot(rayFromPointToSP,rayFromPointToSP);
-
-		if (cosAngle < cosCutoffAngle) { // if cos is smaller, angle is bigger
 			return false;
 		}
-		// if reaching an object before reaching light position, then false
-
-		// FIXME : keep a track of index of spot light, to ensure correct indexing
-		float distancePointFromSL = length(pointOnObject - lightsPosition[lightSourceId].xyz);
-
-		for (int objectIndex = 0; objectIndex < numOfObjects; ++objectIndex) {
-			float t = rayObjectIntersection(pointOnObject, -normalizedLightDirection, objectIndex)[3];
-
-			if (objectId != objectIndex
-				&& t < distancePointFromSL) {
-
-				return false;
-			}
-		}
 	}
 
-	// TODO : if light is a spotlight, return true if not hitting any objects, before reaching the light source, on the opposite direction of the light
-
-	return true; // FIXME
+	return true;
 }
 
 
-bool lightIsDirectional(int lightSourceId) {
-	return lightsDirection[lightSourceId][3] == 0.0;
+bool spotlightReachesObject(int lightDirectionIndex, int lightPositionIndex, vec3 pointOnObject, int objectId) {
+
+	vec3 normalizedLightDirection = normalize(lightsDirection[lightDirectionIndex].xyz);
+
+	// if angle between (light direction) and (ray from point to it) is bigger than cut-off-angle, then false
+	vec3 rayFromPointToSP = pointOnObject - lightsPosition[lightPositionIndex].xyz;
+	float cosCutoffAngle = lightsPosition[lightPositionIndex].w;
+	
+	float cosAngle = dot(-normalizedLightDirection, rayFromPointToSP)
+				/*/ dot(lightDirection,lightDirection)*/
+				/ dot(rayFromPointToSP,rayFromPointToSP);
+
+	if (cosAngle > cosCutoffAngle) { // if cos is smaller, angle is bigger
+		return false;
+	}
+
+	// if reaching an object before reaching light position, then false
+	// FIXME : keep a track of index of spot light, to ensure correct indexing
+	float distancePointFromSL = length(pointOnObject - lightsPosition[lightPositionIndex].xyz);
+
+	int numOfObjects = sizes[0];
+	for (int objectIndex = 0; objectIndex < numOfObjects; ++objectIndex) {
+		if (objectId != objectIndex) {
+			float t = rayObjectIntersection(pointOnObject, -normalizedLightDirection, objectIndex)[3];
+
+			if (t > 0 && t < distancePointFromSL) {
+				return false;
+			}
+		}
+	}
+
+	return true;
+}
+
+
+// bool lightReachesObject(int lightSourceId, vec3 pointOnObject, int objectId) {
+// 	// FIXME consider reflection of light from mirror surface???
+// 	vec3 normalizedLightDirection = normalize(lightsDirection[lightSourceId].xyz);
+	
+// 	// if light is directional, return true if not hitting ANY objects on the opposite direction of the light
+// 	int numOfObjects = sizes[0];
+// 	if (lightIsDirectional(lightSourceId)) {
+		
+// 	}
+// 	else { // light is a spot light
+
+		
+
+
+		
+
+// 		// return false; // FIXME remove debug
+// 	}
+
+// 	return true;
+// }
+
+
+bool lightIsSpotlight(int lightDirectionIndex) {
+	return lightsDirection[lightDirectionIndex][3] > 0.0;
+}
+
+
+bool lightIsDirectional(int lightDirectionIndex) {
+	return !lightIsSpotlight(lightDirectionIndex);
 }
 
 

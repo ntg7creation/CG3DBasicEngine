@@ -18,7 +18,9 @@ static void printMat(const Eigen::Matrix4d& mat)
 
 Assignment2::Assignment2()
 {
-	SceneParser("data/scenes/myScene.txt",&scnData);
+	//SceneParser("data/scenes/myScene.txt",&scnData);
+	SceneParser("data/scenes/scene4.txt", &scnData);
+
 	xResolution = 800;
 	yResolution = 800;
 	//x = 0.5f;

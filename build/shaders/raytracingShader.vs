@@ -13,6 +13,8 @@ out vec3 position0;
 uniform mat4 Proj;
 uniform mat4 View;
 uniform mat4 Model;
+
+
 void main()
 {	
 	texCoord0 = texCoords;

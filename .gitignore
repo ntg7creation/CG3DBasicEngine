@@ -1,7 +1,12 @@
 *
 
-!tutorial/**
+!tutorial
+!tutorial/Assignment2/**
 
+!build
+!build/shaders
 !build/shaders/**
 
+!build/data
+!build/data/scenes
 !build/data/scenes/**

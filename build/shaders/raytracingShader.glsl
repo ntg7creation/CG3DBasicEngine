@@ -178,7 +178,7 @@ void main()
         if(objects[indx].w <= 0 && (((mod(int(1.5*x),2) == mod(int(1.5*y),2)) && ((x>0 && y>0) || (x<0 && y<0))) || ((mod(int(1.5*x),2) != mod(int(1.5*y),2) && ((x<0 && y>0) || (x>0 && y<0))))))
             gl_FragColor = vec4(colorCalc(indx,p,v,0.5),1);
         else 
-            gl_FragColor = vec4(colorCalc(indx,p,v,1.0),1);      
+            gl_FragColor = vec4(colorCalc(indx,p,v,1.0),1);
     }
 }
  
