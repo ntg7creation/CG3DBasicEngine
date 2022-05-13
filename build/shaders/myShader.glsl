@@ -253,12 +253,12 @@ vec3 calculateReflectRay(vec3 pointOnObject, int objectId, int lightSourceId) {
 	vec3 correctedNormal;
 	vec3 rayFromSurfaceToLight;
 	
-	if (lightIsDirectional(lightSourceId)) {
+	// if (lightIsDirectional(lightSourceId)) {
 		rayFromSurfaceToLight = lightsDirection[lightSourceId].xyz;
-	}
-	else {
-		rayFromSurfaceToLight = pointOnObject - lightsPosition[lightSourceId].xyz;
-	}
+	// }
+	// else {
+	// 	rayFromSurfaceToLight = pointOnObject - lightsPosition[lightSourceId].xyz;
+	// }
 
 	correctedNormal = calculateNormalToSurface(pointOnObject, objectId);
 	if (dot(rayFromSurfaceToLight, correctedNormal) < dot(rayFromSurfaceToLight, -correctedNormal)) {
