@@ -16,6 +16,9 @@ uniform ivec4 sizes;
 
 out vec4 Color;
 
+uniform vec4 rotations; // vec4 x rotate ,y rotate ,z rotate,
+uniform vec4 translate; // vec4 x translate, y translate , z translate.
+
 
 /// [x] DEFINITIONS for implemetation
 
@@ -53,25 +56,71 @@ void assert(bool condition, vec4 colorOnTrue);
 
 
 void main() {
-	
+	// Color = WHITE; // FIXME : incase not hitting anything (infinity)
 
-	// discard;
-	Color = WHITE; // FIXME : incase not hitting anything (infinity)
+	mat4 mtranslate ;
+    mtranslate[0] = vec4(1,0,0,translate.x);
+    mtranslate[1] = vec4(0,1,0,translate.y);
+    mtranslate[2] = vec4(0,0,1,translate.z);
+    mtranslate[3] = vec4(0,0,0,1);
+    mtranslate = transpose(mtranslate);
 
-	vec3 normalizedRayDirection = normalize(position0 - eyeCoordinates); // TODO : figure out why it's negative
+    mat4 z_rotation ;
+    z_rotation[0] = vec4(cos(rotations.z),-sin(rotations.z),0,0);
+    z_rotation[1] = vec4(sin(rotations.z),cos(rotations.z),0,0);
+    z_rotation[2] = vec4(0,0,1,0);
+    z_rotation[3] = vec4(0,0,0,1);
+    z_rotation = transpose(z_rotation);
+
+    mat4 y_rotation ;
+    y_rotation[0] = vec4(cos(rotations.y),0,sin(rotations.y),0);
+    y_rotation[1] = vec4(0,1,0,0);
+    y_rotation[2] = vec4(-sin(rotations.y),0,cos(rotations.y),0);
+    y_rotation[3] = vec4(0,0,0,1);
+    y_rotation = transpose(y_rotation);
+
+    mat4 x_rotation;
+    x_rotation[0] = vec4(1,0,0,0);
+    x_rotation[1] = vec4(0,cos(rotations.x),-sin(rotations.x),0);
+    x_rotation[2] = vec4(0,sin(rotations.x),cos(rotations.x),0);
+    x_rotation[3] = vec4(0,0,0,1);
+    x_rotation = transpose(x_rotation);
+
+	vec4 new_pos = z_rotation*y_rotation*x_rotation* mtranslate *  vec4(position0.x,position0.y,0,1);//y_rotation *x_rotation* new_pos;
+    vec4 new_eye = z_rotation*y_rotation*x_rotation*mtranslate * vec4(eyeCoordinates,1);//y_rotation *x_rotation* eye;
+   
+	vec3 normalizedRayDirection = normalize(new_pos.xyz - new_eye.xyz);
+
+	vec4 intersectionInfo; // FIXME : remove?
+	float min_t = 1.0e10;
 	int numOfObjects = sizes[0];
 
-	vec4 res; // FIXME : remove?
-	float min_t = 1.0e10;
-
 	for (int objectIndex = 0; objectIndex < numOfObjects; ++objectIndex) {
-		res = rayObjectIntersection(eyeCoordinates, normalizedRayDirection, objectIndex);
+		intersectionInfo = rayObjectIntersection(new_eye.xyz, normalizedRayDirection, objectIndex);
 
-		if (res[3] > 0 && res[3] < min_t) { // if valid intersection point
-			min_t = res[3];
-			Color = vec4(calculatePixelColor(res.xyz, objectIndex), 1);
+		if (intersectionInfo[3] > 0 && intersectionInfo[3] < min_t) { // if valid intersection point
+			min_t = intersectionInfo[3];
+			Color = vec4(calculatePixelColor(intersectionInfo.xyz, objectIndex), 1);
 		}
 	}
+
+
+	// Color = WHITE; // FIXME : incase not hitting anything (infinity)
+
+	// vec3 normalizedRayDirection = normalize(position0 - eyeCoordinates); // TODO : figure out why it's negative
+	// int numOfObjects = sizes[0];
+
+	// vec4 res; // FIXME : remove?
+	// float min_t = 1.0e10;
+
+	// for (int objectIndex = 0; objectIndex < numOfObjects; ++objectIndex) {
+	// 	res = rayObjectIntersection(eyeCoordinates, normalizedRayDirection, objectIndex);
+
+	// 	if (res[3] > 0 && res[3] < min_t) { // if valid intersection point
+	// 		min_t = res[3];
+	// 		Color = vec4(calculatePixelColor(res.xyz, objectIndex), 1);
+	// 	}
+	// }
 
 	// FIXME : remove debug
 	// assert(lightReachesObject(/*light*/0, /*pointOnObject*/), RED);
@@ -116,11 +165,11 @@ vec3 calculatePixelColor(vec3 pointOnObject, int objectId) {
 		if (lightIsDirectional(lightDirectionIndex) && directionalLightReachesObject(lightDirectionIndex, pointOnObject, objectId)) {
 			// FIXME split light type check to count spotlights
 			color += calculateDiffuseColor(pointOnObject, objectId, lightDirectionIndex)
-				+ calculateSpecularColor(pointOnObject, objectId, lightDirectionIndex); //FIXME uncomment specular
+				+ calculateSpecularColor(pointOnObject, objectId, lightDirectionIndex);
 		}
 		if (lightIsSpotlight(lightDirectionIndex) && spotlightReachesObject(lightDirectionIndex, lightPositionIndex, pointOnObject, objectId)) {
 			color += calculateDiffuseColor(pointOnObject, objectId, lightDirectionIndex)
-				+ calculateSpecularColor(pointOnObject, objectId, lightDirectionIndex); //FIXME uncomment specular
+				+ calculateSpecularColor(pointOnObject, objectId, lightDirectionIndex);
 			++lightPositionIndex;
 		}
 		// if (lightReachesObject(lightDirectionIndex, lightPositionIndex, pointOnObject, objectId)) {

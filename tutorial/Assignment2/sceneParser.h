@@ -8,6 +8,8 @@
 struct SceneData
 {
 	Eigen::Vector4f eye;         //position + shine
+	Eigen::Vector4f eye_rotate;
+	Eigen::Vector4f eye_translate;
 	Eigen::Vector4f ambient;
 	Eigen::Vector4i sizes;				// total object num, lights num, reflecting object num, transmitting object num
 	std::vector<Eigen::Vector4f> objects;      //center coordinates + radius / normal + d

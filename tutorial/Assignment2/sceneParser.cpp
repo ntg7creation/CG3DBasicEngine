@@ -42,6 +42,8 @@ Eigen::Vector4f SceneParser::parseVec4(const std::string& line)
 
 SceneParser::SceneParser(const std::string& fileName, SceneData* data)
 {
+	data->eye_rotate = Eigen::Vector4f(0, 0, 0, 0);
+	data->eye_translate = Eigen::Vector4f(0, 0, 0, 0);
 	std::ifstream file;
     file.open((fileName).c_str());
 	std::vector<Eigen::Vector4f> notRefobjects,notRefColor,refobjects,refColor;

@@ -136,8 +136,8 @@
 			case GLFW_KEY_U:
 				rndr->MoveCamera(0, scn->yTranslate, 0.25f);
 				break;
-			case GLFW_KEY_D:
-				rndr->MoveCamera(0, scn->yTranslate, -0.25f);
+			//case GLFW_KEY_D:
+				//rndr->MoveCamera(0, scn->yTranslate, -0.25f);
 				break;
 			case GLFW_KEY_L:
 				rndr->MoveCamera(0, scn->xTranslate, -0.25f);
@@ -152,6 +152,25 @@
 				break;
 			case GLFW_KEY_F:
 				rndr->MoveCamera(0, scn->zTranslate, -0.5f);
+				break;
+				//my addtions
+			case GLFW_KEY_W:
+				scn->TranslateEye(0.5, 1);
+				break;
+			case GLFW_KEY_S:
+				scn->TranslateEye(-0.5, 1);
+				break;
+			case GLFW_KEY_A:
+				scn->TranslateEye(-0.5, 0);
+				break;
+			case GLFW_KEY_D:
+				scn->TranslateEye(0.5, 0);
+				break;
+			case GLFW_KEY_Q:
+				scn->TranslateEye(0.5, 2);
+				break;
+			case GLFW_KEY_E:
+				scn->TranslateEye(-0.5, 2);
 				break;
 			default:
 				break;

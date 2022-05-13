@@ -40,13 +40,17 @@ void Assignment2::Init()
 	unsigned int texIDs[3] = { 0 , 1, 2};
 	unsigned int slots[3] = { 0 , 1, 2 };
 
-	AddShader("shaders/pickingShader"); // TODO
+	AddShader("shaders/pickingShader");
+	//AddShader("shaders/raytracingShader");
+	//AddShader("shaders/myShader");
+
 	if (USE_MINE) {
 		AddShader("shaders/myShader"); // TODO
 	}
 	else {
 		AddShader("shaders/raytracingShader"); // TODO
 	}
+
 	
 	AddTexture("textures/box0.bmp",2);
 	AddTexture("textures/grass.bmp", 2);
@@ -90,6 +94,10 @@ void Assignment2::Update(const Eigen::Matrix4f& Proj, const Eigen::Matrix4f& Vie
 	s->SetUniform4fv("lightsPosition", &scnData.lights[0], scnData.lights.size());
 	s->SetUniform4fv("lightsDirection", &scnData.directions[0], scnData.directions.size());
 	s->SetUniform4fv("lightsIntensity", &scnData.intensities[0], scnData.intensities.size());
+	s->SetUniform4fv("rotations", &scnData.eye_rotate, 1);
+	//Eigen::Vector4f vector = Eigen::Vector4f(1, 0.5, 0.5, 0.5);
+	
+	s->SetUniform4fv("translate", &scnData.eye_translate, 1);
 	
 	s->SetUniform4i("sizes", scnData.sizes[0], scnData.sizes[1], scnData.sizes[2], scnData.sizes[3]);
 	if (data_list[shapeIndx]->GetMaterial() >= 0 && !materials.empty())
@@ -224,10 +232,27 @@ void Assignment2::RotateEye(float amt, bool upDown)
 {
 	float n = scnData.eye.norm();
 	if (upDown)
-		scnData.eye[1] += amt;
+		scnData.eye_rotate += Eigen::Vector4f(amt, 0, 0, 0);
+		//scnData.eye[1] += amt;
 	else
-		scnData.eye[0] += amt;
+		scnData.eye_rotate += Eigen::Vector4f(0, amt, 0, 0);
+		//scnData.eye[0] += amt;
 	//scnData.eye = scnData.eye.normalized()*n;
+}
+
+void Assignment2::TranslateEye(float amt, int xyz)
+{
+	float n = scnData.eye.norm();
+	
+	if (xyz == 0)
+		scnData.eye_translate += Eigen::Vector4f(amt, 0, 0, 0);
+	//scnData.eye[1] += amt;
+	if(xyz == 1)
+		scnData.eye_translate += Eigen::Vector4f(0, amt, 0, 0);
+	if(xyz == 2)
+		scnData.eye_translate += Eigen::Vector4f(0, 0, amt, 0);
+	//scnData.eye[0] += amt;
+//scnData.eye = scnData.eye.normalized()*n;
 }
 
 Assignment2::~Assignment2(void)

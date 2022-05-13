@@ -26,6 +26,7 @@ public:
 	void SetRightPress() { isRightPressed = !isRightPressed; }
 	float Intersection(Eigen::Vector3f sourcePoint);
 	void RotateEye(float amt, bool upDown);
+	void TranslateEye(float amt, int left_right_up_down_forwod_back);
 	~Assignment2(void);
 };
 
