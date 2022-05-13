@@ -15,12 +15,20 @@ static void printMat(const Eigen::Matrix4d& mat)
 		std::cout<<std::endl;
 	}
 }
+static void printMat(const Eigen::Matrix4f& mat)
+{
+	std::cout << " matrix:" << std::endl;
+	for (int i = 0; i < 4; i++)
+	{
+		for (int j = 0; j < 4; j++)
+			std::cout << mat(j, i) << " ";
+		std::cout << std::endl;
+	}
+}
 
 Assignment2::Assignment2()
 {
-	//SceneParser("data/scenes/myScene.txt",&scnData);
-	SceneParser("data/scenes/scene4.txt", &scnData);
-
+	SceneParser("data/scenes/scene4.txt",&scnData);
 	xResolution = 800;
 	yResolution = 800;
 	//x = 0.5f;
@@ -40,9 +48,7 @@ void Assignment2::Init()
 	unsigned int texIDs[3] = { 0 , 1, 2};
 	unsigned int slots[3] = { 0 , 1, 2 };
 
-	AddShader("shaders/pickingShader");
-	//AddShader("shaders/raytracingShader");
-	//AddShader("shaders/myShader");
+	AddShader("shaders/basicShader");
 
 	if (USE_MINE) {
 		AddShader("shaders/myShader"); // TODO
@@ -51,7 +57,6 @@ void Assignment2::Init()
 		AddShader("shaders/raytracingShader"); // TODO
 	}
 
-	
 	AddTexture("textures/box0.bmp",2);
 	AddTexture("textures/grass.bmp", 2);
 
@@ -184,8 +189,46 @@ void Assignment2::ScaleAllShapes(float amt,int viewportIndx)
 
 float Assignment2::Intersection(Eigen::Vector3f sourcePoint)
 {
+
+
+	Eigen::Matrix4f mtranslate = Eigen::Matrix4f::Identity();
+	mtranslate(3) = scnData.eye_translate[0];
+	mtranslate(7) = scnData.eye_translate[1];
+	mtranslate(11) = scnData.eye_translate[2];
+	
+	Eigen::Matrix4f z_rotation = Eigen::Matrix4f::Identity();
+	z_rotation(0) = cos(scnData.eye_rotate[2]);
+	z_rotation(1) = -sin(scnData.eye_rotate[2]);
+	z_rotation(4) = sin(scnData.eye_rotate[2]);
+	z_rotation(5) = cos(scnData.eye_rotate[2]);
+
+	Eigen::Matrix4f y_rotation = Eigen::Matrix4f::Identity();
+	y_rotation(0) = cos(scnData.eye_rotate[1]);
+	y_rotation(2) = sin(scnData.eye_rotate[1]);
+	y_rotation(8) = -sin(scnData.eye_rotate[1]);
+	y_rotation(10) = cos(scnData.eye_rotate[1]);
+
+
+	Eigen::Matrix4f x_rotation = Eigen::Matrix4f::Identity();
+	x_rotation(5) = cos(scnData.eye_rotate[0]);
+	x_rotation(6) = sin(scnData.eye_rotate[0]);
+	x_rotation(9) = -sin(scnData.eye_rotate[0]);
+	x_rotation(10) = cos(scnData.eye_rotate[0]);
+	
+	Eigen::Vector4f new_sourcePoint = z_rotation * y_rotation * x_rotation * mtranslate * Eigen::Vector4f(sourcePoint[0], sourcePoint[1], sourcePoint[2], 1);
+	Eigen::Vector4f new_eye = z_rotation * y_rotation * x_rotation * mtranslate * Eigen::Vector4f(scnData.eye[0], scnData.eye[1], scnData.eye[2], 1.0);
+
+	//sourcePoint = Eigen::Vector3f(new_sourcePoint[0], new_sourcePoint[1], new_sourcePoint[2]);
+
 	Eigen::Vector3f v = (sourcePoint - Eigen::Vector3f(0, 0, scnData.eye[2] - scnData.eye[3])).normalized();
+
+	//v = (sourcePoint + Eigen::Vector3f(0, 0,  scnData.eye[3] - Eigen::Vector3f(new_eye[0], new_eye[1], new_eye[2])).normalized();
+
+	for (int j = 0; j < 3; j++)
+
 	sourcePoint = sourcePoint + Eigen::Vector3f(scnData.eye[0], scnData.eye[1], scnData.eye[3]);
+	//sourcePoint = sourcePoint + Eigen::Vector3f(new_eye[0], new_eye[1], new_eye[3]);
+
 	float tmin = 1.0e10;
 	int indx = -1;
 	for (int i = 0; i < scnData.sizes[0]; i++) //every object
@@ -193,7 +236,7 @@ float Assignment2::Intersection(Eigen::Vector3f sourcePoint)
 		if (scnData.objects[i][3] > 0) //sphere
 		{
 			Eigen::Vector3f p0o = (scnData.objects[i].head(3)) - sourcePoint;
-			float r = scnData.objects[i][3];
+			float r = scnData.objects[i][3] * 2;
 			float b = v.dot(p0o);
 			float delta = b * b - p0o.dot(p0o) + r * r;
 			float t;
@@ -224,7 +267,7 @@ float Assignment2::Intersection(Eigen::Vector3f sourcePoint)
 		}
 	}
 	sourceIndx = indx;
-	//std::cout<<"indx "<<indx<<std::endl;
+	std::cout<<"indx "<<indx<<std::endl;
 	return tmin;
 }
 

@@ -18,12 +18,26 @@
 
 	
 			scn->SetPosition((int)x2, (int)y2);
+			double x3 = (float)x2 / 400.0f - 1, y3 = 1 - (float)y2 / 400.0f;
 			scn->Intersection(Eigen::Vector3f((float)x2 / 400.0f - 1, 1 - (float)y2 / 400.0f, 0));
+			if (button == GLFW_MOUSE_BUTTON_LEFT)
+			{
+				if (y3 > 0)
+					scn->TranslateEye(0.5, 1);
+				if (y3 < 0)
+					scn->TranslateEye(-0.5, 1);
+				if (x3 < 0)
+					scn->TranslateEye(-0.5, 0);
+				if (x3 > 0)
+					scn->TranslateEye(0.5, 0);
+			}
 			if (rndr->Picking((int)x2, (int)y2))
 			{
 				rndr->UpdatePosition(x2, y2);
 				if(button == GLFW_MOUSE_BUTTON_LEFT)
 					rndr->Pressed();
+
+
 			}
 			else
 			{
@@ -48,7 +62,7 @@
 	{
 		Renderer* rndr = (Renderer*)glfwGetWindowUserPointer(window);
 		Assignment2* scn = (Assignment2*)rndr->GetScene();
-		scn->scnData.eye[2] += ((float)yoffset * 0.2);
+		//scn->scnData.eye[2] += ((float)yoffset * 0.2);
 		/*if (rndr->IsPicked())
 		{
 			rndr->UpdateZpos((int)yoffset);
@@ -56,8 +70,11 @@
 		}
 		else
 		{
+
 			rndr->MoveCamera(0, rndr->zTranslate, (float)yoffset);
 		}*/
+						scn->TranslateEye(yoffset*0.2, 2);
+						//scn->TranslateEye(-0.5, 2);
 		
 	}
 	

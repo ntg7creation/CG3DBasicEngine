@@ -7,12 +7,12 @@ in vec3 position0;
 
 uniform vec4 eye;
 uniform vec4 ambient;
-uniform vec4[20] objects;
+uniform vec4[20] objects;	// order is : transparent, reflective, normal
 uniform vec4[20] objColors;
 uniform vec4[10] lightsDirection;
 uniform vec4[10] lightsIntensity;
 uniform vec4[10] lightsPosition;
-uniform ivec4 sizes;
+uniform ivec4 sizes; // size[0] : total num of objects, size[1] : num of lights, size[2] : num of reflectives, size[3] : num of transparent
 
 out vec4 Color;
 
@@ -25,14 +25,22 @@ uniform vec4 translate; // vec4 x translate, y translate , z translate.
 vec3 eyeCoordinates = eye.xyz;
 const vec4 INFINITY_COLOR = vec4(0, 0, 0, 1);
 const vec3 objectSpecularValue = vec3(0.7, 0.7, 0.7);
+const float infinityVal = 1.0e10;
 
+int numTotalObjects = sizes[0];
+int numOfLights = sizes[1];
+int numOfReflectives = sizes[2];
+int numOfTransparents = sizes[3];
+int numOfRegulars = numTotalObjects - numOfReflectives - numOfTransparents;
+
+vec4 nearestIntersection(vec3 originPoint, vec3 normalizedDirection);
 vec4 rayObjectIntersection(vec3 originPoint, vec3 normalizedDirection, int objectIndex);
 vec4 rayPlaneIntersection(vec3 originPoint, vec3 normalizedDirection, vec4 plane);
 vec4 raySphereIntersection(vec3 originPoint, vec3 normalizedDirection, vec4 sphere);
 
-vec3 calculatePixelColor(vec3 pointOnObject, int objectId);
+vec3 calculatePixelColor(vec3 originPoint, vec3 pointOnObject, int objectId);
 vec3 calculateDiffuseColor(vec3 pointOnObject, int objectId, int lightSourceId);
-vec3 calculateSpecularColor(vec3 pointOnObject, int objectId, int lightSourceId);
+vec3 calculateSpecularColor(vec3 originPoint, vec3 pointOnObject, int objectId, int lightSourceId);
 vec3 calculateReflectRay(vec3 pointOnObject, int objectId, int lightSourceId);
 
 bool lightReachesObject(int lightSourceId, vec3 pointOnObject, int objectIndex); // FIXME implement to combine directional and spotlight
@@ -55,9 +63,27 @@ const vec4 BLACK = vec4(0, 0, 0, 1);
 void assert(bool condition, vec4 colorOnTrue);
 
 
-void main() {
-	// Color = WHITE; // FIXME : incase not hitting anything (infinity)
+vec4 nearestIntersection(vec3 originPoint, vec3 normalizedDirection) {
+	float min_t = 1.0e10;
+	vec4 min_t_point = vec4(1.0e10);
+	vec4 intersectionInfo;
 
+	for (int objectIndex = 0; objectIndex < numTotalObjects; ++objectIndex) {
+		intersectionInfo = rayObjectIntersection(originPoint, normalizedDirection, objectIndex);
+
+		if (intersectionInfo[3] > 0 // if intersects
+			&& intersectionInfo[3] < min_t) { // if closer than previously found
+
+			min_t = intersectionInfo[3];
+			min_t_point = vec4(intersectionInfo.xyz, objectIndex);
+		}
+	}
+
+	return min_t_point;
+}
+
+
+void main() {
 	mat4 mtranslate ;
     mtranslate[0] = vec4(1,0,0,translate.x);
     mtranslate[1] = vec4(0,1,0,translate.y);
@@ -88,21 +114,122 @@ void main() {
 
 	vec4 new_pos = z_rotation*y_rotation*x_rotation* mtranslate *  vec4(position0.x,position0.y,0,1);//y_rotation *x_rotation* new_pos;
     vec4 new_eye = z_rotation*y_rotation*x_rotation*mtranslate * vec4(eyeCoordinates,1);//y_rotation *x_rotation* eye;
-   
+
+
+	// get nearest intersection
+	// if didn't go to infinity : 
+		// check if object is :
+			// reflective : 
+				// reflect/break up to 5 times until ray goes to infinity or hits a regular object
+			// transparent :
+				// break/reflect up to 5 times until ray goes to infinity or hist a regular object
+			// regular :
+				// calculate regular color
+
+	// FIXME : move to calculating pixelcolor function
+
+
 	vec3 normalizedRayDirection = normalize(new_pos.xyz - new_eye.xyz);
+	// vec3 normalizedRayDirection = normalize(position0 - eyeCoordinates); //FIXME : remove debug
+	vec4 intersectionInfo;
 
-	vec4 intersectionInfo; // FIXME : remove?
-	float min_t = 1.0e10;
-	int numOfObjects = sizes[0];
+	int countdown = 5;
+	do {
+		intersectionInfo = nearestIntersection(new_eye.xyz, normalizedRayDirection);
 
-	for (int objectIndex = 0; objectIndex < numOfObjects; ++objectIndex) {
-		intersectionInfo = rayObjectIntersection(new_eye.xyz, normalizedRayDirection, objectIndex);
-
-		if (intersectionInfo[3] > 0 && intersectionInfo[3] < min_t) { // if valid intersection point
-			min_t = intersectionInfo[3];
-			Color = vec4(calculatePixelColor(intersectionInfo.xyz, objectIndex), 1);
+		if (intersectionInfo == vec4(infinityVal)) { // didn't hit anything
+			Color = INFINITY_COLOR;
+			break;
 		}
-	}
+		if (intersectionInfo[3] < numOfTransparents) { // object is transparent
+
+			new_eye.xyz = intersectionInfo.xyz;
+			normalizedRayDirection = refract(normalizedRayDirection,
+				calculateNormalToSurface(intersectionInfo.xyz, int(intersectionInfo[3])),
+				1.5);
+		}
+		else if (intersectionInfo[3] < numOfReflectives + numOfTransparents) { // object is reflective
+			// get normal of surface of object
+			// new ray direction is the reflection of current direction according to normal
+			// new origin of ray is the point of current intersection
+			new_eye.xyz = intersectionInfo.xyz;
+			vec3 normal = calculateNormalToSurface(intersectionInfo.xyz, int(intersectionInfo[3]));
+			normalizedRayDirection = reflect(normalizedRayDirection, normal);
+		}
+		else { // object is regular
+			Color = vec4(calculatePixelColor(new_eye.xyz, intersectionInfo.xyz, int(intersectionInfo[3])), 1);
+			break;
+		}
+
+		--countdown;
+
+	} while (countdown > 0);
+
+
+
+
+
+	// int indexOffset = 0;
+	// // for all transparents
+	// for (int transparentIndex = indexOffset; transparentIndex < numOfTransparents; ++transparentIndex) {
+	// 	// TODO : use snell law to calculate point of color
+	// }
+
+	// indexOffset += numOfTransparents;
+	// // for all reflectives
+	// for (int reflectiveIndex = indexOffset; reflectiveIndex < indexOffset + numOfReflectives; ++reflectiveIndex) {
+	// 	// TODO : use reflection function
+		
+	// 	// shoot a ray
+	// 	// calculate which object the reflected ray is hitting
+	// 	// if hit reflective object, and didn't reflect 5 times yet, reflect again
+	// 	// else if hit regular object calculate color regularly
+	// 	// else reflected 5 times and return BLACK or the last hit objects color (even if reflective/transparent)
+		
+	// 	intersectionInfo = nearestIntersection(new_eye.xyz, normalizedDirection);
+
+	// 	for (int i = 1; i <= 5; ++i) {
+	// 		if (intersectionInfo == vec4(1.0e10)) { // didn't intersect, color is infinity, break
+	// 			Color = INFINITY_COLOR; // TODO : incorporate the original's color
+	// 			break;
+	// 		}
+	// 		else if (intersectionInfo[3] < numOfTransparents) { // check if object is transparent
+
+	// 		}
+	// 		else if (intersectionInfo[3] < numOfReflectives) { // check if object is reflective
+
+	// 		}
+	// 		else { // object is regular, return color, and break loop
+	// 			Color = vec4(calculatePixelColor(intersectionInfo.xyz, regularIndex	), 1);
+	// 		}
+	// 	}
+	// }
+
+	// indexOffset += numOfReflectives;
+   
+	// // vec3 normalizedRayDirection = normalize(new_pos.xyz - new_eye.xyz);
+	// float min_t = 1.0e10;
+	// // for all regular
+	// for (int regularIndex = indexOffset; regularIndex < numTotalObjects; ++regularIndex) {
+	// 	// TODO : regular color calculation
+	// 	intersectionInfo = rayObjectIntersection(new_eye.xyz, normalizedRayDirection, regularIndex);
+
+	// 	if (intersectionInfo[3] > 0 && intersectionInfo[3] < min_t) { // if valid intersection point
+	// 		min_t = intersectionInfo[3];
+	// 		Color = vec4(calculatePixelColor(intersectionInfo.xyz, regularIndex	), 1);
+	// 	}
+	// }
+
+
+
+	// for (int objectIndex = 0; objectIndex < numOfObjects; ++objectIndex) {
+	// 	intersectionInfo = rayObjectIntersection(new_eye.xyz, normalizedRayDirection, objectIndex);
+
+	// 	if (intersectionInfo[3] > 0 && intersectionInfo[3] < min_t) { // if valid intersection point
+	// 		min_t = intersectionInfo[3];
+	// 		Color = vec4(calculatePixelColor(intersectionInfo.xyz, objectIndex), 1);
+	// 	}
+	// }
 
 
 	// Color = WHITE; // FIXME : incase not hitting anything (infinity)
@@ -152,37 +279,29 @@ vec3 getPointOnPlane(vec4 plane) {
 }
 
 
-vec3 calculatePixelColor(vec3 pointOnObject, int objectId) {
-	// TODO separate calculation of color based on object type: sphere or plane 
-	// 			(sphere has multiplication by normal, planes have multiplication by normal and colored squares)
-
-	vec3 color = ambient.xyz * objColors[objectId].xyz; // FIXME : uncomment ambient color
+vec3 calculatePixelColor(vec3 originPoint, vec3 pointOnObject, int objectId) {
 	
-	int numOfLights = sizes[1];
+	// (sphere has multiplication by normal, planes have multiplication by normal and colored squares)
+
+	vec3 color = ambient.xyz * objColors[objectId].xyz;
+	
 	for (int lightDirectionIndex = 0, lightPositionIndex = 0; lightDirectionIndex < numOfLights; ++lightDirectionIndex) {
 		// if light from source reaches the point on the object (if ray from point on object hits light source first without interruptions)
-		// if (!lightIsDirectional(lightSourceId)) // FIXME remove debug
 		if (lightIsDirectional(lightDirectionIndex) && directionalLightReachesObject(lightDirectionIndex, pointOnObject, objectId)) {
-			// FIXME split light type check to count spotlights
+
 			color += calculateDiffuseColor(pointOnObject, objectId, lightDirectionIndex)
-				+ calculateSpecularColor(pointOnObject, objectId, lightDirectionIndex);
-		}
-		if (lightIsSpotlight(lightDirectionIndex) && spotlightReachesObject(lightDirectionIndex, lightPositionIndex, pointOnObject, objectId)) {
-			color += calculateDiffuseColor(pointOnObject, objectId, lightDirectionIndex)
-				+ calculateSpecularColor(pointOnObject, objectId, lightDirectionIndex);
+				+ calculateSpecularColor(originPoint, pointOnObject, objectId, lightDirectionIndex);
+		} // FIXME uncomment this if
+
+		if (lightIsSpotlight(lightDirectionIndex)) {
 			++lightPositionIndex;
-		}
-		// if (lightReachesObject(lightDirectionIndex, lightPositionIndex, pointOnObject, objectId)) {
+
+			if (spotlightReachesObject(lightDirectionIndex, lightPositionIndex, pointOnObject, objectId)) {
 			
-		// 	// if (!lightIsDirectional(lightSourceId)) {return RED.xyz;} // FIXME remove DEBUG
-
-
-		// 	// FIXME : remove debug
-		// 	// if (!objectIsSphere(objectId)) {
-		// 	// 	return RED.xyz;
-		// 	// }
-		// }
-		// TODO : else, need shadow?
+				color += calculateDiffuseColor(pointOnObject, objectId, lightDirectionIndex)
+					+ calculateSpecularColor(originPoint, pointOnObject, objectId, lightDirectionIndex);
+			}
+		}
 	}
 
 	return clamp(color, 0, 1); //FIXME uncomment use of clamp
@@ -190,14 +309,17 @@ vec3 calculatePixelColor(vec3 pointOnObject, int objectId) {
 }
 
 
-float correctedDot(vec3 normal, vec3 normalizedDirection) {
-	float rawDot = dot(normal, normalizedDirection);
+// float correctedDot(vec3 normal, vec3 normalizedDirection) {
+// 	float rawDot = dot(normal, normalizedDirection);
 
-	return max(rawDot, -rawDot);
-}
+// 	return max(rawDot, -rawDot);
+// }
 
 
 bool darkenSquareAtPoint(vec3 pointOnObject) {
+	float coefficient = 1.5;
+	pointOnObject *= coefficient;
+
 	float x = pointOnObject.x;
 	float y = pointOnObject.y;
 
@@ -212,6 +334,7 @@ bool darkenSquareAtPoint(vec3 pointOnObject) {
 vec3 calculateDiffuseColor(vec3 pointOnObject, int objectId, int lightSourceId) {
 	float diffuseCoefficient = 1;
 
+	// if plane, create dark squares pattern
 	if ( ( ! objectIsSphere(objectId)) && darkenSquareAtPoint(pointOnObject) ) {
 		diffuseCoefficient = 0.5;
 	}
@@ -219,53 +342,59 @@ vec3 calculateDiffuseColor(vec3 pointOnObject, int objectId, int lightSourceId) 
 	vec3 color = diffuseCoefficient
 		* objColors[objectId].xyz
 		* lightsIntensity[lightSourceId].xyz
-		* correctedDot(
+		* dot(
 			calculateNormalToSurface(pointOnObject, objectId),
-			normalize(lightsDirection[lightSourceId].xyz)
+			normalize(pointOnObject-lightsDirection[lightSourceId].xyz)
 		); // FIXME : direction is not entirely correct for spot lights
 
-	return clamp(color, 0, 1); //FIXME uncomment use of clamp
-	// return color;  //FIXME remove debug
+	if (objectIsSphere(objectId)) {
+		color *= -1;
+	}
+
+	return clamp(color, 0, 1);
 }
 
 
-vec3 calculateSpecularColor(vec3 pointOnObject, int objectId, int lightSourceId) {
+vec3 calculateSpecularColor(vec3 originPoint, vec3 pointOnObject, int objectId, int lightSourceId) {
+	vec3 V = -normalize(pointOnObject - originPoint);
+	vec3 R = normalize(calculateReflectRay(pointOnObject, objectId, lightSourceId));
+	float VR = max(0, dot(V,R));
 
-	// TODO: divide the implementation between directional light and a spot light
 	vec3 color = objectSpecularValue
 		* lightsIntensity[lightSourceId].xyz
-		* pow(
-				max(0, dot(
-						normalize(pointOnObject - eye.xyz),
-						normalize(calculateReflectRay(pointOnObject, objectId, lightSourceId))
-					)), // TODO check if should use max(0, V*R)
+		* pow(	VR,
 				objectShininessFactor(objectId)
-		); // FIXME
+			);
 
 		
-	return clamp(color, 0, 1); //FIXME uncomment use of clamp
-	// return color;  //FIXME remove debug
+	return clamp(color, 0, 1);
 }
 
 
 // FIXME : think about the implications of the cutoff angle of a spotlight
 vec3 calculateReflectRay(vec3 pointOnObject, int objectId, int lightSourceId) {
-	vec3 correctedNormal;
-	vec3 rayFromSurfaceToLight;
+	// vec3 correctedNormal;
+	// vec3 rayFromSurfaceToLight;
 	
-	// if (lightIsDirectional(lightSourceId)) {
-		rayFromSurfaceToLight = lightsDirection[lightSourceId].xyz;
-	// }
-	// else {
-	// 	rayFromSurfaceToLight = pointOnObject - lightsPosition[lightSourceId].xyz;
+	// // if (lightIsDirectional(lightSourceId)) {
+		// vec3 rayFromLightToPoint = pointOnObject + lightsDirection[lightSourceId].xyz;
+	// // }
+	// // else {
+		// rayFromSurfaceToLight = pointOnObject - lightsPosition[lightSourceId].xyz;
+	// // }
+
+	// correctedNormal = calculateNormalToSurface(pointOnObject, objectId);
+	// if (dot(rayFromSurfaceToLight, correctedNormal) < dot(rayFromSurfaceToLight, -correctedNormal)) {
+	// 	correctedNormal = -correctedNormal;
 	// }
 
-	correctedNormal = calculateNormalToSurface(pointOnObject, objectId);
-	if (dot(rayFromSurfaceToLight, correctedNormal) < dot(rayFromSurfaceToLight, -correctedNormal)) {
-		correctedNormal = -correctedNormal;
-	}
+	// return 2 * dot(correctedNormal, rayFromSurfaceToLight) * correctedNormal - rayFromSurfaceToLight;
+	// return reflect(rayFromSurfaceToLight);
 
-	return 2 * dot(correctedNormal, rayFromSurfaceToLight) * correctedNormal - rayFromSurfaceToLight;
+	
+	vec3 rayFromLightToPoint = pointOnObject + lightsDirection[lightSourceId].xyz;
+
+	return reflect(rayFromLightToPoint, calculateNormalToSurface(pointOnObject, objectId)); //FIXME remove this
 }
 
 ///
@@ -308,6 +437,7 @@ vec4 raySphereIntersection(vec3 originPoint, vec3 normalizedDirection, vec4 sphe
 
 
 vec4 rayPlaneIntersection(vec3 originPoint, vec3 normalizedDirection, vec4 plane) {
+	// FIXME : check if Q0 == point?
 	vec3 Q0 = getPointOnPlane(plane);
 	vec3 planeNormal = plane.xyz;
 
@@ -353,10 +483,17 @@ vec3 calculateNormalToSurface(vec3 pointOnObject, int objectId) {
 
 bool directionalLightReachesObject(int lightDirectionIndex, vec3 pointOnObject, int objectId) {
 	vec3 normalizedLightDirection = normalize(lightsDirection[lightDirectionIndex].xyz);
-	int numOfObjects = sizes[0];
 	
-	for (int objectIndex = 0; objectIndex < numOfObjects; ++objectIndex) {
-		if (objectId != objectIndex
+	// FIXME : consider reflectives and transparents
+	// FIXME use nearestIntersection function
+
+	// if (objectIsSphere(objectId) && dot(calculateNormalToSurface(pointOnObject, objectId), normalizedLightDirection) < 0) { // on the bottom of a sphere in relation to light source
+	// 	return false;
+	// }
+	
+	// FIXME : consider reflectives and transparents
+	for (int objectIndex = 0; objectIndex < numTotalObjects; ++objectIndex) {
+		if (objectId != objectIndex // FIXME the back of the sphere should still be blocked by the other half of the sphere
 			&& rayObjectIntersection(pointOnObject, -normalizedLightDirection, objectIndex)[3] > 0) {
 
 			return false;
@@ -372,23 +509,23 @@ bool spotlightReachesObject(int lightDirectionIndex, int lightPositionIndex, vec
 	vec3 normalizedLightDirection = normalize(lightsDirection[lightDirectionIndex].xyz);
 
 	// if angle between (light direction) and (ray from point to it) is bigger than cut-off-angle, then false
-	vec3 rayFromPointToSP = pointOnObject - lightsPosition[lightPositionIndex].xyz;
+	vec3 rayFromPointToSP = normalize(pointOnObject - lightsPosition[lightPositionIndex].xyz);
 	float cosCutoffAngle = lightsPosition[lightPositionIndex].w;
 	
-	float cosAngle = dot(-normalizedLightDirection, rayFromPointToSP)
+	float cosAngle = dot(normalizedLightDirection, rayFromPointToSP)
 				/*/ dot(lightDirection,lightDirection)*/
 				/ dot(rayFromPointToSP,rayFromPointToSP);
 
-	if (cosAngle > cosCutoffAngle) { // if cos is smaller, angle is bigger
+	if (/* cosAngle > 0 &&  */acos(cosAngle) > acos(cosCutoffAngle)) {
 		return false;
 	}
 
 	// if reaching an object before reaching light position, then false
 	// FIXME : keep a track of index of spot light, to ensure correct indexing
-	float distancePointFromSL = length(pointOnObject - lightsPosition[lightPositionIndex].xyz);
+	float distancePointFromSL = length(dot(pointOnObject - lightsPosition[lightPositionIndex].xyz, normalizedLightDirection));
 
-	int numOfObjects = sizes[0];
-	for (int objectIndex = 0; objectIndex < numOfObjects; ++objectIndex) {
+	// FIXME : take into account reflectives and transparents
+	for (int objectIndex = 0; objectIndex < numTotalObjects; ++objectIndex) {
 		if (objectId != objectIndex) {
 			float t = rayObjectIntersection(pointOnObject, -normalizedLightDirection, objectIndex)[3];
 
