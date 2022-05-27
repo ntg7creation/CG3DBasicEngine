@@ -65,7 +65,7 @@ void Renderer::SwapDrawInfo(int indx1, int indx2)
 
 IGL_INLINE void Renderer::draw_by_info(int info_index){
     DrawInfo* info = drawInfos[info_index];
-    buffers[info->buffer]->Bind();
+    buffers[info->bufferIndx]->Bind();
     glViewport(viewports[info->viewportIndx].x(), viewports[info->viewportIndx].y(), viewports[info->viewportIndx].z(), viewports[info->viewportIndx].w());
     if (info->flags & scissorTest)
     {
@@ -243,16 +243,16 @@ void Renderer::CopyDraw(int infoIndx, int property, int indx)
     switch (property)
     {
         case non:
-            drawInfos.emplace_back(new DrawInfo(info->viewportIndx, info->cameraIndx, info->shaderIndx, info->buffer, info->flags,next_property_id));
+            drawInfos.emplace_back(new DrawInfo(info->viewportIndx, info->cameraIndx, info->shaderIndx, info->bufferIndx, info->flags,next_property_id));
             break;
         case viewport:
-            drawInfos.emplace_back(new DrawInfo(indx, info->cameraIndx, info->shaderIndx, info->buffer, info->flags,next_property_id));
+            drawInfos.emplace_back(new DrawInfo(indx, info->cameraIndx, info->shaderIndx, info->bufferIndx, info->flags,next_property_id));
             break;
         case camera:
-            drawInfos.emplace_back(new DrawInfo(info->viewportIndx, indx, info->shaderIndx, info->buffer, info->flags,next_property_id));
+            drawInfos.emplace_back(new DrawInfo(info->viewportIndx, indx, info->shaderIndx, info->bufferIndx, info->flags,next_property_id));
             break;
         case shader:
-            drawInfos.emplace_back(new DrawInfo(info->viewportIndx, info->cameraIndx, indx, info->buffer, info->flags,next_property_id));
+            drawInfos.emplace_back(new DrawInfo(info->viewportIndx, info->cameraIndx, indx, info->bufferIndx, info->flags,next_property_id));
             break;
         case buffer:
             drawInfos.emplace_back(new DrawInfo(info->viewportIndx, info->cameraIndx, info->shaderIndx, indx, info->flags,next_property_id));
@@ -373,19 +373,19 @@ void Renderer::MoveCamera(int cameraIndx, int type, float amt)
     switch (type)
     {
         case xTranslate:
-            cameras[cameraIndx]->TranslateInSystem(cameras[cameraIndx]->MakeTransd().block<3,3>(0,0), Eigen::Vector3d(amt, 0, 0)); //MakeTransNoScale was here
+            cameras[cameraIndx]->MyTranslate( Eigen::Vector3d(amt, 0, 0),1); //MakeTransNoScale was here
             break;
         case yTranslate:
-            cameras[cameraIndx]->TranslateInSystem(cameras[cameraIndx]->MakeTransd().block<3,3>(0,0),Eigen::Vector3d(0, amt, 0)); //MakeTransNoScale was here
+            cameras[cameraIndx]->MyTranslate( Eigen::Vector3d(0, amt, 0),1); //MakeTransNoScale was here
             break;
         case zTranslate:
-            cameras[cameraIndx]->TranslateInSystem(cameras[cameraIndx]->MakeTransd().block<3,3>(0,0),Eigen::Vector3d(0, 0, amt)); //MakeTransNoScale was here
+            cameras[cameraIndx]->MyTranslate(Eigen::Vector3d(0, 0, amt),1); //MakeTransNoScale was here
             break;
         case xRotate:
             cameras[cameraIndx]->MyRotate(Eigen::Vector3d(1, 0, 0), amt);
             break;
         case yRotate:
-            cameras[cameraIndx]->MyRotate(Eigen::Vector3d(0, 1, 0), amt);
+            cameras[cameraIndx]->RotateInSystem(Eigen::Vector3d(0, 1, 0), amt);
             break;
         case zRotate:
             cameras[cameraIndx]->MyRotate(Eigen::Vector3d(0, 0, 1), amt);
@@ -440,14 +440,13 @@ unsigned int Renderer::AddBuffer(int infoIndx)
 
     DrawInfo* info = drawInfos.back();
     info->SetFlags(stencilTest );
-   // info->ClearFlags(depthTest);
+ 
     info->SetFlags( clearDepth | clearStencil);
     int width = viewports[info->viewportIndx].z(), height = viewports[info->viewportIndx].w();
 
     unsigned int texId;
     texId = scn->AddTexture(width, height, 0, COLOR);
     scn->AddTexture(width, height, 0, DEPTH);
-    scn->BindTexture(texId, texId);
     buffers.push_back(new igl::opengl::DrawBuffer(width, height, texId));
 
     return texId;
@@ -506,10 +505,10 @@ IGL_INLINE void Renderer::Init(igl::opengl::glfw::Viewer* scene, std::list<int>x
                                                   clearStencil | clearDepth | onPicking ,
                                                   next_property_id);
                 next_property_id <<= 1;
-                for (auto& data : scn->data_list)
-                {
-                    new_draw_info->set(data->is_visible, true);
-                }
+                //for (auto& data : scn->data_list)
+                //{
+                //    new_draw_info->set(data->is_visible, true);
+                //}
                 drawInfos.emplace_back(new_draw_info);
             }
             DrawInfo* temp = new DrawInfo(indx, 0, 1, 0, (int)(indx < 1) | depthTest | clearDepth ,next_property_id);

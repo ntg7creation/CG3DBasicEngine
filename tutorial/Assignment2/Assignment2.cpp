@@ -15,7 +15,7 @@ static void printMat(const Eigen::Matrix4d& mat)
 
 Assignment2::Assignment2()
 {
-	SceneParser("data/scenes/scene1.txt",&scnData);
+	SceneParser("data/scenes/scene3.txt",&scnData);
 	xResolution = 800;
 	yResolution = 800;
 	//x = 0.5f;
@@ -73,7 +73,7 @@ void Assignment2::Update(const Eigen::Matrix4f& Proj, const Eigen::Matrix4f& Vie
 	s->SetUniformMat4f("View", View);
 	s->SetUniformMat4f("Model", Model);
 
-	s->SetUniform4fv("eye",&scnData.eye,1);
+	s->SetUniform4fv("eye1",&scnData.eye,1);
 	s->SetUniform4fv("ambient", &scnData.ambient, 1);
 	s->SetUniform4fv("objects",&scnData.objects[0], scnData.objects.size());
 	s->SetUniform4fv("objColors", &scnData.colors[0], scnData.colors.size());
@@ -147,9 +147,9 @@ void Assignment2::WhenTranslate()
 }
 
 void Assignment2::Animate() {
-    if(isActive)
+	if (isActive)
 	{
-		time = time + 0.125/16.0;		
+		time = time + 0.125 / 16.0;
 	}
 }
 
@@ -212,12 +212,13 @@ float Assignment2::Intersection(Eigen::Vector3f sourcePoint)
 
 void Assignment2::RotateEye(float amt, bool upDown)
 {
-	float n = scnData.eye.norm();
+	//pickedShape = 0;
 	if (upDown)
-		scnData.eye[1] += amt;
+	{
+		data_list[0]->MyRotate(Eigen::Vector3d(1, 0, 0), amt, 0);
+	}
 	else
-		scnData.eye[0] += amt;
-	//scnData.eye = scnData.eye.normalized()*n;
+		data_list[0]->MyRotate(Eigen::Vector3d(0, 1, 0), amt, 0);
 }
 
 Assignment2::~Assignment2(void)
