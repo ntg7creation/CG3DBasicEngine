@@ -13,6 +13,17 @@ static void printMat(const Eigen::Matrix4d& mat)
 	}
 }
 
+static void printMat(const Eigen::Matrix4f& mat)
+{
+	std::cout << " matrix:" << std::endl;
+	for (int i = 0; i < 4; i++)
+	{
+		for (int j = 0; j < 4; j++)
+			std::cout << mat(j, i) << " ";
+		std::cout << std::endl;
+	}
+}
+
 Project::Project()
 {
 }
@@ -23,6 +34,12 @@ Project::Project()
 
 void Project::Init()
 {		
+	Eigen::Matrix4f mat = Eigen::Matrix4f();
+	mat <<	1, 2, 3, 4,
+			5, 6, 7, 8, 
+			9, 10, 11, 12, 
+			13, 14, 15, 16;
+	printMat(mat);
 	unsigned int texIDs[3] = { 0 , 1, 2};
 	unsigned int slots[3] = { 0 , 1, 2 };
 	
