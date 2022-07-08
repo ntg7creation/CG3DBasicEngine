@@ -3,3 +3,37 @@ build
 external
 
 # Files
+
+.vs/CG3DBasicEngine/v17/.suo
+
+.vs/CG3DBasicEngine/v17/Browse.VC.db
+
+.vs/CG3DBasicEngine/v17/Browse.VC.db-shm
+
+.vs/CG3DBasicEngine/v17/Browse.VC.db-wal
+
+.vs/CG3DBasicEngine/v17/Browse.VC.opendb
+
+.vs/CG3DBasicEngine/v17/ipch/AutoPCH/3f4f3310448f3568/MAIN.ipch
+
+.vs/CG3DBasicEngine/v17/ipch/AutoPCH/5c075cdeeea9cd04/MAIN.ipch
+
+.vs/CG3DBasicEngine/v17/ipch/AutoPCH/7cbf86a4a5ded482/RENDERER.ipch
+
+.vs/CG3DBasicEngine/v17/ipch/AutoPCH/7f1b32fd17a09840/OBJECTSDATA.ipch
+
+.vs/CG3DBasicEngine/v17/ipch/AutoPCH/9bb832d2556100c/PROJECT.ipch
+
+.vs/CG3DBasicEngine/v17/ipch/AutoPCH/9e60f243ef2849dd/ASSIGNMENT3.ipch
+
+.vs/CG3DBasicEngine/v17/ipch/AutoPCH/a11ecbd18ada7abb/ASSIGNMENT1.ipch
+
+.vs/CG3DBasicEngine/v17/ipch/AutoPCH/f2491381256b47e8/ASSIGNMENT2.ipch
+
+.vs/CMake Overview
+
+.vs/cmake.db
+
+.vs/ProjectSettings.json
+
+.vs/slnx.sqlite
