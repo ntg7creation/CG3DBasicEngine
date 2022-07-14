@@ -23,6 +23,15 @@ static void printMat(const Eigen::Matrix4f& mat)
 		std::cout << std::endl;
 	}
 }
+static void printline(char* str)
+{
+	std::cout<<str << std::endl;
+}
+
+static void printline(int str)
+{
+	std::cout << str << std::endl;
+}
 
 Project::Project()
 {
@@ -33,70 +42,84 @@ Project::Project()
 //}
 
 void Project::Init()
-{		
+{
+	Eigen::Vector3f vec = Eigen::Vector3f();
+	vec << 0.2, 1.3, 3.2;
+	std::cout << vec << std::endl;
 	Eigen::Matrix4f mat = Eigen::Matrix4f();
 	mat <<	1, 2, 3, 4,
 			5, 6, 7, 8, 
 			9, 10, 11, 12, 
 			13, 14, 15, 16;
-	printMat(mat);
+
 	unsigned int texIDs[3] = { 0 , 1, 2};
 	unsigned int slots[3] = { 0 , 1, 2 };
 	
 	AddShader("shaders/pickingShader");
 	AddShader("shaders/cubemapShader");
-	AddShader("shaders/basicShaderTex");
 	AddShader("shaders/basicShader");
-	
-	AddTexture("textures/plane.png",2);
-	AddTexture("textures/cubemaps/Daylight Box_", 3);
-	AddTexture("textures/grass.bmp", 2);
+	AddShader("shaders/basicShader");
+	int textureID = 0;
+	textureID = AddTexture("textures/plane.png",2);
+	textureID = AddTexture("textures/cubemaps/Daylight Box_", 3);
+	textureID = AddTexture("textures/grass.bmp", 2);
 	//AddTexture("../res/textures/Cat_bump.jpg", 2);
 
 	AddMaterial(texIDs,slots, 1);
 	AddMaterial(texIDs+1, slots+1, 1);
 	AddMaterial(texIDs + 2, slots + 2, 1);
+	int shapeID = 0;
+	shapeID = AddShape(Cube, -2, TRIANGLES);
+	shapeID = AddShape(zCylinder, -1, TRIANGLES);
+	shapeID = AddShape(zCylinder, -1, TRIANGLES);
+	shapeID = AddShape(zCylinder, -1, TRIANGLES);
+	shapeID = AddShape(Axis, -1, LINES);
+	   
+	AddShapeFromFile("./data/cube2.obj",-1, LINES);
+
 	
-	AddShape(Cube, -2, TRIANGLES);
-	AddShape(zCylinder, -1, TRIANGLES);
-	AddShape(zCylinder, 1, TRIANGLES);
-	AddShape(zCylinder, 2, TRIANGLES);
-	AddShape(Axis, -1, LINES);
 	//AddShapeFromFile("../res/objs/Cat_v1.obj", -1, TRIANGLES);
 	
+
 	SetShapeShader(1, 2);
 	SetShapeShader(2, 2);
 	SetShapeShader(3, 2);
 	SetShapeShader(4, 2);
 
 
+	SetShapeMaterial(0, 1);
 	SetShapeMaterial(1, 0);
 	SetShapeMaterial(2, 0);	
 	SetShapeMaterial(3, 0);	
 	SetShapeMaterial(4, 0);
 
-	SetShapeMaterial(0, 1);
 
-
+	
 	selected_data_index = 0;
 	float cylinderLen = 1.6f;
 	float s = 60;
 	ShapeTransformation(scaleAll, s,0);
+	
 	selected_data_index = 1;
 	data()->SetCenterOfRotation(Eigen::Vector3d(0, 0, -cylinderLen / 2.0));
 	ShapeTransformation(zTranslate, cylinderLen / 2.0, 1);
+	ShapeTransformation(yTranslate, 2.0, 1);
 	
 	selected_data_index = 2;
 	ShapeTransformation(zTranslate, cylinderLen , 1);
 	data()->SetCenterOfRotation(Eigen::Vector3d(0, 0, -cylinderLen / 2.0));
-	
+	ShapeTransformation(xTranslate, -2.0, 1);
+
 	selected_data_index = 3;
 	ShapeTransformation(zTranslate, cylinderLen, 1);
 	data()->SetCenterOfRotation(Eigen::Vector3d(0, 0, -cylinderLen / 2.0));
-
+	ShapeTransformation(yTranslate, -2.0, 1);
+	
 	selected_data_index = 0;
 	SetShapeStatic(0);
 
+
+	
 
 	//SetShapeViewport(6, 1);
 //	ReadPixel(); //uncomment when you are reading from the z-buffer
