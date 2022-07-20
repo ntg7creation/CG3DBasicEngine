@@ -1,7 +1,8 @@
 #pragma once
 #include "igl/opengl/glfw/Viewer.h"
 
-/*
+
+
 class IndexedModel
 {
 public:
@@ -32,7 +33,7 @@ public:
 struct LineVertex
 {
 public:
-	LineVertex(const glm::vec3& pos, const glm::vec3& color)
+	LineVertex(const Eigen::Vector3f& pos, const Eigen::Vector3f& color)
 	{
 		this->pos = pos;
 		this->color = color;
@@ -46,7 +47,7 @@ private:
 	Eigen::Vector3f pos;
 	Eigen::Vector3f color;
 };
-*/
+
 
 class Bezier1D
 {
@@ -55,17 +56,20 @@ class Bezier1D
 public:
 	Bezier1D(void);
 	int numberOfPoints;
-	/*
+	
 	IndexedModel GetLine(int resT);						//generates model for rendering using MeshConstructor::initLin
+	
 	LineVertex GetVertex(int segment, float t);			//returns point on curve in the requested segment for value of t
-	LineVertex GetControlPoint(int segment, int indx);	//returns a control point in the requested segment. indx will be 0,1,2,3, for p0,p1,p2,p3
+	void MoveControlPoint(int segment, int indx, bool preserveC1, Eigen::Vector4f newPosition); //change the positon of one control point. when preserveC1 is true it may affect other  control points
 
+														/*
 	Eigen::Vector3f GetVelosity(int segment, float t);			//returns the derivative of the curve in the requested segment for value of t
-
-	void MoveControlPoint(int segment, int indx, bool preserveC1, glm::vec4 newPosition); //change the positon of one control point. when preserveC1 is true it may affect other  control points 
 
 	
 
+
 	~Bezier1D(void);
 	*/
+	LineVertex GetControlPoint(int segment, int indx);	//returns a control point in the requested segment. indx will be 0,1,2,3, for p0,p1,p2,p3
+
 };

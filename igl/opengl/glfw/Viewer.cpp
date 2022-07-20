@@ -522,7 +522,7 @@ IGL_INLINE bool
         return data_list.size() - 1;
     }
 
-
+    
     int Viewer::AddShape(int type, int parent, unsigned int mode, int viewport)
     {
       switch(type){
@@ -713,6 +713,7 @@ IGL_INLINE bool
 
     bool Viewer::Picking(unsigned char data[4], int newViewportIndx)
     {
+        //get from data[4] the correct index
 
         return false;
 

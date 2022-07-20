@@ -1,7 +1,7 @@
 #pragma once
 #include "igl/opengl/glfw/Viewer.h"
 #include "ObjectsData.h"
-
+#include "BezierLine.h"
 class Project : public igl::opengl::glfw::Viewer
 {
 	
