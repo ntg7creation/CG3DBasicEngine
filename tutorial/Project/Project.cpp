@@ -33,13 +33,6 @@ static void printline(int str)
 	std::cout << str << std::endl;
 }
 
-class Bezier1D2
-{
-	std::vector<Eigen::Matrix4f> segments;
-public:
-	Bezier1D2(void);
-	int numberOfPoints;
-};
 
 
 
@@ -100,6 +93,14 @@ int Project::LoadMesh(IndexedModel &mesh, int matID, int shaderID, int parent)
 	return shapeID;
 }
 
+void Project::translateControl(int type, float amt,ControlPoint CP)
+{
+	selected_data_index = CP.ControlID;
+	ShapeTransformation(type, amt, 0);
+
+	//data_list[CP.bezierID].
+}
+
 void Project::Init()
 {
 	Eigen::Vector4f vec = Eigen::Vector4f();
@@ -112,7 +113,8 @@ void Project::Init()
 			9, 10, 11, 12, 
 			13, 14, 15, 16;
 
-	Bezier1D myBezier =  Bezier1D();
+	Bezier1D myBezier =  Bezier1D(); // check not destoryed
+	myMoveable a = myMoveable(0, 5, &myBezier);
 
 	std::cout<< (myBezier.GetControlPoint(0, 1).GetPos()->x())<<std::endl ;
 
@@ -136,6 +138,7 @@ void Project::Init()
 	//shapeID = AddShape(Cube, -2, TRIANGLES);
 	LoadCubeMap(1);
 	int cubeID =LoadMesh(Cube, 1, 2);
+	
 	int bezierlineID = LoadMesh(myBezier.GetLine(), 1, 2);
 	selected_data_index = cubeID;
 	ShapeTransformation(yTranslate, -3, 0);

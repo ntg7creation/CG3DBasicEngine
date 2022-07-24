@@ -6,7 +6,10 @@ class Project : public igl::opengl::glfw::Viewer
 {
 	
 public:
-	
+	struct ControlPoint
+	{
+		int ControlID, bezierID, control_num; // sement = mod3(control_num-1) +1
+	};
 	Project();
 //	Project(float angle,float relationWH,float near, float far);
 	void Init();
@@ -23,6 +26,7 @@ public:
 	/// represent the Camera ID
 	/// </summary>
 	int current_Camera;
+	std::vector<myMoveable> bezierAnimations;
 
 	/// <summary>
 	/// load mesh
@@ -38,6 +42,7 @@ public:
 	
 	int changeMesh(IndexedModel& mesh, int matID, int shaderID, int parent = -1);
 
+	void translateControl(int type, float amt,ControlPoint CP);
 
 	int testloadcostomemesh();
 
