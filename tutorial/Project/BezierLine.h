@@ -6,7 +6,7 @@
 class IndexedModel
 {
 public:
-	std::vector<Eigen::Vector3f> positions;
+	std::vector<Eigen::Vector3d> positions;
 	std::vector<Eigen::Vector2f> texCoords;
 	std::vector<Eigen::Vector3f> normals;
 	std::vector<Eigen::Vector3f> colors;
@@ -33,34 +33,35 @@ public:
 struct LineVertex
 {
 public:
-	LineVertex(const Eigen::Vector3f& pos, const Eigen::Vector3f& color)
+	LineVertex(const Eigen::Vector3d& pos, const Eigen::Vector3f& color)
 	{
 		this->pos = pos;
 		this->color = color;
 	}
 
-	Eigen::Vector3f* GetPos() { return &pos; }
+	Eigen::Vector3d* GetPos() { return &pos; }
 	Eigen::Vector3f* GetColor() { return &color; }
 
 
 private:
-	Eigen::Vector3f pos;
+	Eigen::Vector3d pos;
 	Eigen::Vector3f color;
 };
 
 
+//i remember there is a deconstractor problome 
 class Bezier1D
 {
 	//each line in the matrix represents x,y,z,w of a control point
-	std::vector<Eigen::Matrix4f> segments;
+	std::vector<Eigen::Matrix4d> segments;
 public:
 	Bezier1D(void);
 	int numberOfPoints;
 	
-	IndexedModel GetLine(int resT);						//generates model for rendering using MeshConstructor::initLin
+	IndexedModel GetLine(int resT=50);						//generates model for rendering using MeshConstructor::initLin
 	
 	LineVertex GetVertex(int segment, float t);			//returns point on curve in the requested segment for value of t
-	void MoveControlPoint(int segment, int indx, bool preserveC1, Eigen::Vector4f newPosition); //change the positon of one control point. when preserveC1 is true it may affect other  control points
+	void MoveControlPoint(int segment, int indx, bool preserveC1, Eigen::Vector4d newPosition); //change the positon of one control point. when preserveC1 is true it may affect other  control points
 
 														/*
 	Eigen::Vector3f GetVelosity(int segment, float t);			//returns the derivative of the curve in the requested segment for value of t

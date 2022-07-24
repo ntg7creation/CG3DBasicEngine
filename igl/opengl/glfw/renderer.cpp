@@ -287,8 +287,6 @@ bool Renderer::Picking(int x, int y)
     //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     //glDisable(GL_LIGHTING);
     glGetIntegerv(GL_VIEWPORT, viewport);
-    //glGetIntegerv(GL_VIEWPORT, viewport); //reading viewport parameters
-    //glGetIntegerv(GL_VIEWPORT, viewport);
 
     glReadPixels(x, viewport[3] - y, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, data);
     //glReadPixels(x, viewport[3] - y, 1, 1, GL_DEPTH_COMPONENT, GL_Flo, data);

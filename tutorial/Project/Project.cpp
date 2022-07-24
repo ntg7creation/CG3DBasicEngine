@@ -49,16 +49,61 @@ Project::Project()
 
 
 
-
 //Project::Project(float angle ,float relationWH, float near, float far) : Scene(angle,relationWH,near,far)
 //{ 	
 //}
+int Project::LoadCubeMap(int matID)
+{
+	int shapeID = AddShape(Cube, -2, TRIANGLES);
+	SetShapeMaterial(shapeID, 1);
+	selected_data_index = shapeID;
+	//float cylinderLen = 1.6f;
+	float s = 60;
+	ShapeTransformation(scaleAll, s, 0);
+	SetShapeStatic(shapeID);
+	return shapeID;
+}
+
+int Project::LoadMesh(shapes Shape, int matID, int shaderID, int parent)
+{
+	int	shapeID = AddShape(Shape, parent, TRIANGLES);
+	SetShapeShader(shapeID, shaderID);
+	SetShapeMaterial(shapeID, matID);
+	return shapeID;
+}
+
+int Project::LoadMesh(std::string path, int matID, int shaderID, int parent)
+{
+	int	shapeID = AddShapeFromFile(path, parent, TRIANGLES);
+	SetShapeShader(shapeID, shaderID);
+	SetShapeMaterial(shapeID, matID);
+	return shapeID;
+}
+
+int Project::LoadMesh(IndexedModel &mesh, int matID, int shaderID, int parent)
+{
+	int	shapeID = AddShape(Cube, parent, LINES);
+	//SetShapeShader(shapeID, shaderID);
+	//SetShapeMaterial(shapeID, matID);
+	selected_data_index = shapeID;
+	data()->show_faces = 0;
+	data()->show_lines = 0;
+	data()->show_overlay = 0xFF;
+	SetShapeShader(shapeID, 2);
+	SetShapeMaterial(shaderID, 0);
+	//TODO change colour 
+	for (int i = 0; i < mesh.positions.size() - 1; i++)
+	{
+		data()->add_edges(mesh.positions[i].transpose(), mesh.positions[i + 1].transpose(), Eigen::RowVector3d(0, 0, 0));
+	}
+
+	return shapeID;
+}
 
 void Project::Init()
 {
-	Eigen::Vector3f vec = Eigen::Vector3f();
-	vec << 0.2, 1.3, 3.2;
-	std::cout << vec << std::endl;
+	Eigen::Vector4f vec = Eigen::Vector4f();
+	vec << 0.2, 1.3, 3.2,0.1;
 
 
 	Eigen::Matrix4f mat = Eigen::Matrix4f();
@@ -68,8 +113,9 @@ void Project::Init()
 			13, 14, 15, 16;
 
 	Bezier1D myBezier =  Bezier1D();
-	int lineres = 50;
-	IndexedModel line = myBezier.GetLine(lineres);
+
+	std::cout<< (myBezier.GetControlPoint(0, 1).GetPos()->x())<<std::endl ;
+
 	unsigned int texIDs[3] = { 0 , 1, 2};
 	unsigned int slots[3] = { 0 , 1, 2 };
 	
@@ -87,84 +133,44 @@ void Project::Init()
 	AddMaterial(texIDs+1, slots+1, 1);
 	AddMaterial(texIDs + 2, slots + 2, 1);
 	int shapeID = 0;
-	shapeID = AddShape(Cube, -2, TRIANGLES);
-	shapeID = AddShape(Cube, -1, TRIANGLES);
-	
-	//shapeID = AddShape(zCylinder, -1, TRIANGLES);
-	//shapeID = AddShape(zCylinder, -1, TRIANGLES);
-	//shapeID = AddShape(zCylinder, -1, TRIANGLES);
-	//shapeID = AddShape(Axis, -1, LINES);
-	   
-	//AddShapeFromFile("./data/cube.obj",-1, LINES);
+	//shapeID = AddShape(Cube, -2, TRIANGLES);
+	LoadCubeMap(1);
+	int cubeID =LoadMesh(Cube, 1, 2);
+	int bezierlineID = LoadMesh(myBezier.GetLine(), 1, 2);
+	selected_data_index = cubeID;
+	ShapeTransformation(yTranslate, -3, 0);
 
-	Bezier1D bez = Bezier1D::Bezier1D();
-	//AddShapeFromFile("../res/objs/Cat_v1.obj", -1, TRIANGLES);
-	
-	SetShapeShader(1, 2);
-	//SetShapeShader(2, 2);
-	//SetShapeShader(3, 2);
-	//SetShapeShader(4, 2);
+	selected_data_index = LoadMesh(Octahedron, 0, 2);
+	ShapeTransformation(scaleAll, 0.1, 0);
+	int point = 0;
+	ShapeTransformation(xTranslate, myBezier.GetControlPoint(0, point).GetPos()->x(), 0);
+	ShapeTransformation(yTranslate, myBezier.GetControlPoint(0, point).GetPos()->y(), 0);
+	ShapeTransformation(zTranslate, myBezier.GetControlPoint(0, point).GetPos()->z(), 0);
 
+	selected_data_index = LoadMesh(Octahedron, 0, 2);
+	ShapeTransformation(scaleAll, 0.1, 0);
+	 point = 1;
+	ShapeTransformation(xTranslate, myBezier.GetControlPoint(0, point).GetPos()->x(), 0);
+	ShapeTransformation(yTranslate, myBezier.GetControlPoint(0, point).GetPos()->y(), 0);
+	ShapeTransformation(zTranslate, myBezier.GetControlPoint(0, point).GetPos()->z(), 0);
 
-	SetShapeMaterial(0, 1);
-	SetShapeMaterial(1, 1);
-	//SetShapeMaterial(1, 0);
-	//SetShapeMaterial(2, 0);	
-	//SetShapeMaterial(3, 0);	
-	//SetShapeMaterial(4, 0);
+	selected_data_index = LoadMesh(Octahedron, 0, 2);
+	ShapeTransformation(scaleAll, 0.1, 0);
+	 point = 2;
+	ShapeTransformation(xTranslate, myBezier.GetControlPoint(0, point).GetPos()->x(), 0);
+	ShapeTransformation(yTranslate, myBezier.GetControlPoint(0, point).GetPos()->y(), 0);
+	ShapeTransformation(zTranslate, myBezier.GetControlPoint(0, point).GetPos()->z(), 0);
 
-	selected_data_index = 0;
-	float cylinderLen = 1.6f;
-	float s = 60;
-	ShapeTransformation(scaleAll, s,0);
-	SetShapeStatic(0);
-	//selected_data_index = 1;
-	//data()->SetCenterOfRotation(Eigen::Vector3d(0, 0, -cylinderLen / 2.0));
-	ShapeTransformation(zTranslate, cylinderLen / 2.0, 1);
-	//ShapeTransformation(yTranslate, 2.0, 1);
-	//
-	//selected_data_index = 2;
-	//ShapeTransformation(zTranslate, cylinderLen , 1);
-	//data()->SetCenterOfRotation(Eigen::Vector3d(0, 0, -cylinderLen / 2.0));
-	//ShapeTransformation(xTranslate, -2.0, 1);
-
-	//selected_data_index = 3;
-	//ShapeTransformation(zTranslate, cylinderLen, 1);
-	//data()->SetCenterOfRotation(Eigen::Vector3d(0, 0, -cylinderLen / 2.0));
-	//ShapeTransformation(yTranslate, -2.0, 1);
-	
-	//data_list[1]->set_points(Eigen::Vector3d(-3, -3, -3).transpose(), Eigen::RowVector3d(0, 0, 1));
-	//data_list[1]->set_edges(Eigen::Vector3d(-3, -3, -3).transpose(), Eigen::Vector3d(10, 3, 3).transpose(), Eigen::RowVector3d(1, 1, 0));
-	for (int i = 0; i < lineres-1; i++)
-	{
-		//Eigen::RowVector3d temp; temp << line.positions[i].x(), line.positions[i].y(), line.positions[i].z();
-		//data_list[1]->add_points(temp, Eigen::RowVector3d(1, 0, 0));
-		
-		//data_list[1]->add_edges(line.positions[i], line.positions[i + 1], Eigen::RowVector3d(1, 0, 0));
-		
-		int shapeindex = AddShape(Octahedron, -1, TRIANGLES);
-		SetShapeShader(shapeindex, 2);
-		SetShapeMaterial(shapeindex, 0);
-		selected_data_index = shapeindex;
-
-		
-
-		ShapeTransformation(xTranslate, line.positions[i].x(), 0);
-		ShapeTransformation(yTranslate, line.positions[i].y(), 0);
-		ShapeTransformation(zTranslate, line.positions[i].z(), 0);
-		ShapeTransformation(scaleAll, 0.1, 0);
-		
-
-	}
+	selected_data_index = LoadMesh(Octahedron, 0, 2);
+	ShapeTransformation(scaleAll, 0.1, 0);
+	 point = 3;
+	ShapeTransformation(xTranslate, myBezier.GetControlPoint(0, point).GetPos()->x(), 0);
+	ShapeTransformation(yTranslate, myBezier.GetControlPoint(0, point).GetPos()->y(), 0);
+	ShapeTransformation(zTranslate, myBezier.GetControlPoint(0, point).GetPos()->z(), 0);
+	printline("pos");
+	std::cout << *myBezier.GetControlPoint(0, point).GetPos() << std::endl;
 
 
-
-
-
-	
-
-	//SetShapeViewport(6, 1);
-//	ReadPixel(); //uncomment when you are reading from the z-buffer
 }
 
 void Project::Update(const Eigen::Matrix4f& Proj, const Eigen::Matrix4f& View, const Eigen::Matrix4f& Model, unsigned int  shaderIndx, unsigned int shapeIndx)
@@ -173,7 +179,7 @@ void Project::Update(const Eigen::Matrix4f& Proj, const Eigen::Matrix4f& View, c
 	int r = ((shapeIndx+1) & 0x000000FF) >>  0;
 	int g = ((shapeIndx+1) & 0x0000FF00) >>  8;
 	int b = ((shapeIndx+1) & 0x00FF0000) >> 16;
-
+	//rgb -> id
 
 		s->Bind();
 	s->SetUniformMat4f("Proj", Proj);

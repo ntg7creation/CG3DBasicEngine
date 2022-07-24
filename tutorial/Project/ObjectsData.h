@@ -33,18 +33,3 @@ public:
 	bool add_move(int timeS, int timeE, void* bezier);
 	Eigen::Matrix4f getLoction(int time);
 };
-
-/// <summary>
-/// A single Layer that hold objects 
-/// </summary>
-class Layer
-{
-	int ID, priority;
-	std::vector<ObjectData*> objects;
-public:
-	/// <summary>
-	/// adds objects to Layer
-	/// constrain - objects can only be on one Layer
-	/// </summary>
-	void addObject(ObjectData O);
-	};

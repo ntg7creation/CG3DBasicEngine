@@ -4,11 +4,11 @@ Bezier1D::Bezier1D(void)
 {
 	numberOfPoints = 4;
 
-	Eigen::Matrix4f Model = Eigen::Matrix4f();
-	Model << 0 - 1.5, 0.0, 0.0, 0.0,
-			1 - 1.5, 1.0, 0.0, 0.0,
-			2 - 1.5, 1.0, 0.0, 0.0,
-			3 - 1.5, 1.0, 0.0, 0.0;
+	Eigen::Matrix4d Model = Eigen::Matrix4d();
+	Model << - 1.5, 0.0, 0.0, 0.0,
+			-0.5, 1.0, 0.0, 0.0,
+			0.5, 1.0, 0.0, 0.0,
+			1.5, 1.0, 0.0, 0.0;
 	segments.push_back(Model);
 
 }
@@ -17,7 +17,7 @@ Bezier1D::Bezier1D(void)
 IndexedModel Bezier1D::GetLine(int resT) {
 
 	std::vector<LineVertex> axisVertices;
-	Eigen::Matrix4f sector = segments[0];
+	Eigen::Matrix4d sector = segments[0];
 	for (int s = 0; s < segments.size(); s++)
 	{
 		for (int i = 0; i < resT; i++)
@@ -52,23 +52,11 @@ IndexedModel Bezier1D::GetLine(int resT) {
 }
 
 LineVertex Bezier1D::GetVertex(int segment, float t) {
-	Eigen::Vector3f* CP3 = GetControlPoint(segment, 0).GetPos();
-	Eigen::Vector3f* CP2 = GetControlPoint(segment, 1).GetPos();
-	Eigen::Vector3f* CP1 = GetControlPoint(segment, 2).GetPos();
-	Eigen::Vector3f* CP0 = GetControlPoint(segment, 3).GetPos();
-
-	Eigen::Vector3f thevector;
-	//float a = cp3->x();
-	//float temp = thevector;
-	/*
-	glm::vec3 myvertex(
-		(CP0.GetPos()->x * t * t * t) + (CP1.GetPos()->x * 3 * t * t * (1 - t)) + (CP2.GetPos()->x * 3 * t * (1 - t) * (1 - t)) + (CP3.GetPos()->x * (1 - t) * (1 - t) * (1 - t)), // point x
-		(CP0.GetPos()->y * t * t * t) + (CP1.GetPos()->y * 3 * t * t * (1 - t)) + (CP2.GetPos()->y * 3 * t * (1 - t) * (1 - t)) + (CP3.GetPos()->y * (1 - t) * (1 - t) * (1 - t)), //point y
-		(CP0.GetPos()->z * t * t * t) + (CP2.GetPos()->z * 3 * t * t * (1 - t)) + (CP2.GetPos()->z * 3 * t * (1 - t) * (1 - t)) + (CP3.GetPos()->z * (1 - t) * (1 - t) * (1 - t))  // point z
-	);
-	*/
-
-	
+	Eigen::Vector3d* CP3 = GetControlPoint(segment, 0).GetPos();
+	Eigen::Vector3d* CP2 = GetControlPoint(segment, 1).GetPos();
+	Eigen::Vector3d* CP1 = GetControlPoint(segment, 2).GetPos();
+	Eigen::Vector3d* CP0 = GetControlPoint(segment, 3).GetPos();
+	Eigen::Vector3d thevector;
 	
 	thevector <<
 		(CP0->x() * t * t * t) + (CP1->x() * 3 * t * t * (1 - t)) + (CP2->x() * 3 * t * (1 - t) * (1 - t)) + (CP3->x() * (1 - t) * (1 - t) * (1 - t)), // point x
@@ -84,17 +72,21 @@ LineVertex Bezier1D::GetVertex(int segment, float t) {
 }
 
 
-
 /*
-void Bezier1D::MoveControlPoint(int segment, int index, bool preserveC1, Eigen::Vector4f newPosition) {
+//note change to 3d?
+void Bezier1D::MoveControlPoint(int segment, int index, bool preserveC1, Eigen::Vector4d newPosition) {
 
 	if (segment == segments.size()) { // and..
 		segment = segment - 1;
 		index = 3;
 	}
-	Eigen::Matrix4f sector = segments[segment];
-	Eigen::Vector4f oldpos;oldpos<< sector(index, 0), sector(index, 1), sector(index, 2), 0;
-	Eigen::Vector4f diff; diff = newPosition - oldpos;
+
+	Eigen::Matrix4d sector = segments[segment];
+	Eigen::Vector4d oldpos = sector.row(index);
+
+	//Eigen::Matrix4d sector = segments[segment];
+	//Eigen::Vector4d oldpos;oldpos<< sector(index, 0), sector(index, 1), sector(index, 2), 0;
+	Eigen::Vector4d diff; diff = newPosition - oldpos;
 
 
 
@@ -168,9 +160,11 @@ LineVertex Bezier1D::GetControlPoint(int seg, int index)
 		seg--;
 		index = 3;
 	}
-	Eigen::Matrix4f sector = segments[seg];
-	Eigen::Vector3f thepoint0; // <- sector[index]
-	thepoint0 << sector(index,0), sector(index,1),sector(index,2);
+	Eigen::Matrix4d sector = segments[seg];
+	Eigen::Vector3d thepoint0; // <- sector[index]
+	//thepoint0 << sector(index,0), sector(index,1),sector(index,2);
+	thepoint0 = sector.row(index).head<3>();
+	
 	Eigen::Vector3f tempcolor; tempcolor << 0, 0, 1;
 	LineVertex output(thepoint0, tempcolor);
 	return output;

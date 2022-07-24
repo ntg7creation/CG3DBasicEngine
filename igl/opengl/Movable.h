@@ -27,6 +27,7 @@ public:
 	void ZeroTrans();
 
 	Eigen::Matrix3d GetRotation() const{ return Tout.rotation().matrix(); }
+	//	Eigen::Matrix3d GetRotation() const{ return Tout.tranlatoin().matrix(); }
     virtual ~Movable() {}
 private:
 

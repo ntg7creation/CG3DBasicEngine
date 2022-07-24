@@ -19,20 +19,27 @@ public:
 	~Project(void);
 
 	//---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-	std::vector<Layer> layers;
 	/// <summary>
 	/// represent the Camera ID
 	/// </summary>
 	int current_Camera;
 
 	/// <summary>
-	/// load mesh from path
+	/// load mesh
 	/// </summary>
 	/// <param name="path"></param>
 	/// <returns>
 	/// return loaded object id  and -1 if fail
 	/// </returns>
-	int LoadMesh(std::string path);
+	int LoadCubeMap(int matID);
+	int LoadMesh(std::string path,int matID,int shaderID,int parent = -1);
+	int LoadMesh(shapes Shape, int matID, int shaderID, int parent = -1);
+	int LoadMesh(IndexedModel &mesh, int matID, int shaderID, int parent = -1);
+	
+	int changeMesh(IndexedModel& mesh, int matID, int shaderID, int parent = -1);
+
+
+	int testloadcostomemesh();
 
 	/// <summary>
 	/// change object to a diffrent layer 
