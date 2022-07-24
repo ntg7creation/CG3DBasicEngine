@@ -1,5 +1,6 @@
 #pragma once
 #include "igl/opengl/glfw/Viewer.h"
+#include <tutorial/Project/BezierLine.h>
 
 //note to self create proper decontractor for everthing 
 enum object_type {Mesh,Camera,bezier_body,bezier_point };
@@ -9,12 +10,14 @@ enum object_type {Mesh,Camera,bezier_body,bezier_point };
 /// </summary>
 class myMoveable
 {
-	int time_start, time_end;
-	float speed;
-	void* bezier; // change void* to bezier object
+
 	//std::vector<int> Control_Points_ID;// dont know if its needed
 public:
-	myMoveable(int timeS, int timeE, void* bezier);
+	int time_start, time_end, objectindex;
+	float speed;
+
+	Bezier1D* bezier; // change void* to bezier object
+	myMoveable(int timeS, int timeE, Bezier1D* bezier, int objectindex);
 };
 
 
