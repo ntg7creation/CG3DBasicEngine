@@ -63,14 +63,13 @@ public:
 	LineVertex GetVertex(int segment, float t);			//returns point on curve in the requested segment for value of t
 	void MoveControlPoint(int segment, int indx, bool preserveC1, Eigen::Vector4d newPosition); //change the positon of one control point. when preserveC1 is true it may affect other  control points
 
-														/*
-	Eigen::Vector3f GetVelosity(int segment, float t);			//returns the derivative of the curve in the requested segment for value of t
+	//currently not working											
+	Eigen::Vector3d GetVelosity(int segment, float t);			//returns the derivative of the curve in the requested segment for value of t
 
 	
 
 
-	~Bezier1D(void);
-	*/
+	
 	LineVertex GetControlPoint(int segment, int indx);	//returns a control point in the requested segment. indx will be 0,1,2,3, for p0,p1,p2,p3
 
 };

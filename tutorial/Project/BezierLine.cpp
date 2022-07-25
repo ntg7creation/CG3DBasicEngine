@@ -5,10 +5,10 @@ Bezier1D::Bezier1D(void)
 	numberOfPoints = 4;
 
 	Eigen::Matrix4d Model = Eigen::Matrix4d();
-	Model << - 1.5, 0.0, 0.0, 0.0,
-			-0.5, 1.0, 0.0, 0.0,
-			0.5, 1.0, 0.0, 0.0,
-			1.5, -1.0, 0.0, 0.0;
+	Model << 0, 0.0, 0.0, 0.0,
+			1.5-0.5, 1.0, 0.0, 0.0,
+			1.5+0.5, 1.0, 0.0, 0.0,
+			1.5 +1.5, -1.0, 0.0, 0.0;
 	segments.push_back(Model);
 
 }
@@ -123,36 +123,23 @@ void Bezier1D::MoveControlPoint(int segment, int index, bool preserveC1, Eigen::
 }
 
 
-/*
-glm::vec3  Bezier1D::GetVelosity(int segment, float t) {
-	glm::vec3 CP3 = *GetControlPoint(segment, 3).GetPos();
-	glm::vec3 CP2 = *GetControlPoint(segment, 2).GetPos();
-	glm::vec3 CP1 = *GetControlPoint(segment, 1).GetPos();
-	glm::vec3 CP0 = *GetControlPoint(segment, 0).GetPos();
-	//CP3.z = 0;
-	//CP2.z = 0;
-	//CP1.z = 0;
-	//CP0.z = 0;
+
+Eigen::Vector3d Bezier1D::GetVelosity(int segment, float t) {
+	Eigen::Vector3d* CP3 = GetControlPoint(segment, 0).GetPos();
+	Eigen::Vector3d* CP2 = GetControlPoint(segment, 1).GetPos();
+	Eigen::Vector3d* CP1 = GetControlPoint(segment, 2).GetPos();
+	Eigen::Vector3d* CP0 = GetControlPoint(segment, 3).GetPos();
+
 	float tp0 = -3 * pow((1 - t), 2);
 	float tp1 = 3 * (1 - t) * (1 - t) - 6 * t * (1 - t);	//-3 * (-3 * t*t + 4 * t - 1);
 	float tp2 = 6 * t * (1 - t) - 3 * t * t; // -3 * (3 * pow(t, 2) - 2 * t);
 	float tp3 = 3 * pow(t, 2);
+	return (*CP3 * tp3 + *CP2 * tp2 + *CP1 * tp1 + *CP0 * tp0);
 
-	return (CP3 * tp3 + CP2 * tp2 + CP1 * tp1 + CP0 * tp0);
-	//	glm::vec3 myvertex(
-	//	(CP0.GetPos()->x * 3 * t*t) + (CP1.GetPos()->x * 6 * t*t*(1 - t)) + (CP2.GetPos()->x * 3 * t*(1 - t)*(1 - t)) + (CP3.GetPos()->x * (1 - t)*(1 - t)*(1 - t)), // point x
-	//	(CP0.GetPos()->y * t*t*t) + (CP1.GetPos()->y * 3 * t*t*(1 - t)) + (CP2.GetPos()->y * 3 * t*(1 - t)*(1 - t)) + (CP3.GetPos()->y * (1 - t)*(1 - t)*(1 - t)), //point y
-	//	(CP0.GetPos()->z * t*t*t) + (CP2.GetPos()->z * 3 * t*t*(1 - t)) + (CP2.GetPos()->z * 3 * t*(1 - t)*(1 - t)) + (CP3.GetPos()->z * (1 - t)*(1 - t)*(1 - t))  // point z
-	//);
-
-	//return myvertex;
 }
 
 
-Bezier1D::~Bezier1D(void)
-{
-}
-*/
+
 
 LineVertex Bezier1D::GetControlPoint(int seg, int index)
 {

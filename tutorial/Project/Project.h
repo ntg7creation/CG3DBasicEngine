@@ -2,14 +2,16 @@
 #include "igl/opengl/glfw/Viewer.h"
 #include "ObjectsData.h"
 #include "BezierLine.h"
+
+
+
+
+
 class Project : public igl::opengl::glfw::Viewer
 {
 	
 public:
-	struct ControlPoint
-	{
-		int ControlID, bezierID, control_num; // sement = mod3(control_num-1) +1
-	};
+
 	Project();
 //	Project(float angle,float relationWH,float near, float far);
 	void Init();
@@ -22,14 +24,32 @@ public:
 	~Project(void);
 
 	//---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+	struct myMoveable
+	{
+
+		//std::vector<int> Control_Points_ID;// dont know if its needed
+	public:
+		//TODO add what object do i need to animate
+		float time_start, time_end;
+		int meshindex;// meshindex = the index of the bizer line in datalist
+		float speed;
+		std::vector<int> CPs; // loction = control num - value = CP_mesh_index
+		Bezier1D* bezier; // change void* to bezier object
+		myMoveable(int timeS, int timeE, Bezier1D* bezier, int objectindex, int CP1, int CP2, int CP3, int CP4);
+
+	};
+
+	void Connect_Controls(myMoveable);
+
 	/// <summary>
 	/// represent the Camera ID
 	/// </summary>
 	int current_Camera;
-	Project::ControlPoint CP3;
-	int bezierlineID;
-	Bezier1D myBezier;
-
+	int tempcontrolindex;
+	float mytime = 0;
+	const float tick = 0.00166; // asume 1 update a sec time =1 means 1 min
+	myMoveable find_Control(int mesh_index);
 	std::vector<myMoveable> bezierAnimations;
 
 	/// <summary>
@@ -43,10 +63,15 @@ public:
 	int LoadMesh(std::string path,int matID,int shaderID,int parent = -1);
 	int LoadMesh(shapes Shape, int matID, int shaderID, int parent = -1);
 	int LoadMesh(IndexedModel &mesh, int matID, int shaderID, int parent = -1);
-	ControlPoint Project::AddControlPoints(shapes type, int matID, int shaderID,  int point, int bezIndex);
+	//ControlPoint AddControlPoints(shapes type, int matID, int shaderID,  int point, int bezIndex);
 	int changeMesh(IndexedModel& mesh, int matID, int shaderID, int parent = -1);
 	int Project::editMesh(IndexedModel& mesh, int index);
-	void translateControl(int type, float amt,ControlPoint CP,bool preserve);
+	void translateControl(int type, float amt,int mesh_index,bool preserve);
+	void translateControl_no_update(int type, float amt, myMoveable obj,int cpnum, bool preserve);
+	void connect_bezier_to_mesh(int meshindex, myMoveable moveable);
+
+	void Animate_obj(int object_index, myMoveable path,float time); 
+	//void Animate_obj2(int object_index, myMoveable path,float time); 
 
 	int testloadcostomemesh();
 
