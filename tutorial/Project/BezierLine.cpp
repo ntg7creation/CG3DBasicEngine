@@ -8,7 +8,7 @@ Bezier1D::Bezier1D(void)
 	Model << - 1.5, 0.0, 0.0, 0.0,
 			-0.5, 1.0, 0.0, 0.0,
 			0.5, 1.0, 0.0, 0.0,
-			1.5, 1.0, 0.0, 0.0;
+			1.5, -1.0, 0.0, 0.0;
 	segments.push_back(Model);
 
 }
@@ -72,7 +72,7 @@ LineVertex Bezier1D::GetVertex(int segment, float t) {
 }
 
 
-/*
+
 //note change to 3d?
 void Bezier1D::MoveControlPoint(int segment, int index, bool preserveC1, Eigen::Vector4d newPosition) {
 
@@ -89,39 +89,39 @@ void Bezier1D::MoveControlPoint(int segment, int index, bool preserveC1, Eigen::
 	Eigen::Vector4d diff; diff = newPosition - oldpos;
 
 
+	
+	segments[segment].row(index) = newPosition;
 
-	segments[segment][index] = newPosition;
-
-	if (indx == 0 && segment != 0) // we need to move the copy of the point on the previos seg
-		(segments[segment - 1])[3] = newPosition;
+	if (index == 0 && segment != 0) // we need to move the copy of the point on the previos seg
+		(segments[segment - 1]).row(3) = newPosition;
 	if (preserveC1)
 	{
-		if (segment == 0 && indx == 0) {
-			segments[segment][1] += diff; // segments[0][1] += diff;
+		if (segment == 0 && index == 0) {
+			segments[segment].row(1) += diff; // segments[0][1] += diff;
 			return;
 		}
-		switch (indx)
+		switch (index)
 		{
 		case 0:
-			segments[segment - 1][2] += diff;
-			segments[segment][1] += diff;
+			segments[segment - 1].row(2) += diff;
+			segments[segment].row(1) += diff;
 			break;
 		case 1:
 			if (segment != 0)
-				segments[segment - 1][2] -= diff;
+				segments[segment - 1].row(2) -= diff;
 			break;
 		case 2:
 			if (segment != segments.size() - 1)
-				segments[segment + 1][1] -= diff;
+				segments[segment + 1].row(1) -= diff;
 			break;
 		case 3: // last point on line
-			segments[segment][2] += diff;
+			segments[segment].row(2) += diff;
 		}
 
 	}
-
+	
 }
-*/
+
 
 /*
 glm::vec3  Bezier1D::GetVelosity(int segment, float t) {
