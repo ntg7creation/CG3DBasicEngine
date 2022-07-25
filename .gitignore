@@ -37,3 +37,7 @@ external
 .vs/ProjectSettings.json
 
 .vs/slnx.sqlite
+
+*.ipch
+
+.vs/CG3DBasicEngine/v17/workspaceFileList.bin
