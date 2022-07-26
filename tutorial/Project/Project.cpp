@@ -125,8 +125,8 @@ int Project::LoadMesh(IndexedModel &mesh, int matID, int shaderID, int parent)
 	data()->show_faces = 0;
 	data()->show_lines = 0;
 	data()->show_overlay = 0xFF;
-	SetShapeShader(shapeID, 2);
-	SetShapeMaterial(matID, 0);
+	SetShapeShader(shapeID, shaderID);
+	SetShapeMaterial(shapeID, matID);
 	//TODO change colour 
 	for (int i = 0; i < mesh.positions.size() - 1; i++)
 	{
@@ -159,10 +159,9 @@ int Project::editMesh(IndexedModel& mesh, int index)
 
 	return shapeID;
 }
-
-
-void Project::Animate_obj(int object_index, myMoveable path, float time)
+void Project::Animate_obj(int object_index, int animetionindex, float time)
 {
+	myMoveable path = bezierAnimations[animetionindex];
 	if (path.time_start > time || path.time_end < time)
 		return;
 	float start = path.time_start;
@@ -178,28 +177,57 @@ void Project::Animate_obj(int object_index, myMoveable path, float time)
 
 
 }
-/*
-void Project::Animate_obj2(int object_index, myMoveable path, float time)
+int CP2;
+int Project::addbezier(int meshindex)
 {
-	if (path.time_start > time || path.time_end < time)
-		return;
-	float start = path.time_start;
-	float end = path.time_end;
-	float progress = (time - start) / end;
+	if (data_list[meshindex]->animtoinindex < 0) {
+		int defaultmat = 0;
+		int defaultsader = 2;
+		//controls int
+		Bezier1D* myBezier = new Bezier1D(); // check not destoryed
+		int CP0 = LoadMesh(Octahedron, defaultmat, defaultsader);
+		data_list[CP0]->iscontrolpoint = true;
+		selected_data_index = CP0;
+		ShapeTransformation(scaleAll, 0.1, 0);
+		int CP1 = LoadMesh(Octahedron, defaultmat, defaultsader);
+		data_list[CP1]->iscontrolpoint = true;
+		selected_data_index = CP1;
+		ShapeTransformation(scaleAll, 0.1, 0);
+		CP2 = LoadMesh(Octahedron, defaultmat, defaultsader);
+		data_list[CP2]->iscontrolpoint = true;
+		selected_data_index = CP2;
+		ShapeTransformation(scaleAll, 0.1, 0);
+		int CP3 = LoadMesh(Octahedron, defaultmat, defaultsader);
+		data_list[CP3]->iscontrolpoint = true;
+		selected_data_index = CP3;
+		ShapeTransformation(scaleAll, 0.1, 0);
 
-	Eigen::Vector3d new_pos = path.bezier->GetVelosity(0,progress);
-	selected_data_index = object_index;
-	ShapeTransformation(xTranslate, new_pos.x(), false);
-	ShapeTransformation(yTranslate, new_pos.y(), false);
-	ShapeTransformation(zTranslate, new_pos.z(), false);
+
+		int bezierlineID = LoadMesh(myBezier->GetLine(), 1, 2);
+		myMoveable tempmove = myMoveable(0, 1, myBezier, bezierlineID, CP0, CP1, CP2, CP3);
+		bezierAnimations.push_back(tempmove);
+		int animtionindex = bezierAnimations.size() - 1;
+		Connect_Controls(tempmove);
 
 
-}*/
-void Project::connect_bezier_to_mesh(int meshindex, myMoveable moveable) 
+		connect_bezier_to_mesh(meshindex, animtionindex);
+		return animtionindex;
+	}
+	else
+	{
+		//TODO add segment
+	}
+	return -1;
+}
+//we translate mesh i
+//if animtoinindex >= 0 call this 
+void Project::connect_bezier_to_mesh(int meshindex, int animetionindex) 
 {
-	
+	myMoveable moveable = bezierAnimations[animetionindex];
 	Eigen::Vector3d new_pos = data_list[meshindex]->GetPos();
-	Eigen::Vector3d old_pos = data_list[0]->GetPos();
+	//Eigen::Vector3d new_pos2 = data_list[meshindex]->GetPos2();
+	Eigen::Vector3d old_pos = data_list[moveable.CPs[0]]->GetPos(); // pos of cp0
+
 	for (int i = 0; i < moveable.CPs.size(); i++)
 	{
 		translateControl_no_update(xTranslate, new_pos.x() - old_pos.x(), moveable, i, false);
@@ -208,6 +236,7 @@ void Project::connect_bezier_to_mesh(int meshindex, myMoveable moveable)
 	}
 
 	editMesh(moveable.bezier->GetLine(), moveable.meshindex);
+	data_list[meshindex]->animtoinindex = animetionindex;
 	
 }
 void Project::translateControl_no_update(int type, float amt, myMoveable obj, int cpnum, bool preserve)
@@ -264,12 +293,50 @@ void Project::translateControl(int type, float amt,int mesh_index,bool preserve)
 	editMesh(mybez->bezier->GetLine(),mybez->meshindex);
 }
 
-int cubeID = -1;
+int Project::addgridmesh(int resT)
+{
+	IndexedModel mesh = IndexedModel();
+	Eigen::Vector3d pos = Eigen::Vector3d();
+	pos << 0, 0, 0;
+	for (int i = 0; i < resT; i++)
+	{
+		for (int j = 0; j < resT; j++)
+		{
+			pos << i, 0, j;
+			mesh.positions.push_back(pos);
+		}
+	}
+	int MatID = 0;
+	int watershader = 3;
+
+	int	shapeID = AddShape(Cube, -1, TRIANGLES);
+
+	selected_data_index = shapeID;
+	data()->show_faces = 0;
+	data()->show_lines = 0;
+	data()->show_overlay = 0xFF;
+	SetShapeShader(shapeID, watershader);
+	SetShapeMaterial(shapeID, MatID);
+	for (int i = 0; i < resT; i++)
+	{
+		for (int j = 0; j < resT; j++)
+		{
+			if(j<resT-1)
+				data()->add_edges(mesh.positions[i * resT + j].transpose(), mesh.positions[i * resT + j + 1].transpose(), Eigen::RowVector3d(0, 0, 0));
+			if (i < resT - 1)
+				data()->add_edges(mesh.positions[i * resT + j].transpose(), mesh.positions[i * resT + j + resT].transpose(), Eigen::RowVector3d(1, 0, 0));
+		}
+	}
+
+	return shapeID;
+	return LoadMesh(mesh,0,2);
+
+
+}
+
 void Project::Init()
 {
-	Eigen::Vector3d CP0 = Eigen::Vector3d();
-	float temp = 0.2;
-	CP0 = CP0 * 3.2 + CP0 *temp;
+	int cubeID = -1;
 
 	//basic int
 	{
@@ -278,60 +345,39 @@ void Project::Init()
 		AddShader("shaders/pickingShader");
 		AddShader("shaders/cubemapShader");
 		AddShader("shaders/basicShader");
-		AddShader("shaders/basicShader");
+		AddShader("shaders/waterShader");
 		int textureID = 0;
 		textureID = AddTexture("textures/plane.png", 2);
 		textureID = AddTexture("textures/cubemaps/Daylight Box_", 3);
 		textureID = AddTexture("textures/grass.bmp", 2);
+		textureID = AddTexture("textures/water.jpg", 2);
 		//AddTexture("../res/textures/Cat_bump.jpg", 2);
 
 		AddMaterial(texIDs, slots, 1);
 		AddMaterial(texIDs + 1, slots + 1, 1);
 		AddMaterial(texIDs + 2, slots + 2, 1);
+		AddMaterial(texIDs + 3, slots + 3, 1);
 		int shapeID = 0;
 		LoadCubeMap(1);
-		cubeID = LoadMesh(Cube, 1, 2);
+	}
+	//load cube
+	{
+		cubeID = LoadMesh(Cube, 0, 2);
 		selected_data_index = cubeID;
 		ShapeTransformation(yTranslate, 1, 0);
 	}
+	//add bezier 
+	addbezier(cubeID);
 
-	int defaultmat = 0;
-	int defaultsader = 2;
-	//bezier int
-	{
-		//controls int
-		Bezier1D* myBezier = new Bezier1D(); // check not destoryed
-		int CP0 = LoadMesh(Octahedron, defaultmat, defaultsader);
-		selected_data_index = CP0;
-		ShapeTransformation(scaleAll, 0.1, 0);
-		int CP1 = LoadMesh(Octahedron, defaultmat, defaultsader);
-		selected_data_index = CP1;
-		ShapeTransformation(scaleAll, 0.1, 0);
-		int CP2 = LoadMesh(Octahedron, defaultmat, defaultsader);
-		selected_data_index = CP2;
-		ShapeTransformation(scaleAll, 0.1, 0);
-		int CP3 = LoadMesh(Octahedron, defaultmat, defaultsader);
-		selected_data_index = CP3;
-		ShapeTransformation(scaleAll, 0.1, 0);
+	//moving mesh that is not a control point
+	selected_data_index = cubeID;
+	ShapeTransformation(yTranslate,2, 0);
+	connect_bezier_to_mesh(cubeID, data_list[cubeID]->animtoinindex);
 
-
-		int bezierlineID = LoadMesh(myBezier->GetLine(), 1, 2);
-		myMoveable tempmove = myMoveable(0, 1, myBezier, bezierlineID, CP0, CP1, CP2, CP3);
-		bezierAnimations.push_back(tempmove);
-		Connect_Controls(tempmove);
-		//translateControl(yTranslate, -2, CP2, false);
-		tempcontrolindex = CP2;
-
-		connect_bezier_to_mesh(cubeID, tempmove);
-	}
-
-	//myMoveable a = myMoveable(0, 5, &myBezier, bezierlineID);
-	//bezierAnimations.push_back(a);
-
-
-	/*selected_data_index = CP3.ControlID;
-	translateControl(yTranslate, -2, CP3,false);
-	editMesh(myBezier.GetLine(), bezierlineID);*/
+	//addgrid
+	int id = addgridmesh(10);
+	selected_data_index = id;
+	ShapeTransformation(yTranslate, -1.5, 0);
 
 
 
@@ -340,9 +386,9 @@ void Project::Init()
 
 void Project::Update(const Eigen::Matrix4f& Proj, const Eigen::Matrix4f& View, const Eigen::Matrix4f& Model, unsigned int  shaderIndx, unsigned int shapeIndx)
 {
-	mytime += tick;
-	
-	Animate_obj(cubeID,bezierAnimations[0], mytime);
+
+
+	//Animate_obj(cubeID,bezierAnimations[0], mytime);
 	Shader *s = shaders[shaderIndx];
 	int r = ((shapeIndx+1) & 0x000000FF) >>  0;
 	int g = ((shapeIndx+1) & 0x0000FF00) >>  8;
@@ -386,6 +432,16 @@ void Project::WhenTranslate()
 }
 
 void Project::Animate() {
+
+	//int temp = selected_data_index;
+	//mytime += tick;
+	//for (int i = 0; i < data_list.size(); i++)
+	//	if (data_list[i]->animtoinindex >= 0)
+	//		Animate_obj(i, data_list[i]->animtoinindex, mytime);
+
+	//translateControl(yTranslate, -0.01, CP2, false);
+	//selected_data_index = temp;
+
     if(isActive)
 	{
 		if(selected_data_index > 0 )

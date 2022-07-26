@@ -51,7 +51,6 @@ public:
 	const float tick = 0.00166; // asume 1 update a sec time =1 means 1 min
 	myMoveable find_Control(int mesh_index);
 	std::vector<myMoveable> bezierAnimations;
-
 	/// <summary>
 	/// load mesh
 	/// </summary>
@@ -63,15 +62,18 @@ public:
 	int LoadMesh(std::string path,int matID,int shaderID,int parent = -1);
 	int LoadMesh(shapes Shape, int matID, int shaderID, int parent = -1);
 	int LoadMesh(IndexedModel &mesh, int matID, int shaderID, int parent = -1);
-	//ControlPoint AddControlPoints(shapes type, int matID, int shaderID,  int point, int bezIndex);
-	int changeMesh(IndexedModel& mesh, int matID, int shaderID, int parent = -1);
-	int Project::editMesh(IndexedModel& mesh, int index);
+
+	int editMesh(IndexedModel& mesh, int index);
 	void translateControl(int type, float amt,int mesh_index,bool preserve);
 	void translateControl_no_update(int type, float amt, myMoveable obj,int cpnum, bool preserve);
-	void connect_bezier_to_mesh(int meshindex, myMoveable moveable);
+	void connect_bezier_to_mesh(int meshindex, int animetionindex);
+	int addbezier(int meshindex);
 
-	void Animate_obj(int object_index, myMoveable path,float time); 
-	//void Animate_obj2(int object_index, myMoveable path,float time); 
+	void Animate_obj(int object_index, int animetionindex,float time);
+
+	int addgridmesh(int resT);
+
+
 
 	int testloadcostomemesh();
 

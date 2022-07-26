@@ -8,7 +8,8 @@ class Movable
 {
 public:
 	enum{preRot,postRot,phiRot,thetaRot,psiRot,psiPhiRot};
-
+	int animtoinindex = -1;
+	bool iscontrolpoint = false; 
 	Movable();
 	Movable(const Movable& mov);
 	Eigen::Matrix4f MakeTransScale();
@@ -27,6 +28,7 @@ public:
 	void ZeroTrans();
 		//Eigen::Vector3d GetTranslation const{ return Tout.tranlastion(); }
 	Eigen::Vector3d GetPos() const { return Tin.translation(); }
+	Eigen::Vector3d GetPos2() const { return Tout.translation(); }
 	Eigen::Matrix3d GetRotation() const{ return Tout.rotation().matrix(); }
 	//	Eigen::Matrix3d GetRotation() const{ return Tout.tranlatoin().matrix(); }
     virtual ~Movable() {}
