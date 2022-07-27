@@ -339,27 +339,25 @@ void Project::Init()
 	int cubeID = -1;
 
 	//basic int
-	{
-		unsigned int texIDs[3] = { 0 , 1, 2 };
-		unsigned int slots[3] = { 0 , 1, 2 };
-		AddShader("shaders/pickingShader");
-		AddShader("shaders/cubemapShader");
-		AddShader("shaders/basicShader");
-		AddShader("shaders/waterShader");
-		int textureID = 0;
-		textureID = AddTexture("textures/plane.png", 2);
-		textureID = AddTexture("textures/cubemaps/Daylight Box_", 3);
-		textureID = AddTexture("textures/grass.bmp", 2);
-		textureID = AddTexture("textures/water.jpg", 2);
-		//AddTexture("../res/textures/Cat_bump.jpg", 2);
+	unsigned int texIDs[4] = { 0 , 1, 2,3 };
+	unsigned int slots[4] = { 0 , 1, 2,3 };
+	AddShader("shaders/pickingShader");
+	AddShader("shaders/cubemapShader");
+	int basicshader =AddShader("shaders/basicShader");
+	int watershader = AddShader("shaders/waterShader");
+	int textureID = 0;
+	textureID = AddTexture("textures/plane.png", 2);
+	textureID = AddTexture("textures/cubemaps/Daylight Box_", 3);
+	textureID = AddTexture("textures/grass.bmp", 2);
+	textureID = AddTexture("textures/water.bmp", 2);
+	//AddTexture("../res/textures/Cat_bump.jpg", 2);
 
-		AddMaterial(texIDs, slots, 1);
-		AddMaterial(texIDs + 1, slots + 1, 1);
-		AddMaterial(texIDs + 2, slots + 2, 1);
-		AddMaterial(texIDs + 3, slots + 3, 1);
-		int shapeID = 0;
-		LoadCubeMap(1);
-	}
+	AddMaterial(texIDs, slots, 1);
+	AddMaterial(texIDs + 1, slots + 1, 1);
+	AddMaterial(texIDs + 2, slots + 2, 1);
+	AddMaterial(texIDs + 3, slots + 3, 1);
+	int shapeID = 0;
+	LoadCubeMap(1);
 	//load cube
 	{
 		cubeID = LoadMesh(Cube, 0, 2);
@@ -371,13 +369,28 @@ void Project::Init()
 
 	//moving mesh that is not a control point
 	selected_data_index = cubeID;
-	ShapeTransformation(yTranslate,2, 0);
+	ShapeTransformation(yTranslate, 2, 0);
 	connect_bezier_to_mesh(cubeID, data_list[cubeID]->animtoinindex);
 
 	//addgrid
-	int id = addgridmesh(10);
-	selected_data_index = id;
-	ShapeTransformation(yTranslate, -1.5, 0);
+	//int id = addgridmesh(10);
+	int map = 4;
+	float scale = 0.5;
+	for (int i = 0; i < map; i++)
+	{
+		for (int j = 0; j < map; j++)
+		{
+			int id = LoadMesh("./data/planegrid.obj", 3, watershader);
+			selected_data_index = id;
+			ShapeTransformation(scaleAll, scale, 0);
+			ShapeTransformation(xTranslate, (i - map / 2) * 10* scale, 0);
+			ShapeTransformation(yTranslate, -7, 0);
+			ShapeTransformation(zTranslate, -(j - map / 2) * 10* scale - 20, 0);
+		}
+	}
+
+
+
 
 
 
@@ -389,29 +402,36 @@ void Project::Update(const Eigen::Matrix4f& Proj, const Eigen::Matrix4f& View, c
 
 
 	//Animate_obj(cubeID,bezierAnimations[0], mytime);
-	Shader *s = shaders[shaderIndx];
-	int r = ((shapeIndx+1) & 0x000000FF) >>  0;
-	int g = ((shapeIndx+1) & 0x0000FF00) >>  8;
-	int b = ((shapeIndx+1) & 0x00FF0000) >> 16;
+	Shader* s = shaders[shaderIndx];
+	int r = ((shapeIndx + 1) & 0x000000FF) >> 0;
+	int g = ((shapeIndx + 1) & 0x0000FF00) >> 8;
+	int b = ((shapeIndx + 1) & 0x00FF0000) >> 16;
 	//rgb -> id
 
-		s->Bind();
+	s->Bind();
 	s->SetUniformMat4f("Proj", Proj);
 	s->SetUniformMat4f("View", View);
 	s->SetUniformMat4f("Model", Model);
 	if (data_list[shapeIndx]->GetMaterial() >= 0 && !materials.empty())
 	{
-//		materials[shapes[pickedShape]->GetMaterial()]->Bind(textures);
+		//		materials[shapes[pickedShape]->GetMaterial()]->Bind(textures);
 		BindMaterial(s, data_list[shapeIndx]->GetMaterial());
 	}
 	if (shaderIndx == 0)
 		s->SetUniform4f("lightColor", r / 255.0f, g / 255.0f, b / 255.0f, 0.0f);
+	else if (shaderIndx == 3)// water shader
+	{
+		s->SetUniform4f("lightColor", 1, 1, 1, 0.0f);
+		s->SetUniform1f("time", mytime * 3); 
+			float scale = 1/0.5;
+		s->SetUniform4f("tranlasion", scale*data_list[shapeIndx]->GetPos().x(), scale*data_list[shapeIndx]->GetPos().y(), scale* data_list[shapeIndx]->GetPos().z(), 0);
+	}
 	else
-		s->SetUniform4f("lightColor", 4/100.0f, 60 / 100.0f, 99 / 100.0f, 0.5f);
+		s->SetUniform4f("lightColor", 4 / 100.0f, 60 / 100.0f, 99 / 100.0f, 0.5f);
 	//textures[0]->Bind(0);
 
-	
-	
+
+
 
 	//s->SetUniform1i("sampler2", materials[shapes[pickedShape]->GetMaterial()]->GetSlot(1));
 	//s->SetUniform4f("lightDirection", 0.0f , 0.0f, -1.0f, 0.0f);
@@ -433,14 +453,14 @@ void Project::WhenTranslate()
 
 void Project::Animate() {
 
-	//int temp = selected_data_index;
-	//mytime += tick;
-	//for (int i = 0; i < data_list.size(); i++)
-	//	if (data_list[i]->animtoinindex >= 0)
-	//		Animate_obj(i, data_list[i]->animtoinindex, mytime);
+	int temp = selected_data_index;
+	mytime += tick;
+	for (int i = 0; i < data_list.size(); i++)
+		if (data_list[i]->animtoinindex >= 0)
+			Animate_obj(i, data_list[i]->animtoinindex, mytime);
 
 	//translateControl(yTranslate, -0.01, CP2, false);
-	//selected_data_index = temp;
+	selected_data_index = temp;
 
     if(isActive)
 	{

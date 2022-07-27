@@ -48,7 +48,7 @@ public:
 	int current_Camera;
 	int tempcontrolindex;
 	float mytime = 0;
-	const float tick = 0.00166; // asume 1 update a sec time =1 means 1 min
+	const float tick = 0.00166*3; // asume 1 update a sec time =1 means 1 min
 	myMoveable find_Control(int mesh_index);
 	std::vector<myMoveable> bezierAnimations;
 	/// <summary>

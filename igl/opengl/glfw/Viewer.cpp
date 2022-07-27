@@ -193,7 +193,7 @@ IGL_INLINE bool
                   //std::cout << "faces normals:  " << corner_normals.row(fNormIndices(k, 0)) << std::endl;
               }
               
-              std::cout << "faces normals: \n" << N << std::endl;
+              //std::cout << "faces normals: \n" << N << std::endl;
              
               normal_read = true;
           }
@@ -719,15 +719,18 @@ IGL_INLINE bool
 
     }
 
-    void Viewer::WhenTranslate( const Eigen::Matrix4d& preMat, float dx, float dy)
+    void Viewer::WhenTranslate(const Eigen::Matrix4d& preMat, float dx, float dy)
     {
         Movable* obj;
         if (selected_data_index == 0 || data()->IsStatic())
             obj = (Movable*)this;
-        else  if (selected_data_index > 0) { obj = (Movable *) data(); }
+        else  if (selected_data_index > 0)
+        {
+            obj = (Movable*)data();
+        }
         obj->TranslateInSystem(preMat.block<3, 3>(0, 0), Eigen::Vector3d(dx, 0, 0));
         obj->TranslateInSystem(preMat.block<3, 3>(0, 0), Eigen::Vector3d(0, dy, 0));
-        WhenTranslate(dx,dy);
+        WhenTranslate(dx, dy);
     }
 
     void Viewer::WhenRotate(const Eigen::Matrix4d& preMat, float dx, float dy)
