@@ -280,7 +280,6 @@ void Project::translateControl(int type, float amt,int mesh_index,bool preserve)
 
 
 
-
 	Eigen::Vector4d posv4 = Eigen::Vector4d();
 	Eigen::Vector3d pos = data_list[mesh_index]->GetPos();
 	posv4 << pos.x(), pos.y(), pos.z(), 0;
@@ -290,6 +289,45 @@ void Project::translateControl(int type, float amt,int mesh_index,bool preserve)
 		//TODO
 	}
 	editMesh(mybez->bezier->GetLine(),mybez->meshindex);
+}
+
+
+void Project::translateControl( int mesh_index, bool preserve)
+{
+	//selected_data_index = mesh_index;
+	//ShapeTransformation(type, amt, 0);
+	myMoveable* mybez;
+	int CP_num = -1;
+	for (int i = 0; i < bezierAnimations.size(); i++)
+	{
+		for (CP_num = 0; CP_num < bezierAnimations[i].CPs.size(); CP_num++)
+		{
+			if (bezierAnimations[i].CPs[CP_num] == mesh_index)
+			{
+				mybez = &bezierAnimations[i];
+				break;
+			}
+		}
+		if (i == bezierAnimations.size())
+		{
+			// if we got here that means that mesh_index is not a control point;
+			// maybe we need to change it to add a flag to mesh_index
+			return;
+		}
+		break;
+	}
+
+
+
+	Eigen::Vector4d posv4 = Eigen::Vector4d();
+	Eigen::Vector3d pos = data_list[mesh_index]->GetPos();
+	posv4 << pos.x(), pos.y(), pos.z(), 0;
+	mybez->bezier->MoveControlPoint(0, CP_num, false, posv4);
+	if (preserve)
+	{
+		//TODO
+	}
+	editMesh(mybez->bezier->GetLine(), mybez->meshindex);
 }
 
 //not used

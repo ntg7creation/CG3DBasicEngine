@@ -67,6 +67,7 @@ public:
 
 	int editMesh(IndexedModel& mesh, int index);
 	void translateControl(int type, float amt,int mesh_index,bool preserve);
+	void translateControl(int mesh_index,bool preserve);
 	void translateControl_no_update(int type, float amt, myMoveable obj,int cpnum, bool preserve);
 	void connect_bezier_to_mesh(int meshindex, int animetionindex);
 	int addbezier(int meshindex);
