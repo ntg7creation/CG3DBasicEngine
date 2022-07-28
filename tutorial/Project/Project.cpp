@@ -454,8 +454,8 @@ void Project::Init()
 	AddShader("shaders/basicShader");
 
 	//basic int
-	unsigned int texIDs[4] = { 0 , 1, 2,3 };
-	unsigned int slots[4] = { 0 , 1, 2,3 };
+	//unsigned int texIDs[4] = { 0 , 1, 2,3 };
+	//unsigned int slots[4] = { 0 , 1, 2,3 };
 	AddShader("shaders/pickingShader");
 	AddShader("shaders/cubemapShader");
 	int basicshader =AddShader("shaders/basicShader");
