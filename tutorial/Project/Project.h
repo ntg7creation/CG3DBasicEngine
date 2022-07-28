@@ -6,6 +6,11 @@ class Project : public igl::opengl::glfw::Viewer
 {
 	
 public:
+	int cubeMapShapeID;
+	int InitCubeMap(int matID); 
+	int numObjectsTextures;
+	int numCubeMapTextures;
+
 	int ticksCounter;
 	Project();
 //	Project(float angle,float relationWH,float near, float far);
@@ -31,7 +36,7 @@ public:
 	/// <returns>
 	/// return loaded object id  and -1 if fail
 	/// </returns>
-	int LoadCubeMap(int matID);
+	void LoadCubeMap(int matID);
 	int LoadMesh(std::string path,int matID,int shaderID,int parent = -1);
 	int LoadMesh(shapes Shape, int matID, int shaderID, int parent = -1);
 	int LoadMesh(IndexedModel &mesh, int matID, int shaderID, int parent = -1);

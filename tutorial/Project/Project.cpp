@@ -49,20 +49,25 @@ Project::Project()
 }
 
 
-
-//Project::Project(float angle ,float relationWH, float near, float far) : Scene(angle,relationWH,near,far)
-//{ 	
-//}
-int Project::LoadCubeMap(int matID)
+int Project::InitCubeMap(int matID)
 {
 	int shapeID = AddShape(Cube, -2, TRIANGLES);
-	SetShapeMaterial(shapeID, 1);
+	SetShapeMaterial(shapeID, matID);
 	selected_data_index = shapeID;
 	//float cylinderLen = 1.6f;
 	float s = 60;
 	ShapeTransformation(scaleAll, s, 0);
 	SetShapeStatic(shapeID);
 	return shapeID;
+}
+
+
+//Project::Project(float angle ,float relationWH, float near, float far) : Scene(angle,relationWH,near,far)
+//{ 	
+//}
+void Project::LoadCubeMap(int matID)
+{
+	SetShapeMaterial(cubeMapShapeID, matID + numObjectsTextures);
 }
 
 int Project::LoadMesh(shapes Shape, int matID, int shaderID, int parent)
@@ -103,40 +108,74 @@ int Project::LoadMesh(IndexedModel &mesh, int matID, int shaderID, int parent)
 
 void Project::Init()
 {
-	Eigen::Vector4f vec = Eigen::Vector4f();
-	vec << 0.2, 1.3, 3.2,0.1;
+	unsigned int objectTextureIDs[] = {
+		AddTexture("textures/plane.png", 2),
+		AddTexture("textures/grass.bmp", 2),
+	};
+
+	unsigned int cubeMapTextureIDs[] = { 
+		AddTexture("textures/cubemaps/Daylight Box_", 3),
+		AddTexture("textures/cubemaps/cube3/3_", 3),
+		//AddTexture("textures/cubemaps/cube2/output_skybox_", 3),
+	};
+
+	numObjectsTextures = sizeof(objectTextureIDs) / sizeof(unsigned int);
+	numCubeMapTextures = sizeof(cubeMapTextureIDs) / sizeof(unsigned int);
+
+	int numSlots = numCubeMapTextures + numObjectsTextures;
+	unsigned int *slots = new unsigned int[numSlots];
+
+	for (int i = 0; i < numSlots; ++i) {
+		slots[i] = i;
+	}
+	for (int i = 0; i < numObjectsTextures; ++i) {
+		AddMaterial(objectTextureIDs + i, slots + i, 1);
+	}
+	for (int i = 0, j = numObjectsTextures; i < numCubeMapTextures; ++i) {
+		AddMaterial(cubeMapTextureIDs + i, slots + j, 1);
+	}
 
 
-	Eigen::Matrix4f mat = Eigen::Matrix4f();
-	mat <<	1, 2, 3, 4,
-			5, 6, 7, 8, 
-			9, 10, 11, 12, 
-			13, 14, 15, 16;
+	/*int textureID = 0;
+	textureID = AddTexture("textures/plane.png",2);
+	textureID = AddTexture("textures/cubemaps/Daylight Box_", 3);
+	textureID = AddTexture("textures/grass.bmp", 2);*/
+	//AddTexture("../res/textures/Cat_bump.jpg", 2);
 
-	Bezier1D myBezier =  Bezier1D();
+	/*AddMaterial(texIDs, slots, 1);
+	AddMaterial(texIDs+1, slots+1, 1);
+	AddMaterial(texIDs + 2, slots + 2, 1);*/
 
-	std::cout<< (myBezier.GetControlPoint(0, 1).GetPos()->x())<<std::endl ;
+	//int shapeID = 0;
+	//shapeID = AddShape(Cube, -2, TRIANGLES);
+	//LoadCubeMap(1);
+	cubeMapShapeID = InitCubeMap(cubeMapTextureIDs[0]);
 
-	unsigned int texIDs[3] = { 0 , 1, 2};
-	unsigned int slots[3] = { 0 , 1, 2 };
-	
+
+
 	AddShader("shaders/pickingShader");
 	AddShader("shaders/cubemapShader");
 	AddShader("shaders/basicShader");
 	AddShader("shaders/basicShader");
-	int textureID = 0;
-	textureID = AddTexture("textures/plane.png",2);
-	textureID = AddTexture("textures/cubemaps/Daylight Box_", 3);
-	textureID = AddTexture("textures/grass.bmp", 2);
-	//AddTexture("../res/textures/Cat_bump.jpg", 2);
 
-	AddMaterial(texIDs,slots, 1);
-	AddMaterial(texIDs+1, slots+1, 1);
-	AddMaterial(texIDs + 2, slots + 2, 1);
-	int shapeID = 0;
-	//shapeID = AddShape(Cube, -2, TRIANGLES);
-	LoadCubeMap(1);
-	int cubeID =LoadMesh(Cube, 1, 2);
+
+
+	Eigen::Vector4f vec = Eigen::Vector4f();
+	vec << 0.2, 1.3, 3.2, 0.1;
+
+
+	Eigen::Matrix4f mat = Eigen::Matrix4f();
+	mat << 1, 2, 3, 4,
+		5, 6, 7, 8,
+		9, 10, 11, 12,
+		13, 14, 15, 16;
+
+	Bezier1D myBezier = Bezier1D();
+
+	std::cout << (myBezier.GetControlPoint(0, 1).GetPos()->x()) << std::endl;
+
+
+	int cubeID = LoadMesh(Cube, 1, 2);
 	int bezierlineID = LoadMesh(myBezier.GetLine(), 1, 2);
 	selected_data_index = cubeID;
 	ShapeTransformation(yTranslate, -3, 0);
@@ -150,21 +189,21 @@ void Project::Init()
 
 	selected_data_index = LoadMesh(Octahedron, 0, 2);
 	ShapeTransformation(scaleAll, 0.1, 0);
-	 point = 1;
+	point = 1;
 	ShapeTransformation(xTranslate, myBezier.GetControlPoint(0, point).GetPos()->x(), 0);
 	ShapeTransformation(yTranslate, myBezier.GetControlPoint(0, point).GetPos()->y(), 0);
 	ShapeTransformation(zTranslate, myBezier.GetControlPoint(0, point).GetPos()->z(), 0);
 
 	selected_data_index = LoadMesh(Octahedron, 0, 2);
 	ShapeTransformation(scaleAll, 0.1, 0);
-	 point = 2;
+	point = 2;
 	ShapeTransformation(xTranslate, myBezier.GetControlPoint(0, point).GetPos()->x(), 0);
 	ShapeTransformation(yTranslate, myBezier.GetControlPoint(0, point).GetPos()->y(), 0);
 	ShapeTransformation(zTranslate, myBezier.GetControlPoint(0, point).GetPos()->z(), 0);
 
 	selected_data_index = LoadMesh(Octahedron, 0, 2);
 	ShapeTransformation(scaleAll, 0.1, 0);
-	 point = 3;
+	point = 3;
 	ShapeTransformation(xTranslate, myBezier.GetControlPoint(0, point).GetPos()->x(), 0);
 	ShapeTransformation(yTranslate, myBezier.GetControlPoint(0, point).GetPos()->y(), 0);
 	ShapeTransformation(zTranslate, myBezier.GetControlPoint(0, point).GetPos()->z(), 0);

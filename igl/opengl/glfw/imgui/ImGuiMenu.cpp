@@ -253,6 +253,11 @@ namespace igl
 						}
 					}
 
+					if (ImGui::Button("Set CubeMap", ImVec2(-1, 0))) {
+						((Project*)(viewer))->LoadCubeMap(materialIndex);
+					}
+					ImGui::InputInt("CubeMap Index", &materialIndex);
+
 					if (ImGui::CollapsingHeader("Picked Object Config", ImGuiTreeNodeFlags_CollapsingHeader/*ImGuiTreeNodeFlags_DefaultOpen*/)) {
 						//if (ImGui::SliderInt("Time slider", &timeSliderValue, 0, 100)) {
 
