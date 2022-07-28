@@ -12,6 +12,9 @@
 #define IGL_OPENGL_4
 #endif
 
+//#include "renderer.h"
+class Renderer;
+
 #include "../../igl_inline.h"
 #include "../MeshGL.h"
 
@@ -19,7 +22,6 @@
 #include "ViewerPlugin.h"
 #include "igl/opengl/Movable.h"
 #include "igl/opengl/glfw/Material.h"
-
 
 #include <Eigen/Core>
 #include <Eigen/Geometry>
@@ -143,6 +145,9 @@ namespace glfw
     inline void Deactivate() { isActive = false; }
     int AddShader(const std::string& fileName);
 public:
+
+	Renderer* rndr;
+
     //////////////////////
     // Member variables //
     //////////////////////
@@ -166,7 +171,6 @@ public:
     Shader* overlay_shader;
     Shader* overlay_point_shader;
     std::vector<Shader*> shaders;
-
     
 
     // List of registered plugins

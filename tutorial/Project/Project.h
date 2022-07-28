@@ -6,7 +6,7 @@ class Project : public igl::opengl::glfw::Viewer
 {
 	
 public:
-	
+	int ticksCounter;
 	Project();
 //	Project(float angle,float relationWH,float near, float far);
 	void Init();

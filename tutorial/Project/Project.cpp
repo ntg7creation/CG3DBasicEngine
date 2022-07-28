@@ -45,6 +45,7 @@ public:
 
 Project::Project()
 {
+	ticksCounter = 0;
 }
 
 
@@ -205,6 +206,7 @@ void Project::Update(const Eigen::Matrix4f& Proj, const Eigen::Matrix4f& View, c
 //		s->SetUniform4f("lightColor",r/255.0f, g/255.0f, b/255.0f,1.0f);
 //	else 
 //		s->SetUniform4f("lightColor",0.7f,0.8f,0.1f,1.0f);
+
 	s->Unbind();
 }
 
@@ -220,9 +222,16 @@ void Project::WhenTranslate()
 void Project::Animate() {
     if(isActive)
 	{
+		//std::cout << "animate isactive" << std::endl;
+		ticksCounter += 1;
+		
 		if(selected_data_index > 0 )
 			data()->MyRotate(Eigen::Vector3d(0, 1, 0), 0.01);
 	}
+
+	//std::cout << "animate out of if" << std::endl;
+
+	//if (ticksCounter)
 }
 
 void Project::ScaleAllShapes(float amt,int viewportIndx)

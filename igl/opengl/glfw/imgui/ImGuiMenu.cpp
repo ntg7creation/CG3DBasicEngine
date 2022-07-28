@@ -19,6 +19,8 @@
 //#include <imgui_fonts_droid_sans.h>
 //#include <GLFW/glfw3.h>
 #include <iostream>
+#include "../renderer.h"
+#include "../../../../tutorial/Project/Project.h"
 ////////////////////////////////////////////////////////////////////////////////
 
 namespace igl
@@ -52,6 +54,9 @@ namespace igl
 						style.FrameRounding = 5.0f;
 						reload_font();
 					}
+
+					pickedLayerIndex = 0;
+					animationDuration = 5;
 				}
 
 				IGL_INLINE void ImGuiMenu::reload_font(int font_size)
@@ -113,6 +118,7 @@ namespace igl
 				IGL_INLINE bool ImGuiMenu::mouse_down(GLFWwindow* window, int button, int modifier)
 				{
 					ImGui_ImplGlfw_MouseButtonCallback(window, button, GLFW_PRESS, modifier);
+					std::cout << "mouse_down of imgui";
 					return ImGui::GetIO().WantCaptureMouse;
 				}
 
@@ -181,8 +187,6 @@ namespace igl
 					if (no_bring_to_front)  window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus;
 
 
-					static float timeSliderValue = 0.f;
-
 					ImGui::Begin(
 						"Menu", p_open,
 						window_flags
@@ -214,12 +218,24 @@ namespace igl
 
 					// swith to camera X
 
+					if (ImGui::Button("Play animation", ImVec2(-1, 0))) {
+						((Project*)(viewer))->ticksCounter = 0;
+						((Project*)(viewer))->Activate();
+
+					}
+
+					if (ImGui::Button("Stop animation", ImVec2(-1, 0))) {
+						((Project*)(viewer))->Deactivate();
+					}
+
 
 					if (ImGui::Button("Load an Object", ImVec2(-1, 0))) {
 
 						int savedIndx = viewer->selected_data_index;
 						// viewer->selected_data_index = viewer->parents.size();
 						// viewer->AddShape(viewer->xCylinder,-1,viewer->TRIANGLES);
+
+						//LoadFrom
 						viewer->open_dialog_load_mesh();
 						if (viewer->data_list.size() > viewer->parents.size())
 						{
@@ -237,38 +253,110 @@ namespace igl
 						}
 					}
 
-					if (ImGui::Button("Add a Camera", ImVec2(-1, 0))) {
-						std::cout << "Add camera clicked but not implemented" << std::endl;
+					if (ImGui::CollapsingHeader("Picked Object Config", ImGuiTreeNodeFlags_CollapsingHeader/*ImGuiTreeNodeFlags_DefaultOpen*/)) {
+						//if (ImGui::SliderInt("Time slider", &timeSliderValue, 0, 100)) {
+
+						ImGui::Text("Object's Layer: <NOT IMPLEMENTED>");
+
+						ImGui::InputInt("Animation Duration", &animationDuration);
+
+						if (ImGui::SliderFloat("Animation delay slider", &timeSliderValue, 0.f, 100.f)) {
+							std::cout << "Time slider changed to value " << timeSliderValue << " but not implemented" << std::endl;
+						}
+
+						if (ImGui::Button("Set Material", ImVec2(-1, 0))) {
+							std::cout << "Change Material of Picked Object clicked but not implemented" << std::endl;
+						}
+
+						ImGui::InputInt("Material Index", &materialIndex);
+
+						if (ImGui::Button("Set transparency", ImVec2(-1, 0))) {
+							std::cout << "Change Material of Picked Object clicked but not implemented" << std::endl;
+						}
+
+						ImGui::SliderFloat("Trans. Value", &transparencySliderValue, 0.f, 100.f);
 					}
 
-					if (ImGui::Button("Add a Layer", ImVec2(-1, 0))) {
-						std::cout << "Add layer clicked but not implemented" << std::endl;
+					if (ImGui::CollapsingHeader("Cameras", ImGuiTreeNodeFlags_CollapsingHeader))
+					{
+						ImGui::Text("Number of cameras: ");
+
+						ImGui::Text("Current camera index: ");
+
+						if (ImGui::Button("Add a Camera", ImVec2(-1, 0))) {
+							std::cout << "Add camera clicked but not implemented" << std::endl;
+						}
+
+						if (ImGui::Button("Switch to previous camera", ImVec2(-1, 0))) {
+							std::cout << "Switch to previous camera clicked but not implemented" << std::endl;
+						}
+
+						if (ImGui::Button("Switch to next camera", ImVec2(-1, 0))) {
+							std::cout << "Switch to next camera clicked but not implemented" << std::endl;
+						}
 					}
 
-					if (ImGui::Button("Play animation", ImVec2(-1, 0))) {
-						std::cout << "Play animation clicked but not implemented" << std::endl;
-					}
+					if (ImGui::CollapsingHeader("Layers", ImGuiTreeNodeFlags_CollapsingHeader))
+					{
+						ImGui::Text("Number of layers: <NOT IMPLEMENTED>");
+						if (ImGui::Button("Add a Layer", ImVec2(-1, 0))) {
+							std::cout << "Add layer clicked but not implemented" << std::endl;
+						}
 
-					if (ImGui::Button("Change Material of Picked Object", ImVec2(-1, 0))) {
-						std::cout << "Change Material of Picked Object clicked but not implemented" << std::endl;
+						if (ImGui::Button("Hide Layer", ImVec2(-1, 0))) {
+							std::cout << "Add layer clicked but not implemented" << std::endl;
+						}
+
+						if (ImGui::Button("Unhide Layer", ImVec2(-1, 0))) {
+							std::cout << "Add layer clicked but not implemented" << std::endl;
+						}
+
+						ImGui::InputInt("Layer Number", &pickedLayerIndex);
+						/*ImGui::InputInt2();
+						ImGui::InputInt3();
+						ImGui::InputInt4();*/
+
+						/*char buf[256];
+						ImGui::InputTextWithHint("", "", buf, 256);*/
+
 					}
 
 					if (ImGui::Button("Choose Area to Zoom into", ImVec2(-1, 0))) {
 						std::cout << "Choose Area to Zoom into clicked but not implemented" << std::endl;
 					}
 
-					//if (ImGui::SliderInt("Time slider", &timeSliderValue, 0, 100)) {
-					if (ImGui::SliderFloat("Time slider", &timeSliderValue, 0.f, 100.f)) {
-						std::cout << "Time slider changed to value " << timeSliderValue << " but not implemented" << std::endl;
+
+					if (ImGui::Button("btn 1", ImVec2(-1, 0))) {
+						std::cout << "Choose Area to Zoom into clicked but not implemented" << std::endl;
+					}
+					if (ImGui::Button("btn 2", ImVec2(-1, 0))) {
+						std::cout << "Choose Area to Zoom into clicked but not implemented" << std::endl;
+					}
+					if (ImGui::Button("btn 3", ImVec2(-1, 0))) {
+						std::cout << "Choose Area to Zoom into clicked but not implemented" << std::endl;
+					}
+					if (ImGui::Button("btn 4", ImVec2(-1, 0))) {
+						std::cout << "Choose Area to Zoom into clicked but not implemented" << std::endl;
+					}
+					if (ImGui::Button("btn 5", ImVec2(-1, 0))) {
+						std::cout << "Choose Area to Zoom into clicked but not implemented" << std::endl;
+					}
+					if (ImGui::Button("btn 6", ImVec2(-1, 0))) {
+						std::cout << "Choose Area to Zoom into clicked but not implemented" << std::endl;
+					}
+					if (ImGui::Button("btn 7", ImVec2(-1, 0))) {
+						std::cout << "Choose Area to Zoom into clicked but not implemented" << std::endl;
+					}
+					if (ImGui::Button("btn 8", ImVec2(-1, 0))) {
+						std::cout << "Choose Area to Zoom into clicked but not implemented" << std::endl;
+					}
+					if (ImGui::Button("btn 9", ImVec2(-1, 0))) {
+						std::cout << "Choose Area to Zoom into clicked but not implemented" << std::endl;
+					}
+					if (ImGui::Button("btn 10", ImVec2(-1, 0))) {
+						std::cout << "Choose Area to Zoom into clicked but not implemented" << std::endl;
 					}
 
-					if (ImGui::Button("Switch to previous camera", ImVec2(-1, 0))) {
-						std::cout << "Switch to previous camera clicked but not implemented" << std::endl;
-					}
-
-					if (ImGui::Button("Switch to next camera", ImVec2(-1, 0))) {
-						std::cout << "Switch to next camera clicked but not implemented" << std::endl;
-					}
 
 					ImGui::End();
 
