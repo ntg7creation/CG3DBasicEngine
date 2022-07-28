@@ -11,7 +11,7 @@ class Project : public igl::opengl::glfw::Viewer
 {
 	
 public:
-
+	int cubeID = -1;
 	Project();
 //	Project(float angle,float relationWH,float near, float far);
 	void Init();
@@ -39,6 +39,8 @@ public:
 		myMoveable(int timeS, int timeE, Bezier1D* bezier, int objectindex, int CP1, int CP2, int CP3, int CP4);
 
 	};
+
+
 
 	void Connect_Controls(myMoveable);
 
@@ -72,19 +74,15 @@ public:
 	void Animate_obj(int object_index, int animetionindex,float time);
 
 	int addgridmesh(int resT);
-
-
+	
+	void changelayer(int layer,int objectindex);
+	int hidelayer(int layer);
+	int unhidelayer(int layer);
 
 	int testloadcostomemesh();
 
-	/// <summary>
-	/// change object to a diffrent layer 
-	/// if Layer dont exist create one
-	/// if Layer is empty delete it
-	/// </summary>
-	/// <param name="layerNumber"></param>
-	/// <returns>return old layer ID</returns>
-	int changeLayer(int layerNumber);
+
+	void moveCamera(Eigen::Vector3d pos);
 
 	/// <summary>
 	/// adds view camera at pos
@@ -107,16 +105,6 @@ public:
 	/// <param name="time"></param>
 	void changeTime(int time);
 
-	/// <summary>
-	/// change object apperance
-	/// texture, Matiral 
-	/// </summary>
-	/// <param name="objectID"></param>
-	/// <param name="TextureID"></param>
-	/// <param name="ShaderID"></param>
-	/// <param name="LayerID"></param>
-	/// <returns>true on success and false on fail</returns>
-	bool editobject(int objectID, int TextureID = -1, int MatiralID = -1);
 
 	/// <summary>
 	/// zoom in or out of current Camera 

@@ -131,6 +131,8 @@ IGL_INLINE void Renderer::draw_by_info(int info_index){
 
 IGL_INLINE void Renderer::draw( GLFWwindow* window)
 {
+
+    
 	using namespace std;
 	using namespace Eigen;
 
@@ -405,6 +407,41 @@ void Renderer::MoveCamera(int cameraIndx, int type, float amt)
     }
 }
 
+void Renderer::ZoomCamera(int cameraIndx, int type, float amt)
+{
+    igl::opengl::Camera* c = cameras[cameraIndx];
+    Eigen::RowVector3d V = Eigen::RowVector3d(0, 0, -1);
+    switch (type)
+    {
+    case xTranslate:
+        V =  Eigen::RowVector3d(1, 0, 0) ;
+        break;
+    case yTranslate:
+        V =  Eigen::RowVector3d(0, 1, 0);
+        break;
+    case zTranslate:
+        V =  Eigen::RowVector3d(0, 0, 1) ;
+        break;
+    default:
+        break;
+    }
+    V = amt * V * c->GetRotation().transpose();
+    cameras[cameraIndx]->MyTranslate(V, 1);
+}
+
+void Renderer::ZoomCamera(int cameraIndx, Eigen::Vector3d pos)
+{
+    igl::opengl::Camera* c = cameras[cameraIndx];
+    //rotate
+
+    //translate
+ 
+    Eigen::Vector3d V = pos - c->GetPos2();
+    //V = V * c->GetRotation().transpose();
+    cameras[cameraIndx]->MyTranslate(V, 1);
+    ZoomCamera(cameraIndx, zTranslate, 2);
+}
+
 bool Renderer::CheckViewport(int x, int y, int viewportIndx)
 {
     return (viewports[viewportIndx].x() < x && viewports[viewportIndx].y() < y && viewports[viewportIndx].z() + viewports[viewportIndx].x() > x && viewports[viewportIndx].w() + viewports[viewportIndx].y() > y);
@@ -412,6 +449,7 @@ bool Renderer::CheckViewport(int x, int y, int viewportIndx)
 
 bool Renderer::UpdateViewport(int viewport)
 {
+    
     if (viewport != currentViewport)
     {
         isPicked = false;

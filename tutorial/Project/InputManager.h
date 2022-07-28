@@ -84,6 +84,18 @@
 		
 	}
 	
+
+	static void printMat(const Eigen::Matrix3d& mat)
+	{
+		std::cout << " matrix:" << std::endl;
+		for (int i = 0; i < 3; i++)
+		{
+			for (int j = 0; j < 3; j++)
+				std::cout << mat(j, i) << " ";
+			std::cout << std::endl;
+		}
+	}
+
 	void glfw_key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
 	{
 		Renderer* rndr = (Renderer*)glfwGetWindowUserPointer(window);
@@ -105,42 +117,53 @@
 				break;
 
 			case GLFW_KEY_UP:
-				rndr->MoveCamera(0, scn->xRotate, 0.05f);
+				rndr->MoveCamera(0, rndr->xRotate, 0.05f);
 				
 				break;
 			case GLFW_KEY_DOWN:
 				//scn->shapeTransformation(scn->xGlobalRotate,-5.f);
 				//cout<< "down: "<<endl;
-				rndr->MoveCamera(0, scn->xRotate, -0.05f);
+				rndr->MoveCamera(0, rndr->xRotate, -0.05f);
 				break;
 			case GLFW_KEY_LEFT:
-				rndr->MoveCamera(0, scn->yRotate, 0.05f);
+				rndr->MoveCamera(0, rndr->yRotate, 0.05f);
 				break;
 			case GLFW_KEY_RIGHT:
 				//scn->shapeTransformation(scn->xGlobalRotate,-5.f);
 				//cout<< "down: "<<endl;
-				rndr->MoveCamera(0, scn->yRotate, -0.05f);
+				rndr->MoveCamera(0, rndr->yRotate, -0.05f);
 				break;
-			case GLFW_KEY_U:
-				rndr->MoveCamera(0, scn->yTranslate, 0.25f);
+			case GLFW_KEY_W:
+				rndr->ZoomCamera(0, rndr->yTranslate, 0.25f);
 				break;
+			case GLFW_KEY_S:
+				rndr->ZoomCamera(0, rndr->yTranslate, -0.25f);
+				break;
+			case GLFW_KEY_A:
+				rndr->ZoomCamera(0, rndr->xTranslate, -0.25f);
+				break;
+			
 			case GLFW_KEY_D:
-				rndr->MoveCamera(0, scn->yTranslate, -0.25f);
-				break;
-			case GLFW_KEY_L:
-				rndr->MoveCamera(0, scn->xTranslate, -0.25f);
+				rndr->ZoomCamera(0, rndr->xTranslate, 0.25f);
 				break;
 			
-			case GLFW_KEY_R:
-				rndr->MoveCamera(0, scn->xTranslate, 0.25f);
+			case GLFW_KEY_Q:
+				rndr->ZoomCamera(0, scn->zTranslate, 0.5f);
 				break;
-			
-			case GLFW_KEY_B:
-				rndr->MoveCamera(0, scn->zTranslate, 0.5f);
+			case GLFW_KEY_E:
+				rndr->ZoomCamera(0, scn->zTranslate, -0.5f);
 				break;
-			case GLFW_KEY_F:
-				rndr->MoveCamera(0, scn->zTranslate, -0.5f);
+
+			case GLFW_KEY_Z:
+				rndr->ZoomCamera(0,scn->data_list[scn->cubeID]->GetPos());
 				break;
+			//case GLFW_KEY_C:
+			//	break;
+			//case GLFW_KEY_X:
+			//	rndr->ZoomCamera(0, scn->zTranslate, 0.5f);
+			//	break;
+
+
 			case GLFW_KEY_1:
 				std::cout << "picked 1\n";
 				scn->selected_data_index = 1;

@@ -90,7 +90,6 @@ Project::Project()
 //}
 
 
-
 int Project::LoadCubeMap(int matID)
 {
 	int shapeID = AddShape(Cube, -2, TRIANGLES);
@@ -293,6 +292,7 @@ void Project::translateControl(int type, float amt,int mesh_index,bool preserve)
 	editMesh(mybez->bezier->GetLine(),mybez->meshindex);
 }
 
+//not used
 int Project::addgridmesh(int resT)
 {
 	IndexedModel mesh = IndexedModel();
@@ -334,9 +334,46 @@ int Project::addgridmesh(int resT)
 
 }
 
+int Project::hidelayer(int layer)
+{
+	int count = 0;
+	for each (igl::opengl::ViewerData* var in data_list)
+	{
+		if (var->layer == layer)
+		{
+			count++;
+			var->hide = true;
+		}
+	}
+	return 0;
+}
+int Project::unhidelayer(int layer)
+{
+	int count = 0;
+	for each (igl::opengl::ViewerData * var in data_list)
+	{
+		if (var->layer == layer)
+		{
+			count++;
+			var->hide = false;
+		}
+	}
+	return 0;
+}
+void Project::changelayer(int layer, int objectindex)
+{
+	data_list[objectindex]->layer = layer;
+}
+
+void moveCamera(Eigen::Vector3d pos)
+{
+	
+}
+
+
 void Project::Init()
 {
-	int cubeID = -1;
+	
 
 	//basic int
 	unsigned int texIDs[4] = { 0 , 1, 2,3 };
@@ -382,10 +419,10 @@ void Project::Init()
 		{
 			int id = LoadMesh("./data/planegrid.obj", 3, watershader);
 			selected_data_index = id;
-			ShapeTransformation(scaleAll, scale, 0);
-			ShapeTransformation(xTranslate, (i - map / 2) * 10* scale, 0);
+			//ShapeTransformation(scaleAll, scale, 0);
+			ShapeTransformation(xTranslate, (i - map / 2) * map, 0);
 			ShapeTransformation(yTranslate, -7, 0);
-			ShapeTransformation(zTranslate, -(j - map / 2) * 10* scale - 20, 0);
+			ShapeTransformation(zTranslate, -(j - map / 2) * map - 20, 0);
 		}
 	}
 
@@ -423,8 +460,8 @@ void Project::Update(const Eigen::Matrix4f& Proj, const Eigen::Matrix4f& View, c
 	{
 		s->SetUniform4f("lightColor", 1, 1, 1, 0.0f);
 		s->SetUniform1f("time", mytime * 3); 
-			float scale = 1/0.5;
-		s->SetUniform4f("tranlasion", scale*data_list[shapeIndx]->GetPos().x(), scale*data_list[shapeIndx]->GetPos().y(), scale* data_list[shapeIndx]->GetPos().z(), 0);
+		//float scale = 2;
+		s->SetUniform4f("tranlasion", data_list[shapeIndx]->GetPos().x(), data_list[shapeIndx]->GetPos().y(),  data_list[shapeIndx]->GetPos().z(), 0);
 	}
 	else
 		s->SetUniform4f("lightColor", 4 / 100.0f, 60 / 100.0f, 99 / 100.0f, 0.5f);
