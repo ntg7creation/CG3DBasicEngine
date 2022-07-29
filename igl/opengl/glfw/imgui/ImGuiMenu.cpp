@@ -230,6 +230,8 @@ namespace igl
 						((Project*)(viewer))->Deactivate();
 					}
 
+					ImGui::Separator();
+					ImGui::Separator();
 
 					if (ImGui::Button("Load an Object", ImVec2(-1, 0))) {
 
@@ -255,16 +257,42 @@ namespace igl
 						}
 					}
 
+					ImGui::Separator();
+					ImGui::Separator();
 
-					if (ImGui::Button("Set CubeMap", ImVec2(-1, 0))) {
-						((Project*)(viewer))->SetCubeMap(materialIndex);
+					if (ImGui::CollapsingHeader("CubeMap", ImGuiTreeNodeFlags_CollapsingHeader/*ImGuiTreeNodeFlags_DefaultOpen*/)) {
+						static int selectedCubeMapMaterial = -1; // Here we store our selection data as an index.
+						//const char* combo_label = "";  // Label to preview before opening the combo (technically it could be anything)
+						if (ImGui::BeginCombo("cubemap index", (selectedCubeMapMaterial == -1 ? "" : std::to_string(selectedCubeMapMaterial).c_str())))
+						{
+							for (int n = 0; n < ((Project*)(viewer))->numCubeMapTextures; n++)
+							{
+								const bool is_selected = (selectedCubeMapMaterial == n);
+
+								char buf[32];
+								sprintf(buf, "Material %d", n);
+
+								if (ImGui::Selectable(buf, is_selected)) {
+									selectedCubeMapMaterial = n;
+								}
+
+								// Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
+								if (is_selected)
+									ImGui::SetItemDefaultFocus();
+							}
+							ImGui::EndCombo();
+						}
+
+						if (ImGui::Button("Set CubeMap", ImVec2(-1, 0))) {
+							((Project*)(viewer))->SetCubeMap(selectedCubeMapMaterial);
+						}
 					}
-					ImGui::Text("CubeMap Index");
+					/*ImGui::Text("CubeMap Index");
 					ImGui::SameLine();
 					ImGui::InputInt("", &materialIndex);
 					ImGui::Text("out of");
 					ImGui::SameLine();
-					ImGui::Text(std::to_string(((Project*)(viewer))->numCubeMapTextures).c_str());
+					ImGui::Text(std::to_string(((Project*)(viewer))->numCubeMapTextures).c_str());*/
 
 
 					if (ImGui::CollapsingHeader("Picked Object Config", ImGuiTreeNodeFlags_CollapsingHeader/*ImGuiTreeNodeFlags_DefaultOpen*/)) {
@@ -278,11 +306,50 @@ namespace igl
 							std::cout << "Time slider changed to value " << timeSliderValue << " but not implemented" << std::endl;
 						}
 
+						//ImGui::InputInt("Material Index", &materialIndex);
+
+						//if (ImGui::TreeNode("Selection State: Single Selection"))
+						//{
+							/*static int selectedObjMaterial = -1;
+							for (int n = 0; n < ((Project*)(viewer))->numObjectsTextures; n++) {
+								char buf[32];
+								sprintf(buf, "Material %d", n);
+								if (ImGui::Selectable(buf, selectedObjMaterial == n))
+									selectedObjMaterial = n;
+							}*/
+							//ImGui::TreePop();
+						//}
+
+						//const char* items[] = { "AAAA", "BBBB", "CCCC", "DDDD", "EEEE", "FFFF", "GGGG", "HHHH", "IIII", "JJJJ", "KKKK", "LLLLLLL", "MMMM", "OOOOOOO" };
+						static int selectedObjMaterial = -1; // Here we store our selection data as an index.
+						//const char* combo_label = "";  // Label to preview before opening the combo (technically it could be anything)
+						if (ImGui::BeginCombo("material index", (selectedObjMaterial == -1 ? "": std::to_string(selectedObjMaterial).c_str())))
+						{
+							for (int n = 0; n < ((Project*)(viewer))->numObjectsTextures; n++)
+							{
+								const bool is_selected = (selectedObjMaterial == n);
+
+								char buf[32];
+								sprintf(buf, "Material %d", n);
+
+								if (ImGui::Selectable(buf, is_selected)) {
+									selectedObjMaterial = n;
+								}
+
+								// Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
+								if (is_selected)
+									ImGui::SetItemDefaultFocus();
+							}
+							ImGui::EndCombo();
+						}
+
+
 						if (ImGui::Button("Set Material", ImVec2(-1, 0))) {
 							//std::cout << "Change Material of Picked Object clicked but not implemented" << std::endl;
-							((Project*)(viewer))->SetMaterialOfPickedObjs(materialIndex);
+							if (selectedObjMaterial != -1) {
+								((Project*)(viewer))->SetMaterialOfPickedObjs(selectedObjMaterial);
+							}
 						}
-						ImGui::InputInt("Material Index", &materialIndex);
 
 						bool transparencyPlaceholder = false;
 						ImGui::Checkbox("Transparent", &transparencyPlaceholder);
@@ -342,6 +409,10 @@ namespace igl
 					if (ImGui::Button("Choose Area to Zoom into", ImVec2(-1, 0))) {
 						std::cout << "Choose Area to Zoom into clicked but not implemented" << std::endl;
 					}
+
+
+					ImGui::Separator();
+					ImGui::Separator();
 
 
 					if (ImGui::Button("btn 1", ImVec2(-1, 0))) {

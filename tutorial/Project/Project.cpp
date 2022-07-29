@@ -107,7 +107,9 @@ void Project::SetCubeMap(int matID) {
 
 
 void Project::SetMaterialOfPickedObjs(int matID) {
-	std::cout << "inside SetMaterialOfPickedObjs()" << std::endl;
+	//std::cout << "inside SetMaterialOfPickedObjs()" << std::endl;
+
+	pShapes.push_back(2);// TODO : remove debug line
 
 	// for all picked Shapes (inside pShapes or pickedShapes)
 	for (int index : pShapes) {
@@ -431,7 +433,6 @@ void Project::Init()
 	unsigned int objectTextureIDs[] = {
 		AddTexture("textures/plane.png", 2),
 		AddTexture("textures/grass.bmp", 2),
-		AddTexture("textures/grass.bmp", 2),
 		AddTexture("textures/water.bmp", 2),
 	};
 
@@ -506,7 +507,7 @@ void Project::Init()
 	{
 		for (int j = 0; j < map; j++)
 		{
-			int id = LoadMesh("./data/planegrid.obj", 3, watershader);
+			int id = LoadMesh("./data/planegrid.obj", 2, watershader);
 			selected_data_index = id;
 			//ShapeTransformation(scaleAll, scale, 0);
 			ShapeTransformation(xTranslate, (i - map / 2) * map, 0);
