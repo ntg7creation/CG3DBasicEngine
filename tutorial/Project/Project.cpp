@@ -101,10 +101,21 @@ int Project::InitCubeMap(int matID)
 //Project::Project(float angle ,float relationWH, float near, float far) : Scene(angle,relationWH,near,far)
 //{ 	
 //}
-void Project::LoadCubeMap(int matID)
-{
+void Project::SetCubeMap(int matID) {
 	SetShapeMaterial(cubeMapShapeID, matID + numObjectsTextures);
 }
+
+
+void Project::SetMaterialOfPickedObjs(int matID) {
+	std::cout << "inside SetMaterialOfPickedObjs()" << std::endl;
+
+	// for all picked Shapes (inside pShapes or pickedShapes)
+	for (int index : pShapes) {
+		std::cout << "calling SetMaterial() for shape id: " << index << std::endl;
+		data_list[index]->SetMaterial(matID);
+	}
+}
+
 
 int Project::LoadMesh(shapes Shape, int matID, int shaderID, int parent)
 {

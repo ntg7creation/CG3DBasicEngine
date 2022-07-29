@@ -187,6 +187,8 @@ namespace igl
 					if (no_bring_to_front)  window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus;
 
 
+					//ImGui::ShowDemoWindow(); // TODO : remove debug
+
 					ImGui::Begin(
 						"Menu", p_open,
 						window_flags
@@ -253,15 +255,22 @@ namespace igl
 						}
 					}
 
+
 					if (ImGui::Button("Set CubeMap", ImVec2(-1, 0))) {
-						((Project*)(viewer))->LoadCubeMap(materialIndex);
+						((Project*)(viewer))->SetCubeMap(materialIndex);
 					}
-					ImGui::InputInt("CubeMap Index", &materialIndex);
+					ImGui::Text("CubeMap Index");
+					ImGui::SameLine();
+					ImGui::InputInt("", &materialIndex);
+					ImGui::Text("out of");
+					ImGui::SameLine();
+					ImGui::Text(std::to_string(((Project*)(viewer))->numCubeMapTextures).c_str());
+
 
 					if (ImGui::CollapsingHeader("Picked Object Config", ImGuiTreeNodeFlags_CollapsingHeader/*ImGuiTreeNodeFlags_DefaultOpen*/)) {
 						//if (ImGui::SliderInt("Time slider", &timeSliderValue, 0, 100)) {
 
-						ImGui::Text("Object's Layer: <NOT IMPLEMENTED>");
+						ImGui::Text("Object on layer: <NOT IMPLEMENTED>");
 
 						ImGui::InputInt("Animation Duration", &animationDuration);
 
@@ -270,17 +279,20 @@ namespace igl
 						}
 
 						if (ImGui::Button("Set Material", ImVec2(-1, 0))) {
-							std::cout << "Change Material of Picked Object clicked but not implemented" << std::endl;
+							//std::cout << "Change Material of Picked Object clicked but not implemented" << std::endl;
+							((Project*)(viewer))->SetMaterialOfPickedObjs(materialIndex);
 						}
-
 						ImGui::InputInt("Material Index", &materialIndex);
+
+						bool transparencyPlaceholder = false;
+						ImGui::Checkbox("Transparent", &transparencyPlaceholder);
 
 						if (ImGui::Button("Set transparency", ImVec2(-1, 0))) {
 							std::cout << "Change Material of Picked Object clicked but not implemented" << std::endl;
 						}
-
 						ImGui::SliderFloat("Trans. Value", &transparencySliderValue, 0.f, 100.f);
 					}
+
 
 					if (ImGui::CollapsingHeader("Cameras", ImGuiTreeNodeFlags_CollapsingHeader))
 					{
@@ -300,6 +312,7 @@ namespace igl
 							std::cout << "Switch to next camera clicked but not implemented" << std::endl;
 						}
 					}
+
 
 					if (ImGui::CollapsingHeader("Layers", ImGuiTreeNodeFlags_CollapsingHeader))
 					{
