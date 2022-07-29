@@ -63,7 +63,7 @@ void Renderer::SwapDrawInfo(int indx1, int indx2)
     drawInfos[indx2] = info;
 }
 
-IGL_INLINE void Renderer::draw_by_info(int info_index){
+IGL_INLINE void Renderer::draw_by_info(int info_index) {
     DrawInfo* info = drawInfos[info_index];
     buffers[info->bufferIndx]->Bind();
     glViewport(viewports[info->viewportIndx].x(), viewports[info->viewportIndx].y(), viewports[info->viewportIndx].z(), viewports[info->viewportIndx].w());
@@ -532,7 +532,7 @@ IGL_INLINE void Renderer::Init(igl::opengl::glfw::Viewer* scene, std::list<int>x
     buffers.push_back(new igl::opengl::DrawBuffer());
     maxPixX = viewport.z();
     maxPixY = viewport.w();
-    xViewport.push_front(0);
+    //xViewport.push_front(0); // commented out to have the rendering started only from where the menu boundary ends
     yViewport.push_front(0);
     std::list<int>::iterator xit = xViewport.begin();
     int indx = 0;
