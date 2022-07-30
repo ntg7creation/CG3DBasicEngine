@@ -72,6 +72,7 @@ namespace glfw
       virtual void WhenTranslate(float dx, float dy) {}
       virtual void WhenRotate(float dx, float dy) {}
       virtual void WhenScroll(float dy) {}
+      virtual void translateControl(int type, float amt, int mesh_index, bool preserve) = 0;
     // Mesh IO
     IGL_INLINE bool load_mesh_from_file(const std::string & mesh_file_name);
     IGL_INLINE bool save_mesh_to_file(const std::string & mesh_file_name);

@@ -637,10 +637,29 @@ IGL_INLINE bool
 
         if (button == 1)
         {
-            for (int pShape : pShapes)
+            /*for (int pShape : pShapes)
             {
                 selected_data_index = pShape;
                 WhenTranslate(scnMat * cameraMat, -xrel / movCoeff, yrel / movCoeff);
+            }*/
+            //WhenTranslate(scnMat * cameraMat, -xrel / movCoeff, yrel / movCoeff);
+            //movCoeff = 2.0f;
+            /*WhenTranslate(scnMat * cameraMat, -((float)xrel / 180) / movCoeff, ((float)yrel / 180) / movCoeff); */
+            std::cout << pShapes.size() << std::endl;
+            /*int idx = selected_data_index;
+            WhenTranslate(scnMat * cameraMat, -((float)xrel / 90), ((float)yrel / 90));
+            if (data_list[idx]->iscontrolpoint)
+                translateControl(xTranslate, -((float)xrel) / 90, idx, false);*/
+            for (int p : pShapes) {
+                selected_data_index = p;
+                int idx = selected_data_index;
+                if (data_list[idx]->iscontrolpoint) {
+                    translateControl(xTranslate, -((float)xrel) / 90, idx, false);
+                    translateControl(yTranslate, ((float)yrel) / 90, idx, false);
+                }
+                else {
+                    WhenTranslate(scnMat * cameraMat, -((float)xrel / 90), ((float)yrel / 90));
+                }
             }
         }
         else
@@ -711,11 +730,32 @@ IGL_INLINE bool
 
     }
 
+
     bool Viewer::Picking(unsigned char data[4], int newViewportIndx)
     {
         //get from data[4] the correct index
+        int index = data[0];
+        index--;
+        if (index < 1) {
+            return false;
+        }
+        std::cout << index << std::endl;
+        selected_data_index = index;
+        
+        /*if (index >= data_list.size())
+            return true;
+        bool found = false;
+        for (int p : pShapes) {
+            if (p == index)
+                found = true;
+        }
+        if (found)
+            std::remove(pShapes.begin(), pShapes.end(), index);
+        else
+            pShapes.push_back(index);*/
 
-        return false;
+
+        return true;
 
     }
 

@@ -1,9 +1,11 @@
 {
   "ExpandedNodes": [
     "",
+    "\\igl\\opengl\\glfw",
     "\\tutorial",
-    "\\tutorial\\Project"
+    "\\tutorial\\Project",
+    "\\tutorial\\shaders"
   ],
-  "SelectedNode": "\\tutorial\\Assignment1",
+  "SelectedNode": "\\tutorial\\shaders\\pickingShader.glsl",
   "PreviewInSolutionExplorer": false
 }

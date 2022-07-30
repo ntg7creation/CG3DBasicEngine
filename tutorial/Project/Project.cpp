@@ -162,8 +162,9 @@ int Project::editMesh(IndexedModel& mesh, int index)
 void Project::Animate_obj(int object_index, int animetionindex, float time)
 {
 	myMoveable path = bezierAnimations[animetionindex];
-	if (path.time_start > time || path.time_end < time)
+	if (path.time_start > time || path.time_end < time) {
 		return;
+	}
 	float start = path.time_start;
 	float end = path.time_end;
 	float progress = (time - start) / end;
@@ -291,6 +292,7 @@ void Project::translateControl(int type, float amt,int mesh_index,bool preserve)
 		//TODO
 	}
 	editMesh(mybez->bezier->GetLine(),mybez->meshindex);
+	selected_data_index = mesh_index;
 }
 
 int Project::addgridmesh(int resT)
@@ -346,6 +348,7 @@ void Project::Init()
 		AddShader("shaders/cubemapShader");
 		AddShader("shaders/basicShader");
 		AddShader("shaders/waterShader");
+		AddShader("shaders/pickingShader");
 		int textureID = 0;
 		textureID = AddTexture("textures/plane.png", 2);
 		textureID = AddTexture("textures/cubemaps/Daylight Box_", 3);
@@ -379,7 +382,16 @@ void Project::Init()
 	selected_data_index = id;
 	ShapeTransformation(yTranslate, -1.5, 0);
 
+	//add a plane for multipick
+	int id2 = AddShape(Plane, -2, TRIANGLES, 1);
+	SetShapeShader(id2, 4);
+	SetShapeMaterial(id2, 0);
+	
 
+	selected_data_index = id2;
+	ShapeTransformation(zTranslate, -1.1, 1);
+
+	SetShapeStatic(id2);
 
 }
 
@@ -433,19 +445,25 @@ void Project::WhenTranslate()
 
 void Project::Animate() {
 
-	//int temp = selected_data_index;
-	//mytime += tick;
-	//for (int i = 0; i < data_list.size(); i++)
-	//	if (data_list[i]->animtoinindex >= 0)
-	//		Animate_obj(i, data_list[i]->animtoinindex, mytime);
+	/*int temp = selected_data_index;
+	mytime += tick;
+	for (int i = 0; i < data_list.size(); i++)
+		if (data_list[i]->animtoinindex >= 0)
+			Animate_obj(i, data_list[i]->animtoinindex, mytime);
 
-	//translateControl(yTranslate, -0.01, CP2, false);
-	//selected_data_index = temp;
+	translateControl(yTranslate, -0.01, CP2, false);
+	selected_data_index = temp;*/
 
     if(isActive)
 	{
-		if(selected_data_index > 0 )
-			data()->MyRotate(Eigen::Vector3d(0, 1, 0), 0.01);
+		int temp = selected_data_index;
+		mytime += tick;
+		for (int i = 0; i < data_list.size(); i++)
+			if (data_list[i]->animtoinindex >= 0)
+				Animate_obj(i, data_list[i]->animtoinindex, mytime);
+		/*if(selected_data_index > 0 )
+			data()->MyRotate(Eigen::Vector3d(0, 1, 0), 0.01);*/
+		selected_data_index = temp;
 	}
 }
 

@@ -95,6 +95,8 @@ public:
 	void* callback_key_down_data;
 	void* callback_key_up_data;
 
+    bool isReleased = false;
+
 // Callbacks
 //	 double Picking(double x, double y);
 	 inline void Animate() { scn->Animate(); };
