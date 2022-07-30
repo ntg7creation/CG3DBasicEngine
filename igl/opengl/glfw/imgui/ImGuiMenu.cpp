@@ -55,7 +55,7 @@ namespace igl
 						reload_font();
 					}
 
-					pickedLayerIndex = 0;
+					//pickedLayerIndex = 0;
 					animationDuration = 5;
 				}
 
@@ -195,7 +195,7 @@ namespace igl
 					);
 
 					ImGui::SetWindowPos(ImVec2((float)0, (float)0), ImGuiCond_Always);
-					ImGui::SetWindowSize(ImVec2((float)300, (float)800), ImGuiCond_Always);
+					ImGui::SetWindowSize(ImVec2((float)350, (float)800), ImGuiCond_Always);
 
 					// Load an Object
 
@@ -220,20 +220,26 @@ namespace igl
 
 					// swith to camera X
 
-					if (ImGui::Button("Play animation", ImVec2(-1, 0))) {
-						((Project*)(viewer))->ticksCounter = 0;
-						((Project*)(viewer))->Activate();
+					ImGui::Indent();
 
+					if ( ! ((Project*)(viewer))->isActive) {
+						if (ImGui::Button("Play animation", ImVec2(-1, 30))) {
+							((Project*)(viewer))->ticksCounter = 0;
+							((Project*)(viewer))->Activate();
+
+						}
+					}
+					else {
+						if (ImGui::Button("Stop animation", ImVec2(-1, 30))) {
+							((Project*)(viewer))->Deactivate();
+						}
 					}
 
-					if (ImGui::Button("Stop animation", ImVec2(-1, 0))) {
-						((Project*)(viewer))->Deactivate();
-					}
+					//ImGui::Separator();
+					//ImGui::Separator();
+					//ImGui::NewLine();
 
-					ImGui::Separator();
-					ImGui::Separator();
-
-					if (ImGui::Button("Load an Object", ImVec2(-1, 0))) {
+					if (ImGui::Button("Load an Object", ImVec2(-1, 30))) {
 
 						int savedIndx = viewer->selected_data_index;
 						// viewer->selected_data_index = viewer->parents.size();
@@ -257,20 +263,42 @@ namespace igl
 						}
 					}
 
+					ImGui::Unindent();
+
+					ImGui::NewLine();
 					ImGui::Separator();
 					ImGui::Separator();
+					ImGui::NewLine();
+
+					if (ImGui::CollapsingHeader("Scene", ImGuiTreeNodeFlags_CollapsingHeader/*ImGuiTreeNodeFlags_DefaultOpen*/)) {
+
+						ImGui::Indent();
+
+						if (ImGui::Button("Load scene from file", ImVec2(-1, 30))) {
+							((Project*)(viewer))->openDialogLoadSceneInfo();
+						}
+
+						if (ImGui::Button("Save current scene to file", ImVec2(-1, 30))) {
+							((Project*)(viewer))->openDialogSaveSceneInfo();
+						}
+
+						ImGui::Unindent();
+					}
 
 					if (ImGui::CollapsingHeader("CubeMap", ImGuiTreeNodeFlags_CollapsingHeader/*ImGuiTreeNodeFlags_DefaultOpen*/)) {
-						static int selectedCubeMapMaterial = -1; // Here we store our selection data as an index.
+
+						ImGui::Indent();
+
+						static int selectedCubeMapMaterial = 0; //-1; // Here we store our selection data as an index.
 						//const char* combo_label = "";  // Label to preview before opening the combo (technically it could be anything)
-						if (ImGui::BeginCombo("cubemap index", (selectedCubeMapMaterial == -1 ? "" : std::to_string(selectedCubeMapMaterial).c_str())))
+						if (ImGui::BeginCombo("##cubemap index", (selectedCubeMapMaterial == -1 ? "" : std::to_string(selectedCubeMapMaterial).c_str())))
 						{
 							for (int n = 0; n < ((Project*)(viewer))->numCubeMapTextures; n++)
 							{
 								const bool is_selected = (selectedCubeMapMaterial == n);
 
 								char buf[32];
-								sprintf(buf, "Material %d", n);
+								sprintf(buf, "Cubemap %d", n);
 
 								if (ImGui::Selectable(buf, is_selected)) {
 									selectedCubeMapMaterial = n;
@@ -286,6 +314,8 @@ namespace igl
 						if (ImGui::Button("Set CubeMap", ImVec2(-1, 0))) {
 							((Project*)(viewer))->SetCubeMap(selectedCubeMapMaterial);
 						}
+
+						ImGui::Unindent();
 					}
 					/*ImGui::Text("CubeMap Index");
 					ImGui::SameLine();
@@ -296,15 +326,28 @@ namespace igl
 
 
 					if (ImGui::CollapsingHeader("Picked Object Config", ImGuiTreeNodeFlags_CollapsingHeader/*ImGuiTreeNodeFlags_DefaultOpen*/)) {
+
+						ImGui::Indent();
+
+						static bool zoomedIn = false;
+						if (ImGui::Button(zoomedIn ? "Zoom out to default state" : "Zoom into picked objects", ImVec2(-1, 0))) {
+							std::cout << "Choose Area to Zoom into clicked but not implemented" << std::endl;
+
+							zoomedIn = !zoomedIn;
+						}
+
 						//if (ImGui::SliderInt("Time slider", &timeSliderValue, 0, 100)) {
 
 						ImGui::Text("Object on layer: <NOT IMPLEMENTED>");
 
-						ImGui::InputInt("Animation Duration", &animationDuration);
+						ImGui::NewLine();
 
+						ImGui::InputInt("Animation Duration", &animationDuration);
 						if (ImGui::SliderFloat("Animation delay slider", &timeSliderValue, 0.f, 100.f)) {
 							std::cout << "Time slider changed to value " << timeSliderValue << " but not implemented" << std::endl;
 						}
+
+						ImGui::NewLine();
 
 						//ImGui::InputInt("Material Index", &materialIndex);
 
@@ -321,9 +364,9 @@ namespace igl
 						//}
 
 						//const char* items[] = { "AAAA", "BBBB", "CCCC", "DDDD", "EEEE", "FFFF", "GGGG", "HHHH", "IIII", "JJJJ", "KKKK", "LLLLLLL", "MMMM", "OOOOOOO" };
-						static int selectedObjMaterial = -1; // Here we store our selection data as an index.
+						static int selectedObjMaterial = 0; //-1; // Here we store our selection data as an index.
 						//const char* combo_label = "";  // Label to preview before opening the combo (technically it could be anything)
-						if (ImGui::BeginCombo("material index", (selectedObjMaterial == -1 ? "": std::to_string(selectedObjMaterial).c_str())))
+						if (ImGui::BeginCombo("##material index", (selectedObjMaterial == -1 ? "": std::to_string(selectedObjMaterial).c_str())))
 						{
 							for (int n = 0; n < ((Project*)(viewer))->numObjectsTextures; n++)
 							{
@@ -342,14 +385,14 @@ namespace igl
 							}
 							ImGui::EndCombo();
 						}
-
-
 						if (ImGui::Button("Set Material", ImVec2(-1, 0))) {
 							//std::cout << "Change Material of Picked Object clicked but not implemented" << std::endl;
 							if (selectedObjMaterial != -1) {
 								((Project*)(viewer))->SetMaterialOfPickedObjs(selectedObjMaterial);
 							}
 						}
+
+						ImGui::NewLine();
 
 						bool transparencyPlaceholder = false;
 						ImGui::Checkbox("Transparent", &transparencyPlaceholder);
@@ -358,35 +401,88 @@ namespace igl
 							std::cout << "Change Material of Picked Object clicked but not implemented" << std::endl;
 						}
 						ImGui::SliderFloat("Trans. Value", &transparencySliderValue, 0.f, 100.f);
+
+						ImGui::Unindent();
 					}
 
 
 					if (ImGui::CollapsingHeader("Cameras", ImGuiTreeNodeFlags_CollapsingHeader))
 					{
+						ImGui::Indent();
+
 						ImGui::Text("Number of cameras: ");
 
 						ImGui::Text("Current camera index: ");
+						
+						ImGui::NewLine();
+
+						static int selectedCamera = 0; //-1; // Here we store our selection data as an index.
 
 						if (ImGui::Button("Add a Camera", ImVec2(-1, 0))) {
-							std::cout << "Add camera clicked but not implemented" << std::endl;
-						}
+							//std::cout << "Add camera clicked but not implemented" << std::endl;
+							//((Project*)(viewer))->rndr->AddCamera(Eigen::Vector3d(0, 0, 3), CAMERA_ANGLE, (float)DISPLAY_WIDTH / (float)DISPLAY_HEIGHT / 2, NEAR, FAR);
 
-						if (ImGui::Button("Switch to previous camera", ImVec2(-1, 0))) {
+							const int DISPLAY_WIDTH = 1200;
+							const int DISPLAY_HEIGHT = 800;
+							const int MENU_WIDTH = 350;
+							const int SCENE_WIDTH = DISPLAY_WIDTH - MENU_WIDTH;
+
+							const float CAMERA_ANGLE = 45.0f;
+							const float NEAR = 1.0f;
+							const float FAR = 120.0f;
+
+							((Project*)(viewer))->rndr->AddCamera(
+								Eigen::Vector3d(0, 0, 3), 
+								CAMERA_ANGLE, 
+								(float)DISPLAY_WIDTH / (float)DISPLAY_HEIGHT / 2, 
+								NEAR, FAR
+							);
+
+							selectedCamera = ((Project*)(viewer))->rndr->cameras.size() - 1;
+						}
+						
+						//const char* combo_label = "";  // Label to preview before opening the combo (technically it could be anything)
+						if (ImGui::BeginCombo("##camera index", (selectedCamera == -1 ? "" : std::to_string(selectedCamera).c_str())))
+						{
+							for (int n = 0; n < ((Project*)(viewer))->rndr->cameras.size(); n++)
+							{
+								const bool is_selected = (selectedCamera == n);
+
+								char buf[32];
+								sprintf(buf, "Camera %d", n);
+
+								if (ImGui::Selectable(buf, is_selected)) {
+									selectedCamera = n;
+								}
+
+								// Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
+								if (is_selected)
+									ImGui::SetItemDefaultFocus();
+							}
+							ImGui::EndCombo();
+						}
+						if (ImGui::Button("Switch to camera", ImVec2(-1, 0))) {
 							std::cout << "Switch to previous camera clicked but not implemented" << std::endl;
 						}
 
-						if (ImGui::Button("Switch to next camera", ImVec2(-1, 0))) {
-							std::cout << "Switch to next camera clicked but not implemented" << std::endl;
-						}
+						ImGui::Unindent();
 					}
 
 
 					if (ImGui::CollapsingHeader("Layers", ImGuiTreeNodeFlags_CollapsingHeader))
 					{
-						ImGui::Text("Number of layers: <NOT IMPLEMENTED>");
+						static int selectedLayer = 0;//-1; // Here we store our selection data as an index.
+
+						ImGui::Indent();
+						//ImGui::Text("Number of layers: <NOT IMPLEMENTED>");
 						if (ImGui::Button("Add a Layer", ImVec2(-1, 0))) {
-							std::cout << "Add layer clicked but not implemented" << std::endl;
+							//std::cout << "Add layer clicked but not implemented" << std::endl;
+							selectedLayer = ((Project*)(viewer))->numOfLayers;
+							((Project*)(viewer))->addLayer();
+
 						}
+
+						ImGui::NewLine();
 
 						if (ImGui::Button("Hide Layer", ImVec2(-1, 0))) {
 							std::cout << "Add layer clicked but not implemented" << std::endl;
@@ -396,24 +492,49 @@ namespace igl
 							std::cout << "Add layer clicked but not implemented" << std::endl;
 						}
 
-						ImGui::InputInt("Layer Number", &pickedLayerIndex);
+						//ImGui::InputInt("Layer Number", &pickedLayerIndex);
+
+						
+						//const char* combo_label = "";  // Label to preview before opening the combo (technically it could be anything)
+						if (ImGui::BeginCombo("##layer index", (selectedLayer == -1 ? "" : std::to_string(selectedLayer).c_str())))
+						{
+							for (int n = 0; n < ((Project*)(viewer))->numOfLayers; n++)
+							{
+								const bool is_selected = (selectedLayer == n);
+
+								char buf[32];
+								sprintf(buf, "Layer %d", n);
+
+								if (ImGui::Selectable(buf, is_selected)) {
+									selectedLayer = n;
+								}
+
+								// Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
+								if (is_selected)
+									ImGui::SetItemDefaultFocus();
+							}
+							ImGui::EndCombo();
+						}
+
 						/*ImGui::InputInt2();
 						ImGui::InputInt3();
 						ImGui::InputInt4();*/
 
 						/*char buf[256];
 						ImGui::InputTextWithHint("", "", buf, 256);*/
+						ImGui::Unindent();
 
 					}
 
-					if (ImGui::Button("Choose Area to Zoom into", ImVec2(-1, 0))) {
-						std::cout << "Choose Area to Zoom into clicked but not implemented" << std::endl;
-					}
 
+					ImGui::NewLine();
 
 					ImGui::Separator();
 					ImGui::Separator();
 
+					ImGui::NewLine();
+
+					ImGui::Indent();
 
 					if (ImGui::Button("btn 1", ImVec2(-1, 0))) {
 						std::cout << "Choose Area to Zoom into clicked but not implemented" << std::endl;
@@ -446,6 +567,7 @@ namespace igl
 						std::cout << "Choose Area to Zoom into clicked but not implemented" << std::endl;
 					}
 
+					ImGui::Unindent();
 
 					ImGui::End();
 

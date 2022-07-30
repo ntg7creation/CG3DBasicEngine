@@ -17,6 +17,13 @@ public:
 	int InitCubeMap(int matID);
 	void SetCubeMap(int matID);
 	void SetMaterialOfPickedObjs(int matID);
+	int numOfLayers = 1;
+	void addLayer(); 
+	void openDialogLoadSceneInfo();
+	void loadSceneFromFile(const std::string& sceneInfoFileName);
+	int numOfSaves = 0;
+	void openDialogSaveSceneInfo();
+	void saveSceneToFile(const std::string& sceneInfoFileName);
 
 	int ticksCounter;
 	int cubeID = -1;
