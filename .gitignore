@@ -41,3 +41,5 @@ external
 *.ipch
 
 .vs/CG3DBasicEngine/v17/workspaceFileList.bin
+
+.vs/VSWorkspaceState.json

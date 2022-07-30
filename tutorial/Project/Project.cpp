@@ -1,7 +1,7 @@
 #include "Project.h"
 #include <iostream>
 
-
+#define M_PI 3.1415926535897932384626433832795
 static void printMat(const Eigen::Matrix4d& mat)
 {
 	std::cout<<" matrix:"<<std::endl;
@@ -308,8 +308,6 @@ void Project::translateControl(int type, float amt,int mesh_index,bool preserve)
 	}
 	editMesh(mybez->bezier->GetLine(),mybez->meshindex);
 }
-
-
 void Project::translateControl( int mesh_index, bool preserve)
 {
 	//selected_data_index = mesh_index;
@@ -421,9 +419,39 @@ void Project::changelayer(int layer, int objectindex)
 	data_list[objectindex]->layer = layer;
 }
 
-void moveCamera(Eigen::Vector3d pos)
+
+int Project::addCamera(Eigen::Vector3f pos) {
+	int temp = selected_data_index;
+	int Camera = LoadMesh(Cube, 3, 2);
+	selected_data_index = Camera;
+	//ShapeTransformation(scaleAll, 0.3, 0);
+	ShapeTransformation(xTranslate, pos.x(), 0);
+	ShapeTransformation(yTranslate, pos.y(), 0);
+	ShapeTransformation(zTranslate, pos.z(), 0); 
+	Cameras.push_back(Camera);
+	selected_data_index = temp;
+	return Camera;
+}
+
+void Project::changeCamera(int CameraID)
 {
-	
+
+}
+void Project::moveCamera(Eigen::Vector3d newpos)
+{
+	int temp = selected_data_index;
+	int Camera_index = Cameras[current_Camera];
+	if (Camera_index < 0)
+		Camera_index *= -1;
+	Movable* Camera_mesh = data_list[Camera_index];
+	selected_data_index = Camera_index;
+	Eigen::Vector3d oldpos = data_list[Camera_index]->GetPos();
+	Eigen::Vector3d diffpos = newpos - oldpos;
+	ShapeTransformation(xTranslate, diffpos.x(), 0);
+	ShapeTransformation(yTranslate, diffpos.y(), 0);
+	ShapeTransformation(zTranslate, diffpos.z(), 0);
+
+	selected_data_index = temp;
 }
 
 
@@ -434,6 +462,7 @@ void Project::Init()
 		AddTexture("textures/plane.png", 2),
 		AddTexture("textures/grass.bmp", 2),
 		AddTexture("textures/water.bmp", 2),
+		AddTexture("textures/Camera.png", 2),
 	};
 
 	unsigned int cubeMapTextureIDs[] = { 
@@ -462,32 +491,24 @@ void Project::Init()
 
 	AddShader("shaders/pickingShader");
 	AddShader("shaders/cubemapShader");
-	AddShader("shaders/basicShader");
-	AddShader("shaders/basicShader");
-
-	//basic int
-	//unsigned int texIDs[4] = { 0 , 1, 2,3 };
-	//unsigned int slots[4] = { 0 , 1, 2,3 };
-	AddShader("shaders/pickingShader");
-	AddShader("shaders/cubemapShader");
 	int basicshader =AddShader("shaders/basicShader");
-	int watershader = AddShader("shaders/waterShader");
-	// int textureID = 0;
-	// textureID = AddTexture("textures/plane.png", 2);
-	// textureID = AddTexture("textures/cubemaps/Daylight Box_", 3);
-	// textureID = AddTexture("textures/grass.bmp", 2);
-	// textureID = AddTexture("textures/water.bmp", 2);
-	//AddTexture("../res/textures/Cat_bump.jpg", 2);
+	watershader = AddShader("shaders/waterShader");
 
-	// AddMaterial(texIDs, slots, 1);
-	// AddMaterial(texIDs + 1, slots + 1, 1);
-	// AddMaterial(texIDs + 2, slots + 2, 1);
-	// AddMaterial(texIDs + 3, slots + 3, 1);
-	// int shapeID = 0;
-	// LoadCubeMap(1);
-	//load cube
+	//add Camera
+	addCamera(Eigen::Vector3f(0, 0, 10));
+	current_Camera = Cameras.size() - 1;
+	ShapeTransformation(yRotate, M_PI/2 , 2);
+
+	addCamera(Eigen::Vector3f(5, 0, 0));
+	int camera3 = addCamera(Eigen::Vector3f(-4, 2, 0));
+	temp = camera3;
+	selected_data_index = camera3;
+	ShapeTransformation(yRotate, M_PI/2, 2);
+	//current_Camera = Cameras.size() - 1;
+
+
 	{
-		cubeID = LoadMesh(Cube, 0, 2);
+		cubeID = LoadMesh(Cube, 2, 2);
 		selected_data_index = cubeID;
 		ShapeTransformation(yTranslate, 1, 0);
 	}
@@ -498,10 +519,9 @@ void Project::Init()
 	selected_data_index = cubeID;
 	ShapeTransformation(yTranslate, 2, 0);
 	connect_bezier_to_mesh(cubeID, data_list[cubeID]->animtoinindex);
-
 	//addgrid
 	//int id = addgridmesh(10);
-	int map = 4;
+	int map = 6;
 	float scale = 0.5;
 	for (int i = 0; i < map; i++)
 	{
@@ -520,8 +540,7 @@ void Project::Init()
 
 void Project::Update(const Eigen::Matrix4f& Proj, const Eigen::Matrix4f& View, const Eigen::Matrix4f& Model, unsigned int  shaderIndx, unsigned int shapeIndx)
 {
-
-
+	
 	//Animate_obj(cubeID,bezierAnimations[0], mytime);
 	Shader* s = shaders[shaderIndx];
 	int r = ((shapeIndx + 1) & 0x000000FF) >> 0;
@@ -540,10 +559,11 @@ void Project::Update(const Eigen::Matrix4f& Proj, const Eigen::Matrix4f& View, c
 	}
 	if (shaderIndx == 0)
 		s->SetUniform4f("lightColor", r / 255.0f, g / 255.0f, b / 255.0f, 0.0f);
-	else if (shaderIndx == 3)// water shader
+	else if (shaderIndx == watershader)// water shader
 	{
 		s->SetUniform4f("lightColor", 1, 1, 1, 0.0f);
 		s->SetUniform1f("time", mytime * 3); 
+		
 		//float scale = 2;
 		s->SetUniform4f("tranlasion", data_list[shapeIndx]->GetPos().x(), data_list[shapeIndx]->GetPos().y(),  data_list[shapeIndx]->GetPos().z(), 0);
 	}
@@ -575,17 +595,18 @@ void Project::WhenTranslate()
 
 void Project::Animate() {
 
-	int temp = selected_data_index;
-	mytime += tick;
-	for (int i = 0; i < data_list.size(); i++)
-		if (data_list[i]->animtoinindex >= 0)
-			Animate_obj(i, data_list[i]->animtoinindex, mytime);
-
-	//translateControl(yTranslate, -0.01, CP2, false);
-	selected_data_index = temp;
 
     if(isActive)
 	{
+
+		int temp = selected_data_index;
+		mytime += tick;
+		for (int i = 0; i < data_list.size(); i++)
+			if (data_list[i]->animtoinindex >= 0)
+				Animate_obj(i, data_list[i]->animtoinindex, mytime);
+
+		//translateControl(yTranslate, -0.01, CP2, false);
+		selected_data_index = temp;
 		//std::cout << "animate isactive" << std::endl;
 		ticksCounter += 1;
 		

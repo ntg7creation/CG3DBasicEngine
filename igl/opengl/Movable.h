@@ -24,6 +24,7 @@ public:
     void MyRotate(Eigen::Vector3d rotAxis, double angle);
     void RotateInSystem(Eigen::Vector3d rotAxis, double angle);
     void MyRotate(const Eigen::Matrix3d &rot);
+    void MyRotate2(const Eigen::Matrix3d &rot);
     void MyScale(Eigen::Vector3d amt);
 
 	void ZeroTrans();
@@ -31,6 +32,7 @@ public:
 	Eigen::Vector3d GetPos() const { return Tin.translation(); }
 	Eigen::Vector3d GetPos2() const { return Tout.translation(); }
 	Eigen::Matrix3d GetRotation() const{ return Tout.rotation().matrix(); }
+	Eigen::Matrix3d GetRotation2() const{ return Tin.rotation().matrix(); }
 	//	Eigen::Matrix3d GetRotation() const{ return Tout.tranlatoin().matrix(); }
     virtual ~Movable() {}
 private:

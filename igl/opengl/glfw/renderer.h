@@ -134,6 +134,7 @@ public:
     void MoveCamera(int cameraIndx, int type, float amt);
     void ZoomCamera(int cameraIndx, int type, float amt);
     void ZoomCamera(int cameraIndx, Eigen::Vector3d pos);
+    void HardZoomCamera(int cameraIndx, Eigen::Vector3d pos,Eigen::Matrix3d rot);
     bool Picking(int x, int y);
 
     void OutLine();
