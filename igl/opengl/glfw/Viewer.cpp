@@ -284,7 +284,7 @@ IGL_INLINE bool
     return load_scene(fname);
   }
 
-  IGL_INLINE bool Viewer::load_scene(std::string fname)
+  IGL_INLINE bool Viewer::load_scene(std::string &fname)
   {
    // igl::deserialize(core(),"Core",fname.c_str());
     igl::deserialize(*data(),"Data",fname.c_str());
@@ -299,7 +299,7 @@ IGL_INLINE bool
     return save_scene(fname);
   }
 
-  IGL_INLINE bool Viewer::save_scene(std::string fname)
+  IGL_INLINE bool Viewer::save_scene(std::string &fname)
   {
     //igl::serialize(core(),"Core",fname.c_str(),true);
     igl::serialize(data(),"Data",fname.c_str());
