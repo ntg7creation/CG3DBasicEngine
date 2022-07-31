@@ -423,6 +423,7 @@ IGL_INLINE bool
 
         for (int i = 0; i < data_list.size(); i++)
         {
+            //draw by z buffer from last to most forword 
             auto shape = data_list[i];
             if (shape->Is2Render(viewportIndx))
             {
@@ -437,6 +438,12 @@ IGL_INLINE bool
                 else if (parents[i] == -2) {
                     Model = View.inverse() * Model;
                 }
+                /*if (i == 9) {
+                    glEnable(GL_BLEND);
+                    glBlendFunc(GL_ONE_MINUS_SRC_COLOR, GL_SRC_COLOR);
+                }
+                else
+                    glDisable(GL_BLEND);*/
                 if (!(flgs & 65536))
                 {
                     Update(Proj, View, Model, shape->GetShader(),i);
@@ -637,11 +644,41 @@ IGL_INLINE bool
 
         if (button == 1)
         {
-            for (int pShape : pShapes)
+            /*for (int pShape : pShapes)
             {
                 selected_data_index = pShape;
                 WhenTranslate(scnMat * cameraMat, -xrel / movCoeff, yrel / movCoeff);
+            }*/
+            //WhenTranslate(scnMat * cameraMat, -xrel / movCoeff, yrel / movCoeff);
+            //movCoeff = 2.0f;
+            /*WhenTranslate(scnMat * cameraMat, -((float)xrel / 180) / movCoeff, ((float)yrel / 180) / movCoeff); */
+            std::cout << pShapes.size() << std::endl;
+            /*int idx = selected_data_index;
+            WhenTranslate(scnMat * cameraMat, -((float)xrel / 90), ((float)yrel / 90));
+            if (data_list[idx]->iscontrolpoint)
+                translateControl(xTranslate, -((float)xrel) / 90, idx, false);*/
+           /*
+            for (int p : pShapes) {
+                selected_data_index = p;
+                //int idx = selected_data_index;
+                if (data_list[p]->iscontrolpoint) {
+                    translateControl(xTranslate, -((float)xrel) / 90, p, false);
+                    translateControl(yTranslate, ((float)yrel) / 90, p, false);
+                }
+                else {
+                    WhenTranslate(scnMat * cameraMat, -((float)xrel / 90), ((float)yrel / 90));
+                }
             }
+            */
+            
+            int idx = selected_data_index;
+            data_list[idx]->AddViewport(2);
+            if (data_list[idx]->iscontrolpoint) {
+                translateControl(xTranslate, -((float)xrel) / 90, idx, false);
+                translateControl(yTranslate, ((float)yrel) / 90, idx, false);
+            }
+            else
+                WhenTranslate(scnMat * cameraMat, -((float)xrel / 90), ((float)yrel / 90));
         }
         else
         {
@@ -650,7 +687,7 @@ IGL_INLINE bool
             if (button == 0)
             {
 //                if (selected_data_index > 0 )
-                    WhenRotate(scnMat * cameraMat, -((float)xrel/180) / movCoeff, ((float)yrel/180) / movCoeff);
+                   // WhenRotate(scnMat * cameraMat, -((float)xrel/180) / movCoeff, ((float)yrel/180) / movCoeff);
 
             }
             else
@@ -711,11 +748,32 @@ IGL_INLINE bool
 
     }
 
+
     bool Viewer::Picking(unsigned char data[4], int newViewportIndx)
     {
         //get from data[4] the correct index
+        int index = data[0];
+        index--;
+        if (index < 1) {
+            return false;
+        }
+        std::cout << index << std::endl;
+        selected_data_index = index;
+        
+        /*if (index >= data_list.size())
+            return true;
+        bool found = false;
+        for (int p : pShapes) {
+            if (p == index)
+                found = true;
+        }
+        if (found)
+            std::remove(pShapes.begin(), pShapes.end(), index);
+        else
+            pShapes.push_back(index);*/
 
-        return false;
+
+        return true;
 
     }
 
@@ -789,7 +847,13 @@ IGL_INLINE bool
             Eigen::Vector4d pos = MVP * Model * Eigen::Vector4d(0,0,0,1);
             float xpix = (1 + pos.x() / pos.z()) * viewport.z() / 2;
             float ypix = (1 + pos.y() / pos.z()) * viewport.w() / 2;
-            if (data_list[i]->Is2Render(viewportIndx) && xpix < right && xpix > left && ypix < bottom && ypix > up)
+            bool contains = false;
+            for (int p : pShapes) {
+                if (i == p) {
+                    contains = true;
+                }
+            }
+            if (!contains && data_list[i]->isPickable && data_list[i]->Is2Render(viewportIndx) && xpix < right && xpix > left && ypix < bottom && ypix > up)
             {
                 pShapes.push_back(i);
                 data_list[i]->AddViewport(newViewportIndx);

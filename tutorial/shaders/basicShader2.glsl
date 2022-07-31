@@ -13,5 +13,5 @@ in vec3 position0;
 out vec4 Color;
 void main()
 {
-	Color = texture2D(sampler, texCoords0) * vec4(color0,1.0); //you must have gl_FragColor
+	Color = texture2D(sampler, texCoords0) * vec4(color0, 0.5); //you must have gl_FragColor
 }
