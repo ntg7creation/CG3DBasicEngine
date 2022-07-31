@@ -11,6 +11,8 @@ class Project : public igl::opengl::glfw::Viewer
 {
 	
 public:
+	int watershader;
+	int transparentshader;
 	int cubeMapShapeID;
 	int numObjectsTextures;
 	int numCubeMapTextures;
@@ -25,6 +27,13 @@ public:
 	void openDialogSaveSceneInfo();
 	void saveSceneToFile(const std::string& sceneInfoFileName);
 
+	int current_Camera = 0;
+	std::vector<int> Cameras; // value is index of mesh represention the camera; if neg it means it animtion camera 
+	int temp;
+	float mytime = 0;
+	const float tick = 0.00166 * 3; // asume 1 update a sec time =1 means 1 min
+
+
 	int ticksCounter;
 	int cubeID = -1;
 	Project();
@@ -35,7 +44,7 @@ public:
 	void WhenTranslate();
 	void Animate() override;
 	void ScaleAllShapes(float amt, int viewportIndx);
-	
+	int Project::get_CP0(int mesh);
 	~Project(void);
 
 	//---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -54,20 +63,14 @@ public:
 		myMoveable(int timeS, int timeE, Bezier1D* bezier, int objectindex, int CP1, int CP2, int CP3, int CP4);
 
 	};
-
+	std::vector<myMoveable> bezierAnimations;
+	
 
 
 	void Connect_Controls(myMoveable);
 
-	/// <summary>
-	/// represent the Camera ID
-	/// </summary>
-	int current_Camera;
-	int tempcontrolindex;
-	float mytime = 0;
-	const float tick = 0.00166*3; // asume 1 update a sec time =1 means 1 min
 	myMoveable find_Control(int mesh_index);
-	std::vector<myMoveable> bezierAnimations;
+
 	/// <summary>
 	/// load mesh
 	/// </summary>
@@ -84,6 +87,7 @@ public:
 	void translateControl(int mesh_index,bool preserve);
 	void translateControl_no_update(int type, float amt, myMoveable obj,int cpnum, bool preserve);
 	void connect_bezier_to_mesh(int meshindex, int animetionindex);
+	void fix_bezier_to_mesh(int meshindex);
 	int addbezier(int meshindex);
 
 	void Animate_obj(int object_index, int animetionindex,float time);
@@ -111,14 +115,14 @@ public:
 	/// </summary>
 	/// <param name="CameraID"></param>
 	/// <returns>old Camera ID</returns>
-	int changeCamera(int CameraID);
+	void changeCamera(int CameraID);
 
 	/// <summary>
 	/// change animtion start time
 	/// for now view will always be at time = 0 due to picking
 	/// </summary>
 	/// <param name="time"></param>
-	void changeTime(int time);
+	void changeTime(float time);
 
 
 	/// <summary>

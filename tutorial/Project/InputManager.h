@@ -7,31 +7,42 @@
 
 	void glfw_mouse_callback(GLFWwindow* window,int button, int action, int mods)
 	{	
+		
 		if (action == GLFW_PRESS)
 		{
+
 			Renderer* rndr = (Renderer*)glfwGetWindowUserPointer(window);
 			Project* scn = (Project*)rndr->GetScene();
+			rndr->UnPick(2);
 			double x2, y2;
+			rndr->isReleased = false;
 			
 			glfwGetCursorPos(window, &x2, &y2);
 			rndr->UpdatePress(x2, y2);
+			if (button == GLFW_MOUSE_BUTTON_RIGHT)
+				rndr->Pressed();
 			if (rndr->Picking((int)x2, (int)y2))
 			{
 				rndr->UpdatePosition(x2, y2);
-				if(button == GLFW_MOUSE_BUTTON_LEFT)
-					rndr->Pressed();
+				//if(button == GLFW_MOUSE_BUTTON_LEFT)
+					//rndr->Pressed();
 			}
 			else
 			{
 				rndr->UnPick(2);
+				
 			}
 		
 		}
 		else
 		{
 			Renderer* rndr = (Renderer*)glfwGetWindowUserPointer(window);
-			rndr->UnPick(2);
+			rndr->isReleased = true;
+			if (button == GLFW_MOUSE_BUTTON_RIGHT)
+				rndr->Pressed();
+			//rndr->UnPick(2);
 		}
+
 	}
 	
 	void glfw_scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
@@ -62,17 +73,18 @@
 		{
 			if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS)
 			{
-
+				//rndr->Picking((int)xpos, (int)ypos);
 				rndr->MouseProccessing(GLFW_MOUSE_BUTTON_RIGHT);
 			}
 			else if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
 			{
-				
+				//rndr->Picking((int)xpos, (int)ypos);
 				rndr->MouseProccessing(GLFW_MOUSE_BUTTON_LEFT);
 			}
-			else if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_RELEASE && rndr->IsPicked() && rndr->IsMany())
-					rndr->MouseProccessing(GLFW_MOUSE_BUTTON_RIGHT);
-
+			else if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_RELEASE && rndr->IsPicked() && rndr->IsMany()) {
+				rndr->MouseProccessing(GLFW_MOUSE_BUTTON_RIGHT);
+				//rndr->Pressed();
+			}
 		}
 	}
 
@@ -100,9 +112,12 @@
 	{
 		Renderer* rndr = (Renderer*)glfwGetWindowUserPointer(window);
 		Project* scn = (Project*)rndr->GetScene();
+		bool temp;
+		Eigen::Vector3d temppos ;
 		//rndr->FreeShapes(2);
 		if (action == GLFW_PRESS || action == GLFW_REPEAT)
 		{
+
 			switch (key)
 			{
 			case GLFW_KEY_ESCAPE:
@@ -135,34 +150,57 @@
 				break;
 			case GLFW_KEY_W:
 				rndr->ZoomCamera(0, rndr->yTranslate, 0.25f);
+				scn->moveCamera(rndr->cameras[0]->GetPos2());
 				break;
 			case GLFW_KEY_S:
 				rndr->ZoomCamera(0, rndr->yTranslate, -0.25f);
+				scn->moveCamera(rndr->cameras[0]->GetPos2());
 				break;
 			case GLFW_KEY_A:
 				rndr->ZoomCamera(0, rndr->xTranslate, -0.25f);
+				scn->moveCamera(rndr->cameras[0]->GetPos2());
 				break;
 			
 			case GLFW_KEY_D:
 				rndr->ZoomCamera(0, rndr->xTranslate, 0.25f);
+				scn->moveCamera(rndr->cameras[0]->GetPos2());
 				break;
 			
 			case GLFW_KEY_Q:
 				rndr->ZoomCamera(0, scn->zTranslate, 0.5f);
+				scn->moveCamera(rndr->cameras[0]->GetPos2());
 				break;
 			case GLFW_KEY_E:
 				rndr->ZoomCamera(0, scn->zTranslate, -0.5f);
+				scn->moveCamera(rndr->cameras[0]->GetPos2());
 				break;
 
 			case GLFW_KEY_Z:
+				//TODO change cube ID to pickshape
 				rndr->ZoomCamera(0,scn->data_list[scn->cubeID]->GetPos());
+				//scn->moveCamera(rndr->cameras[0]->GetPos2());
 				break;
-			//case GLFW_KEY_C:
-			//	break;
+			case GLFW_KEY_X:
+				rndr->HardZoomCamera(0,scn->data_list[scn->cubeID]->GetPos(), scn->data_list[scn->cubeID]->GetRotation());
+				//scn->moveCamera(rndr->cameras[0]->GetPos2());
+				break;
+			case GLFW_KEY_F:
+				scn->current_Camera++;
+				if (scn->current_Camera >= scn->Cameras.size())
+					scn->current_Camera = 0;
+
+				rndr->HardZoomCamera(0, scn->data_list[scn->Cameras[scn->current_Camera]]->GetPos(), scn->data_list[scn->Cameras[scn->current_Camera]]->GetRotation2());
+				break;
+			case GLFW_KEY_C:
+				scn->changeTime(0);
+				temp = scn->isActive;
+				scn->isActive = true;
+				scn->Animate();
+				scn->isActive = temp;
+				break;
 			//case GLFW_KEY_X:
 			//	rndr->ZoomCamera(0, scn->zTranslate, 0.5f);
 			//	break;
-
 
 			case GLFW_KEY_1:
 				std::cout << "picked 1\n";

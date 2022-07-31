@@ -53,8 +53,9 @@ private:
 class Bezier1D
 {
 	//each line in the matrix represents x,y,z,w of a control point
-	std::vector<Eigen::Matrix4d> segments;
+
 public:
+	std::vector<Eigen::Matrix4d> segments;
 	Bezier1D(void);
 	int numberOfPoints;
 	
