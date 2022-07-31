@@ -10,8 +10,10 @@
 		
 		if (action == GLFW_PRESS)
 		{
+
 			Renderer* rndr = (Renderer*)glfwGetWindowUserPointer(window);
 			Project* scn = (Project*)rndr->GetScene();
+			rndr->UnPick(2);
 			double x2, y2;
 			rndr->isReleased = false;
 			
