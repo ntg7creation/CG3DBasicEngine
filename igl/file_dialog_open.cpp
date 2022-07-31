@@ -17,7 +17,7 @@
   #include <Commdlg.h>
 #endif
 
-IGL_INLINE std::string igl::file_dialog_open(const std::string& presetFileName, const char *filter)
+IGL_INLINE std::string igl::file_dialog_open()
 {
   const int FILE_DIALOG_MAX_BUFFER = 1024;
   char buffer[FILE_DIALOG_MAX_BUFFER];
@@ -56,9 +56,6 @@ IGL_INLINE std::string igl::file_dialog_open(const std::string& presetFileName, 
   OPENFILENAME ofn;       // common dialog box structure
   char szFile[260];       // buffer for file name
 
-  strncpy(szFile, presetFileName.c_str(), 259);
-  szFile[259] = '\0';
-
   // Initialize OPENFILENAME
   ZeroMemory(&ofn, sizeof(ofn));
   ofn.lStructSize = sizeof(ofn);
@@ -66,9 +63,9 @@ IGL_INLINE std::string igl::file_dialog_open(const std::string& presetFileName, 
   ofn.lpstrFile = szFile;
   // Set lpstrFile[0] to '\0' so that GetOpenFileName does not
   // use the contents of szFile to initialize itself.
-  //ofn.lpstrFile[0] = '\0';
+  ofn.lpstrFile[0] = '\0';
   ofn.nMaxFile = sizeof(szFile);
-  ofn.lpstrFilter = filter; // "off\0*.off\0obj\0*.obj\0mp\0*.mp\0";
+  ofn.lpstrFilter = "*.*\0";//off\0*.off\0obj\0*.obj\0mp\0*.mp\0";
   ofn.nFilterIndex = 1;
   ofn.lpstrFileTitle = NULL;
   ofn.nMaxFileTitle = 0;

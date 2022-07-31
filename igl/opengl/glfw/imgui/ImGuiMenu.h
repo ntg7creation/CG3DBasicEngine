@@ -52,7 +52,7 @@ protected:
 
 public:
 	Project* scn;
-	//int pickedLayerIndex;
+	int pickedLayerIndex;
 	int animationDuration;
 	float timeSliderValue = 0.f;
 	float transparencySliderValue = 100.f;

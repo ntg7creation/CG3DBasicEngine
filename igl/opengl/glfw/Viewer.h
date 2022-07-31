@@ -80,9 +80,9 @@ namespace glfw
    
     // Scene IO
     IGL_INLINE bool load_scene();
-    IGL_INLINE bool load_scene(std::string &fname);
+    IGL_INLINE bool load_scene(std::string fname);
     IGL_INLINE bool save_scene();
-    IGL_INLINE bool save_scene(std::string &fname);
+    IGL_INLINE bool save_scene(std::string fname);
     // Draw everything
    // IGL_INLINE void draw();
     // OpenGL context resize

@@ -14,7 +14,7 @@
  #include <Commdlg.h>
 #endif
 
-IGL_INLINE std::string igl::file_dialog_save(const char* presetFileName, const char* filter)
+IGL_INLINE std::string igl::file_dialog_save()
 {
   const int FILE_DIALOG_MAX_BUFFER = 1024;
   char buffer[FILE_DIALOG_MAX_BUFFER];
@@ -52,11 +52,9 @@ IGL_INLINE std::string igl::file_dialog_save(const char* presetFileName, const c
 
   // Use native windows file dialog box
   // (code contributed by Tino Weinkauf)
-  //SAVEFILENAME sfn;
+
   OPENFILENAME ofn;       // common dialog box structure
   char szFile[260];       // buffer for file name
-  strncpy(szFile, presetFileName, 259);
-  szFile[259] = '\0';
 
   // Initialize OPENFILENAME
   ZeroMemory(&ofn, sizeof(ofn));
@@ -65,14 +63,14 @@ IGL_INLINE std::string igl::file_dialog_save(const char* presetFileName, const c
   ofn.lpstrFile = szFile;
   // Set lpstrFile[0] to '\0' so that GetOpenFileName does not
   // use the contents of szFile to initialize itself.
-  //ofn.lpstrFile[0] = '\0';
+  ofn.lpstrFile[0] = '\0';
   ofn.nMaxFile = sizeof(szFile);
-  ofn.lpstrFilter = filter; // "";
+  ofn.lpstrFilter = "";
   ofn.nFilterIndex = 1;
   ofn.lpstrFileTitle = NULL;
   ofn.nMaxFileTitle = 0;
   ofn.lpstrInitialDir = NULL;
-  ofn.Flags = OFN_PATHMUSTEXIST; //| OFN_FILEMUSTEXIST;
+  ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
 
   // Display the Open dialog box.
   int pos = 0;

@@ -19,7 +19,7 @@ namespace igl
   //
   // Usage:
   //   std::string str = get_open_file_path();
-  IGL_INLINE std::string file_dialog_open(const std::string& presetFileName="", const char* filter="All files (*.*)\0*.*\0");
+  IGL_INLINE std::string file_dialog_open();
 }
 
 #ifndef IGL_STATIC_LIBRARY
