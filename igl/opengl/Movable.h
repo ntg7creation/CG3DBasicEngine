@@ -31,8 +31,8 @@ public:
 		//Eigen::Vector3d GetTranslation const{ return Tout.tranlastion(); }
 	Eigen::Vector3d GetPos() const { return Tin.translation(); }
 	Eigen::Vector3d GetPos2() const { return Tout.translation(); }
-	Eigen::Matrix3d GetRotation() const{ return Tout.rotation().matrix(); }
-	Eigen::Matrix3d GetRotation2() const{ return Tin.rotation().matrix(); }
+	Eigen::Matrix3d GetRotation() { return Tout.rotation().matrix(); }
+	Eigen::Matrix3d GetRotation2() { return Tin.rotation().matrix(); }
 	//	Eigen::Matrix3d GetRotation() const{ return Tout.tranlatoin().matrix(); }
     virtual ~Movable() {}
 private:

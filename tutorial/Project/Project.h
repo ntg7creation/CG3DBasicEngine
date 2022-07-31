@@ -112,7 +112,7 @@ public:
 	/// for now view will always be at time = 0 due to picking
 	/// </summary>
 	/// <param name="time"></param>
-	void changeTime(int time);
+	void changeTime(float time);
 
 
 	/// <summary>

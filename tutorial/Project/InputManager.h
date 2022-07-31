@@ -103,7 +103,7 @@
 	{
 		Renderer* rndr = (Renderer*)glfwGetWindowUserPointer(window);
 		Project* scn = (Project*)rndr->GetScene();
-
+		bool temp;
 		Eigen::Vector3d temppos ;
 		//rndr->FreeShapes(2);
 		if (action == GLFW_PRESS || action == GLFW_REPEAT)
@@ -182,8 +182,13 @@
 
 				rndr->HardZoomCamera(0, scn->data_list[scn->Cameras[scn->current_Camera]]->GetPos(), scn->data_list[scn->Cameras[scn->current_Camera]]->GetRotation2());
 				break;
-			//case GLFW_KEY_C:
-			//	break;
+			case GLFW_KEY_C:
+				scn->changeTime(0);
+				temp = scn->isActive;
+				scn->isActive = true;
+				scn->Animate();
+				scn->isActive = temp;
+				break;
 			//case GLFW_KEY_X:
 			//	rndr->ZoomCamera(0, scn->zTranslate, 0.5f);
 			//	break;

@@ -441,42 +441,59 @@ void Renderer::ZoomCamera(int cameraIndx, Eigen::Vector3d pos)
     c->MyTranslate(V, 1);
     ZoomCamera(cameraIndx, zTranslate, 2);
 }
+
+void Renderer::verfiy_Camera()
+{
+    Project* scn = (Project*)GetScene();
+    int correntCam = scn->current_Camera;
+    HardZoomCamera(0, scn->data_list[scn->Cameras[correntCam]]->GetPos(), scn->data_list[scn->Cameras[correntCam]]->GetRotation2());
+}
+
 void Renderer::HardZoomCamera(int cameraIndx, Eigen::Vector3d pos, Eigen::Matrix3d rot2)
 {
     igl::opengl::Camera* c = cameras[cameraIndx];
+    //c->GetRotation2() = rot2;
+    //c->GetRotation() = rot2;
 
-    Eigen::Matrix3d rot = rot2.transpose();
-    for (int i = 0; i < 3; i++) { 
-        //x rotate
-        double r33 = rot.coeff(2, 2);
-        double r32 = rot.coeff(2, 1);
-        double newangle = atan2(r32, r33);
-        r32 = c->GetRotation().coeff(2, 1);
-        r32 = c->GetRotation().coeff(2, 1);
-        double oldangle = atan2(r32, r33);
-        MoveCamera(0, xRotate, newangle - oldangle);
-        //y rotate
-        double r31 = rot.coeff(2, 0);
-        r33 = rot.coeff(2, 2);
-        r32 = rot.coeff(2, 1);
-        newangle = atan2(-r31, sqrt(r32 * r32 + r33 * r33));
-        r31 = c->GetRotation().coeff(2, 0);
-        r33 = c->GetRotation().coeff(2, 2);
-        r32 = c->GetRotation().coeff(2, 1);
-        oldangle = atan2(-r31, sqrt(r32 * r32 + r33 * r33));
-        MoveCamera(0, yRotate, newangle - oldangle);
+    //c->MyRotate(rot2);
+    //c->MyRotate2(rot2);
 
-        // z rotate
-        //double r21 = rot.coeff(1, 0);
-        //double r11 = rot.coeff(0, 0);
-        //newangle = atan2(r21, r11);
-        //r21 = c->GetRotation().coeff(1, 0);
-        //r11 = c->GetRotation().coeff(0, 0);
-        //oldangle = atan2(r21, r11);
-        //MoveCamera(0, zRotate, newangle - oldangle);
-    }
+    //Eigen::Matrix3d rot = rot2;
+    //Eigen::Matrix3d rotold = c->GetRotation();
+    //std::cout << "target:-"<<std::endl << rot << std::endl;
+    //std::cout << "start:-" << std::endl << rotold << std::endl;
+    ////x rotate
+    //double r33 = rot.coeff(2, 2);
+    //double r32 = rot.coeff(2, 1);
+    //double newangle = atan2(r32, r33);
+    //r33 = rotold.coeff(2, 2);
+    //r32 = rotold.coeff(2, 1);
+    //double oldangle = atan2(r32, r33);
+    //std::cout << "amount:-" << newangle - oldangle << std::endl;
+    //MoveCamera(0, xRotate, newangle - oldangle);
 
-    //translate
+    //y rotate
+    //double r31 = rot.coeff(2, 0);
+    //r33 = rot.coeff(2, 2);
+    //r32 = rot.coeff(2, 1);
+    //newangle = atan2(-r31, sqrt(r32 * r32 + r33 * r33));
+    //r31 = c->GetRotation().coeff(2, 0);
+    //r33 = c->GetRotation().coeff(2, 2);
+    //r32 = c->GetRotation().coeff(2, 1);
+    //oldangle = atan2(-r31, sqrt(r32 * r32 + r33 * r33));
+    //MoveCamera(0, yRotate, newangle - oldangle);
+
+    //z rotate
+    //double r21 = rot.coeff(1, 0);
+    //double r11 = rot.coeff(0, 0);
+    //newangle = atan2(r21, r11);
+    //r21 = rotold.coeff(1, 0);
+    //r11 = rotold.coeff(0, 0);
+    //oldangle = atan2(r21, r11);
+    //MoveCamera(0, zRotate, newangle - oldangle);
+
+
+//translate
     Eigen::Vector3d V = pos - c->GetPos2();
     //V = V * c->GetRotation().transpose();
     c->MyTranslate(V, 1);

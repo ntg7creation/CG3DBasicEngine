@@ -45,13 +45,29 @@ Project::myMoveable::myMoveable(int timeS, int timeE, Bezier1D* bezier, int obje
 	time_start = timeS;
 	time_end = timeE;
 	this->bezier = bezier;
-	int cpnum= 0;
+	//int cpnum= 0;
 
 };
 void Project::Connect_Controls(myMoveable object)
 {
 	Bezier1D* bezier = object.bezier;
 
+	for (int cpnum = 0; cpnum < object.CPs.size(); cpnum++) {
+		int CP_mesh_index = object.CPs[cpnum];
+		selected_data_index = CP_mesh_index; 
+		int segmentnum = (cpnum -1) / 3 ;
+		int CP_in_segment = cpnum%3;
+		if (segmentnum < 0)
+			segmentnum = 0;
+		if (CP_in_segment == 0 && cpnum != 0)
+			CP_in_segment = 3;
+		float temp = bezier->GetControlPoint(segmentnum, CP_in_segment).GetPos()->x();
+		float temp2 = bezier->GetControlPoint(segmentnum, CP_in_segment).GetPos()->x() - data_list[CP_mesh_index]->GetPos().x();
+		ShapeTransformation(xTranslate, bezier->GetControlPoint(segmentnum, CP_in_segment).GetPos()->x()- data_list[CP_mesh_index]->GetPos().x(), 0);
+		ShapeTransformation(yTranslate, bezier->GetControlPoint(segmentnum, CP_in_segment).GetPos()->y() - data_list[CP_mesh_index]->GetPos().y(), 0);
+		ShapeTransformation(zTranslate, bezier->GetControlPoint(segmentnum, CP_in_segment).GetPos()->z() - data_list[CP_mesh_index]->GetPos().z(), 0);
+	}
+	/*
 	int cpnum = 0;
 	int CP = object.CPs[cpnum];
 	selected_data_index = CP;
@@ -76,6 +92,7 @@ void Project::Connect_Controls(myMoveable object)
 	ShapeTransformation(xTranslate, bezier->GetControlPoint(0, cpnum).GetPos()->x(), 0);
 	ShapeTransformation(yTranslate, bezier->GetControlPoint(0, cpnum).GetPos()->y(), 0);
 	ShapeTransformation(zTranslate, bezier->GetControlPoint(0, cpnum).GetPos()->z(), 0);
+	*/
 }
 
 
@@ -104,8 +121,6 @@ int Project::InitCubeMap(int matID)
 void Project::SetCubeMap(int matID) {
 	SetShapeMaterial(cubeMapShapeID, matID + numObjectsTextures);
 }
-
-
 void Project::SetMaterialOfPickedObjs(int matID) {
 	//std::cout << "inside SetMaterialOfPickedObjs()" << std::endl;
 
@@ -117,10 +132,6 @@ void Project::SetMaterialOfPickedObjs(int matID) {
 		data_list[index]->SetMaterial(matID);
 	}
 }
-
-
-
-
 int Project::LoadMesh(shapes Shape, int matID, int shaderID, int parent)
 {
 	int	shapeID = AddShape(Shape, parent, TRIANGLES);
@@ -161,16 +172,7 @@ int Project::editMesh(IndexedModel& mesh, int index)
 	selected_data_index = index;
 	int	shapeID = index;
 	data_list[shapeID]->clear_edges();
-	//SetShapeShader(shapeID, shaderID);
-	//SetShapeMaterial(shapeID, matID);
-	//data()->show_faces = 0;
-	//data()->show_lines = 0;
-	//data()->show_overlay = 0xFF;
-	//SetShapeShader(shapeID, 2);
-	//SetShapeMaterial(shaderID, 0);
-	//SetShapeShader(shapeID, 2);
-	//SetShapeMaterial(shaderID, 0);
-	//TODO change colour 
+ 
 	for (int i = 0; i < mesh.positions.size() - 1; i++)
 	{
 		data()->add_edges(mesh.positions[i].transpose(), mesh.positions[i + 1].transpose(), Eigen::RowVector3d(0, 0, 0));
@@ -181,13 +183,17 @@ int Project::editMesh(IndexedModel& mesh, int index)
 void Project::Animate_obj(int object_index, int animetionindex, float time)
 {
 	myMoveable path = bezierAnimations[animetionindex];
-	if (path.time_start > time || path.time_end < time)
+	if (path.time_start > time || path.time_end < time|| path.bezier->segments.size() == 0)
 		return;
 	float start = path.time_start;
 	float end = path.time_end;
-	float progress = (time - start) / end;
+	float segmentcount = path.bezier->segments.size();
 
-	Eigen::Vector3d* new_pos = path.bezier->GetVertex(0,progress).GetPos();
+	float total_segment_prog = (time - start) / (end - start);
+	float singel_segment_prog = total_segment_prog *segmentcount;
+	int current_semgent = singel_segment_prog;
+
+	Eigen::Vector3d* new_pos = path.bezier->GetVertex(current_semgent, singel_segment_prog - current_semgent).GetPos();
 	Eigen::Vector3d old_pos = data_list[object_index]->GetPos();
 	selected_data_index = object_index;
 	ShapeTransformation(xTranslate, new_pos->x() - old_pos.x(), false);
@@ -199,15 +205,17 @@ void Project::Animate_obj(int object_index, int animetionindex, float time)
 int CP2;
 int Project::addbezier(int meshindex)
 {
+	int defaultmat = 0;
+	int defaultsader = 2;
 	if (data_list[meshindex]->animtoinindex < 0) {
-		int defaultmat = 0;
-		int defaultsader = 2;
+
 		//controls int
 		Bezier1D* myBezier = new Bezier1D(); // check not destoryed
 		int CP0 = LoadMesh(Octahedron, defaultmat, defaultsader);
 		data_list[CP0]->iscontrolpoint = true;
 		selected_data_index = CP0;
 		ShapeTransformation(scaleAll, 0.1, 0);
+
 		int CP1 = LoadMesh(Octahedron, defaultmat, defaultsader);
 		data_list[CP1]->iscontrolpoint = true;
 		selected_data_index = CP1;
@@ -227,17 +235,53 @@ int Project::addbezier(int meshindex)
 		bezierAnimations.push_back(tempmove);
 		int animtionindex = bezierAnimations.size() - 1;
 		Connect_Controls(tempmove);
-
-
 		connect_bezier_to_mesh(meshindex, animtionindex);
+
 		return animtionindex;
 	}
 	else
 	{
 		//TODO add segment
+		myMoveable* mv = &bezierAnimations[data_list[meshindex]->animtoinindex];
+		int CProot = mv->CPs.size() - 1;
+		int CP_mesh_index = LoadMesh(Octahedron, defaultmat, defaultsader);
+		mv->CPs.push_back(CP_mesh_index);
+		selected_data_index = CP_mesh_index;
+		ShapeTransformation(scaleAll, 0.1, 0);
+
+		CP_mesh_index = LoadMesh(Octahedron, defaultmat, defaultsader);
+		mv->CPs.push_back(CP_mesh_index);
+		selected_data_index = CP_mesh_index;
+		ShapeTransformation(scaleAll, 0.1, 0);
+
+		CP_mesh_index = LoadMesh(Octahedron, defaultmat, defaultsader);
+		mv->CPs.push_back(CP_mesh_index);
+		selected_data_index = CP_mesh_index;
+		ShapeTransformation(scaleAll, 0.1, 0);
+
+		Eigen::Matrix4d mat = Eigen::Matrix4d();
+		double x = data_list[mv->CPs[CProot]]->GetPos().x();
+		double y = data_list[mv->CPs[CProot]]->GetPos().y();
+		double z = data_list[mv->CPs[CProot]]->GetPos().z();
+		mat << x, y, z, 0.0,
+			x + 1, y+1, z, 0.0,
+			x + 2, y-1, z, 0.0,
+			x + 3, y, z+1, 0.0;
+
+
+		mv->bezier->segments.push_back(mat);
+
+		Connect_Controls(*mv);
+
+		editMesh(mv->bezier->GetLine(), mv->meshindex);
+
+
+		//mv.
+
 	}
 	return -1;
 }
+
 //we translate mesh i
 //if animtoinindex >= 0 call this 
 void Project::connect_bezier_to_mesh(int meshindex, int animetionindex) 
@@ -435,10 +479,6 @@ int Project::addCamera(Eigen::Vector3f pos) {
 	return Camera;
 }
 
-void Project::changeCamera(int CameraID)
-{
-
-}
 void Project::moveCamera(Eigen::Vector3d newpos)
 {
 	int temp = selected_data_index;
@@ -496,47 +536,51 @@ void Project::Init()
 	int basicshader =AddShader("shaders/basicShader");
 	watershader = AddShader("shaders/waterShader");
 
-	//add Camera
+	//add Camera on start
 	addCamera(Eigen::Vector3f(0, 0, 10));
 	current_Camera = Cameras.size() - 1;
-	ShapeTransformation(yRotate, M_PI/2 , 2);
 
-	addCamera(Eigen::Vector3f(5, 0, 0));
-	int camera3 = addCamera(Eigen::Vector3f(-4, 2, 0));
+	//add camera 2
+	selected_data_index = addCamera(Eigen::Vector3f(5, 0, 0));
+
+	//add camera with bezier
+	int camera3 = addCamera(Eigen::Vector3f(-4, 3, 0));
 	temp = camera3;
 	selected_data_index = camera3;
-	ShapeTransformation(yRotate, M_PI/2, 2);
-	//current_Camera = Cameras.size() - 1;
 
-
-	{
-		cubeID = LoadMesh(Cube, 2, 2);
-		selected_data_index = cubeID;
-		ShapeTransformation(yTranslate, 1, 0);
-	}
+	//add cube with bezier 
+	cubeID = LoadMesh(Cube, 0, 2);
+	selected_data_index = cubeID;
+	ShapeTransformation(yTranslate, 3, 0);
 	//add bezier 
 	addbezier(cubeID);
+	//connect_bezier_to_mesh(cubeID, data_list[cubeID]->animtoinindex); DO NOT delete find bug in case you call it 2 time but it not a bug if called out side of function
+	//add segment
+	addbezier(cubeID);
+	addbezier(cubeID);
 
-	//moving mesh that is not a control point
-	selected_data_index = cubeID;
-	ShapeTransformation(yTranslate, 2, 0);
-	connect_bezier_to_mesh(cubeID, data_list[cubeID]->animtoinindex);
+
+
+	addbezier(camera3);
+	connect_bezier_to_mesh(camera3, data_list[camera3]->animtoinindex);
+
 	//addgrid
 	//int id = addgridmesh(10);
-	int map = 6;
-	float scale = 0.5;
-	for (int i = 0; i < map; i++)
-	{
-		for (int j = 0; j < map; j++)
-		{
-			int id = LoadMesh("./data/planegrid.obj", 2, watershader);
-			selected_data_index = id;
-			//ShapeTransformation(scaleAll, scale, 0);
-			ShapeTransformation(xTranslate, (i - map / 2) * map, 0);
-			ShapeTransformation(yTranslate, -7, 0);
-			ShapeTransformation(zTranslate, -(j - map / 2) * map - 20, 0);
-		}
-	}
+	//int map = 10;
+	//int sizeofmesh = 7;
+	//float scale = 0.5;
+	//for (int i = 0; i < map; i++)
+	//{
+	//	for (int j = 0; j < map; j++)
+	//	{
+	//		int id = LoadMesh("./data/planegrid.obj", 2, watershader);
+	//		selected_data_index = id;
+	//		//ShapeTransformation(scaleAll, scale, 0);
+	//		ShapeTransformation(xTranslate, (i - map / 2) * sizeofmesh, 0);
+	//		ShapeTransformation(yTranslate, -7, 0);
+	//		ShapeTransformation(zTranslate, -(j - map / 2) * sizeofmesh - 20, 0);
+	//	}
+	//}
 }
 
 
@@ -607,7 +651,6 @@ void Project::Animate() {
 			if (data_list[i]->animtoinindex >= 0)
 				Animate_obj(i, data_list[i]->animtoinindex, mytime);
 
-		//translateControl(yTranslate, -0.01, CP2, false);
 		selected_data_index = temp;
 		//std::cout << "animate isactive" << std::endl;
 		ticksCounter += 1;
@@ -621,6 +664,11 @@ void Project::Animate() {
 	//if (ticksCounter)
 }
 
+
+void Project::changeTime(float time)
+{
+	mytime = time;
+}
 void Project::ScaleAllShapes(float amt,int viewportIndx)
 {
 	for (int i = 1; i < data_list.size(); i++)
