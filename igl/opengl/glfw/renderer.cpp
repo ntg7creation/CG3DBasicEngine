@@ -474,7 +474,7 @@ void Renderer::verfiy_Camera()
 {
     Project* scn = (Project*)GetScene();
     int correntCam = scn->current_Camera;
-    HardZoomCamera(0, scn->data_list[scn->Cameras[correntCam]]->GetPos(), scn->data_list[scn->Cameras[correntCam]]->GetRotation2());
+    HardZoomCamera(0, scn->data_list[abs(scn->Cameras[correntCam])]->GetPos(), scn->data_list[abs(scn->Cameras[correntCam])]->GetRotation2());
 }
 
 void Renderer::HardZoomCamera(int cameraIndx, Eigen::Vector3d pos, Eigen::Matrix3d rot2)
@@ -636,7 +636,7 @@ IGL_INLINE void Renderer::Init(igl::opengl::glfw::Viewer* scene, std::list<int>x
             if ((1 << indx) & pickingBits) {
                 DrawInfo* new_draw_info = new DrawInfo(indx, 0, 0, 0,
                                                   1 | inAction | depthTest | stencilTest | passStencil | blackClear |
-                                                  clearStencil | clearDepth | onPicking| blend,
+                                                  clearStencil | clearDepth | onPicking,//blend,
                                                   next_property_id);
                 next_property_id <<= 1;
                 //for (auto& data : scn->data_list)

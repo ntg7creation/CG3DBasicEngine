@@ -652,7 +652,7 @@ IGL_INLINE bool
             //WhenTranslate(scnMat * cameraMat, -xrel / movCoeff, yrel / movCoeff);
             //movCoeff = 2.0f;
             /*WhenTranslate(scnMat * cameraMat, -((float)xrel / 180) / movCoeff, ((float)yrel / 180) / movCoeff); */
-            std::cout << pShapes.size() << std::endl;
+            //std::cout << pShapes.size() << std::endl;
             /*int idx = selected_data_index;
             WhenTranslate(scnMat * cameraMat, -((float)xrel / 90), ((float)yrel / 90));
             if (data_list[idx]->iscontrolpoint)
@@ -672,13 +672,30 @@ IGL_INLINE bool
             */
             
             int idx = selected_data_index;
+            
+            pShapes.push_back(idx);
             data_list[idx]->AddViewport(2);
             if (data_list[idx]->iscontrolpoint) {
-                translateControl(xTranslate, -((float)xrel) / 90, idx, false);
-                translateControl(yTranslate, ((float)yrel) / 90, idx, false);
+                WhenTranslate(scnMat * cameraMat, -((float)xrel / 90), ((float)yrel / 90));
+                translateControl(idx,false);
+                //translateControl(xTranslate, -((float)xrel) / 90, idx, false);
+                //translateControl(yTranslate, ((float)yrel) / 90, idx, false);
+            }
+            else if (data_list[idx]->animtoinindex >= 0)
+            {
+                selected_data_index = idx;
+                WhenTranslate(scnMat * cameraMat, -((float)xrel / 90), ((float)yrel / 90));
+                
+                //selected_data_index = get_CP0(idx);
+                //WhenTranslate(scnMat * cameraMat, -((float)xrel / 90), ((float)yrel / 90));
+
+                fix_bezier_to_mesh(idx);
             }
             else
+            {
                 WhenTranslate(scnMat * cameraMat, -((float)xrel / 90), ((float)yrel / 90));
+
+            }
         }
         else
         {
@@ -686,8 +703,8 @@ IGL_INLINE bool
 
             if (button == 0)
             {
-//                if (selected_data_index > 0 )
-                   // WhenRotate(scnMat * cameraMat, -((float)xrel/180) / movCoeff, ((float)yrel/180) / movCoeff);
+                if (selected_data_index > 0 )
+                    WhenRotate(scnMat * cameraMat, -((float)xrel/180) / movCoeff, ((float)yrel/180) / movCoeff);
 
             }
             else

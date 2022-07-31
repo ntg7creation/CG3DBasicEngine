@@ -10,8 +10,10 @@
 		
 		if (action == GLFW_PRESS)
 		{
+
 			Renderer* rndr = (Renderer*)glfwGetWindowUserPointer(window);
 			Project* scn = (Project*)rndr->GetScene();
+			rndr->UnPick(2);
 			double x2, y2;
 			rndr->isReleased = false;
 			
@@ -114,6 +116,7 @@
 		Renderer* rndr = (Renderer*)glfwGetWindowUserPointer(window);
 		Project* scn = (Project*)rndr->GetScene();
 		bool temp;
+		int camera_mesh_indx;
 		Eigen::Vector3d temppos ;
 		//rndr->FreeShapes(2);
 		if (action == GLFW_PRESS || action == GLFW_REPEAT)
@@ -124,7 +127,7 @@
 			case GLFW_KEY_ESCAPE:
 				glfwSetWindowShouldClose(window, GLFW_TRUE);
 				break;
-				
+
 			case GLFW_KEY_SPACE:
 				if (scn->IsActive())
 					scn->Deactivate();
@@ -134,7 +137,7 @@
 
 			case GLFW_KEY_UP:
 				rndr->MoveCamera(0, rndr->xRotate, 0.05f);
-				
+
 				break;
 			case GLFW_KEY_DOWN:
 				//scn->shapeTransformation(scn->xGlobalRotate,-5.f);
@@ -161,12 +164,12 @@
 				rndr->ZoomCamera(0, rndr->xTranslate, -0.25f);
 				scn->moveCamera(rndr->cameras[0]->GetPos2());
 				break;
-			
+
 			case GLFW_KEY_D:
 				rndr->ZoomCamera(0, rndr->xTranslate, 0.25f);
 				scn->moveCamera(rndr->cameras[0]->GetPos2());
 				break;
-			
+
 			case GLFW_KEY_Q:
 				rndr->ZoomCamera(0, scn->zTranslate, 0.5f);
 				scn->moveCamera(rndr->cameras[0]->GetPos2());
@@ -178,19 +181,27 @@
 
 			case GLFW_KEY_Z:
 				//TODO change cube ID to pickshape
-				rndr->ZoomCamera(0,scn->data_list[scn->cubeID]->GetPos());
+				rndr->ZoomCamera(0, scn->data_list[scn->cubeID]->GetPos());
 				//scn->moveCamera(rndr->cameras[0]->GetPos2());
 				break;
 			case GLFW_KEY_X:
-				rndr->HardZoomCamera(0,scn->data_list[scn->cubeID]->GetPos(), scn->data_list[scn->cubeID]->GetRotation());
+				rndr->HardZoomCamera(0, scn->data_list[scn->cubeID]->GetPos(), scn->data_list[scn->cubeID]->GetRotation());
 				//scn->moveCamera(rndr->cameras[0]->GetPos2());
 				break;
 			case GLFW_KEY_F:
+
 				scn->current_Camera++;
 				if (scn->current_Camera >= scn->Cameras.size())
 					scn->current_Camera = 0;
+				camera_mesh_indx = scn->Cameras[scn->current_Camera];
+				rndr->HardZoomCamera(0, scn->data_list[abs(camera_mesh_indx)]->GetPos(), scn->data_list[abs(camera_mesh_indx)]->GetRotation2());
+				if (camera_mesh_indx < 0)
+					scn->hide_editor();
+				else
+					scn->unhide_editor();
 
-				rndr->HardZoomCamera(0, scn->data_list[scn->Cameras[scn->current_Camera]]->GetPos(), scn->data_list[scn->Cameras[scn->current_Camera]]->GetRotation2());
+
+
 				break;
 			case GLFW_KEY_C:
 				scn->changeTime(0);
@@ -199,9 +210,9 @@
 				scn->Animate();
 				scn->isActive = temp;
 				break;
-			//case GLFW_KEY_X:
-			//	rndr->ZoomCamera(0, scn->zTranslate, 0.5f);
-			//	break;
+				//case GLFW_KEY_X:
+				//	rndr->ZoomCamera(0, scn->zTranslate, 0.5f);
+				//	break;
 
 			case GLFW_KEY_1:
 				std::cout << "picked 1\n";

@@ -172,6 +172,7 @@ int Project::LoadMesh(IndexedModel &mesh, int matID, int shaderID, int parent)
 
 int Project::editMesh(IndexedModel& mesh, int index)
 {
+	int temp = selected_data_index;
 	selected_data_index = index;
 	int	shapeID = index;
 	data_list[shapeID]->clear_edges();
@@ -180,7 +181,7 @@ int Project::editMesh(IndexedModel& mesh, int index)
 	{
 		data()->add_edges(mesh.positions[i].transpose(), mesh.positions[i + 1].transpose(), Eigen::RowVector3d(0, 0, 0));
 	}
-
+	selected_data_index = temp;
 	return shapeID;
 }
 void Project::Animate_obj(int object_index, int animetionindex, float time)
@@ -254,16 +255,19 @@ int Project::addbezier(int meshindex)
 		mv->CPs.push_back(CP_mesh_index);
 		selected_data_index = CP_mesh_index;
 		ShapeTransformation(scaleAll, 0.1, 0);
+		data_list[CP_mesh_index]->iscontrolpoint = true;
 
 		CP_mesh_index = LoadMesh(Octahedron, defaultmat, defaultsader);
 		mv->CPs.push_back(CP_mesh_index);
 		selected_data_index = CP_mesh_index;
 		ShapeTransformation(scaleAll, 0.1, 0);
+		data_list[CP_mesh_index]->iscontrolpoint = true;
 
 		CP_mesh_index = LoadMesh(Octahedron, defaultmat, defaultsader);
 		mv->CPs.push_back(CP_mesh_index);
 		selected_data_index = CP_mesh_index;
 		ShapeTransformation(scaleAll, 0.1, 0);
+		data_list[CP_mesh_index]->iscontrolpoint = true;
 
 		Eigen::Matrix4d mat = Eigen::Matrix4d();
 		double x = data_list[mv->CPs[CProot]]->GetPos().x();
@@ -292,6 +296,7 @@ int Project::addbezier(int meshindex)
 //if animtoinindex >= 0 call this 
 void Project::connect_bezier_to_mesh(int meshindex, int animetionindex) 
 {
+	int temp = selected_data_index;
 	myMoveable moveable = bezierAnimations[animetionindex];
 	Eigen::Vector3d new_pos = data_list[meshindex]->GetPos();
 	//Eigen::Vector3d new_pos2 = data_list[meshindex]->GetPos2();
@@ -306,8 +311,46 @@ void Project::connect_bezier_to_mesh(int meshindex, int animetionindex)
 
 	editMesh(moveable.bezier->GetLine(), moveable.meshindex);
 	data_list[meshindex]->animtoinindex = animetionindex;
+
+	selected_data_index = temp;
 	
 }
+
+void Project::fix_bezier_to_mesh(int meshindex)
+{
+	
+	if (data_list[meshindex]->animtoinindex < 0)
+		return;
+	int temp = selected_data_index;
+	
+	myMoveable moveable = bezierAnimations[data_list[meshindex]->animtoinindex];
+	Eigen::Vector3d new_pos = data_list[meshindex]->GetPos2() + data_list[meshindex]->GetPos();
+	//Eigen::Vector3d new_pos = data_list[meshindex]->GetPos2() ;
+	//Eigen::Vector3d new_pos = data_list[meshindex]->GetPos();
+	//Eigen::Vector3d new_pos2 = data_list[meshindex]->GetPos2();
+	Eigen::Vector3d old_pos = data_list[moveable.CPs[0]]->GetPos(); // pos of cp0
+
+	//std::cout << "newpos:" << new_pos << " - oldpos:" << old_pos << std::endl;
+	for (int i = 0; i < moveable.CPs.size(); i++)
+	{
+		selected_data_index = moveable.CPs[i];
+		float tt = new_pos.y() - old_pos.y();
+		ShapeTransformation(xTranslate, new_pos.x() - old_pos.x(), 0);
+		ShapeTransformation(yTranslate, new_pos.y() - old_pos.y(), 0);
+		ShapeTransformation(zTranslate, new_pos.z() - old_pos.z(), 0);
+	}
+	selected_data_index = moveable.meshindex;
+	ShapeTransformation(xTranslate, new_pos.x() - old_pos.x(), 0);
+	ShapeTransformation(yTranslate, new_pos.y() - old_pos.y(), 0);
+	ShapeTransformation(zTranslate, new_pos.z() - old_pos.z(), 0);
+
+	//editMesh(moveable.bezier->GetLine(), moveable.meshindex);
+	//data_list[meshindex]->animtoinindex = animetionindex;
+
+	selected_data_index = temp;
+
+}
+
 void Project::translateControl_no_update(int type, float amt, myMoveable obj, int cpnum, bool preserve)
 {
 	int mesh_index = obj.CPs[cpnum];
@@ -317,12 +360,28 @@ void Project::translateControl_no_update(int type, float amt, myMoveable obj, in
 	Eigen::Vector4d posv4 = Eigen::Vector4d();
 	Eigen::Vector3d pos = data_list[mesh_index]->GetPos();
 	posv4 << pos.x(), pos.y(), pos.z(), 0;
-	obj.bezier->MoveControlPoint(0, cpnum, false, posv4);
+
+	int segmentnum = (cpnum - 1) / 3;
+	int CP_in_segment = cpnum % 3;
+	if (segmentnum < 0)
+		segmentnum = 0;
+	if (CP_in_segment == 0 && cpnum != 0)
+		CP_in_segment = 3;
+
+	obj.bezier->MoveControlPoint(segmentnum, CP_in_segment, false, posv4);
 	if (preserve)
 	{
 		//TODO
 	}
 }
+
+int Project::get_CP0(int meshidx) {
+	int animtoinindex = data_list[meshidx]->animtoinindex;
+	if (animtoinindex < 0)
+		return -1;
+	return bezierAnimations[animtoinindex].CPs[0];
+}
+
 void Project::translateControl(int type, float amt,int mesh_index,bool preserve)
 {
 	selected_data_index = mesh_index;
@@ -351,23 +410,35 @@ void Project::translateControl(int type, float amt,int mesh_index,bool preserve)
 
 
 	Eigen::Vector4d posv4 = Eigen::Vector4d();
-	Eigen::Vector3d pos = data_list[mesh_index]->GetPos();
+	//Eigen::Vector3d pos = data_list[mesh_index]->GetPos();
+	Eigen::Vector3d pos = data_list[mesh_index]->GetPos()+ data_list[mesh_index]->GetPos2();
 	posv4 << pos.x(), pos.y(), pos.z(), 0;
-	mybez->bezier->MoveControlPoint(0, CP_num, false, posv4);
+
+
+	int segmentnum = (CP_num - 1) / 3;
+	int CP_in_segment = CP_num % 3;
+	if (segmentnum < 0)
+		segmentnum = 0;
+	if (CP_in_segment == 0 && CP_num != 0)
+		CP_in_segment = 3;
+	mybez->bezier->MoveControlPoint(segmentnum, CP_in_segment, false, posv4);
+	if (segmentnum +1 < (int)(mybez->CPs.size() / 3) && CP_in_segment == 3)
+	{
+		mybez->bezier->MoveControlPoint(segmentnum+1, 0, false, posv4);
+	}
 	if (preserve)
 	{
 		//TODO
 	}
 	editMesh(mybez->bezier->GetLine(),mybez->meshindex);
-	selected_data_index = mesh_index;
+	//selected_data_index = mesh_index;
 }
 void Project::translateControl( int mesh_index, bool preserve)
 {
-	//selected_data_index = mesh_index;
-	//ShapeTransformation(type, amt, 0);
-	myMoveable* mybez;
+
+	myMoveable* mybez = NULL;
 	int CP_num = -1;
-	for (int i = 0; i < bezierAnimations.size(); i++)
+	for (int i = 0; i < bezierAnimations.size() && mybez == NULL; i++)
 	{
 		for (CP_num = 0; CP_num < bezierAnimations[i].CPs.size(); CP_num++)
 		{
@@ -383,7 +454,56 @@ void Project::translateControl( int mesh_index, bool preserve)
 			// maybe we need to change it to add a flag to mesh_index
 			return;
 		}
-		break;
+		//break;
+	}
+
+
+
+	Eigen::Vector4d posv4 = Eigen::Vector4d();
+	Eigen::Vector3d pos = data_list[mesh_index]->GetPos()+ data_list[mesh_index]->GetPos2();
+	posv4 << pos.x(), pos.y(), pos.z(), 0;
+
+
+	int segmentnum = (CP_num - 1) / 3;
+	int CP_in_segment = CP_num % 3;
+	if (segmentnum < 0)
+		segmentnum = 0;
+	if (CP_in_segment == 0 && CP_num != 0)
+		CP_in_segment = 3;
+	mybez->bezier->MoveControlPoint(segmentnum, CP_in_segment, false, posv4);
+	if (segmentnum + 1 < (int)(mybez->CPs.size() / 3) && CP_in_segment == 3)
+	{
+		mybez->bezier->MoveControlPoint(segmentnum + 1, 0, false, posv4);
+	}
+	if (preserve)
+	{
+		//TODO
+	}
+	editMesh(mybez->bezier->GetLine(), mybez->meshindex);
+	//selected_data_index = mesh_index;
+	
+	/*
+	//selected_data_index = mesh_index;
+	//ShapeTransformation(type, amt, 0);
+	myMoveable* mybez = NULL;
+	int CP_num = -1;
+	for (int i = 0; i < bezierAnimations.size() && mybez == NULL; i++)
+	{
+		for (CP_num = 0; CP_num < bezierAnimations[i].CPs.size(); CP_num++)
+		{
+			if (bezierAnimations[i].CPs[CP_num] == mesh_index)
+			{
+				mybez = &bezierAnimations[i];
+				break;
+			}
+		}
+		if (i == bezierAnimations.size())
+		{
+			// if we got here that means that mesh_index is not a control point;
+			// maybe we need to change it to add a flag to mesh_index
+			return;
+		}
+		//break;
 	}
 
 
@@ -391,12 +511,21 @@ void Project::translateControl( int mesh_index, bool preserve)
 	Eigen::Vector4d posv4 = Eigen::Vector4d();
 	Eigen::Vector3d pos = data_list[mesh_index]->GetPos();
 	posv4 << pos.x(), pos.y(), pos.z(), 0;
-	mybez->bezier->MoveControlPoint(0, CP_num, false, posv4);
+
+
+	int segmentnum = (CP_num - 1) / 3;
+	int CP_in_segment = CP_num % 3;
+	if (segmentnum < 0)
+		segmentnum = 0;
+	if (CP_in_segment == 0 && CP_num != 0)
+		CP_in_segment = 3;
+
+	mybez->bezier->MoveControlPoint(segmentnum, CP_in_segment, false, posv4);
 	if (preserve)
 	{
 		//TODO
 	}
-	editMesh(mybez->bezier->GetLine(), mybez->meshindex);
+	editMesh(mybez->bezier->GetLine(), mybez->meshindex);*/
 }
 
 //not used
@@ -473,6 +602,29 @@ int Project::unhidelayer(int layer)
 	}
 	return 0;
 }
+void Project::hide_editor() {
+	for (int mesh = 0; mesh < Cameras.size(); mesh++)
+		data_list[abs(Cameras[mesh])]->hide = true;
+	for (int mesh = 0; mesh < bezierAnimations.size(); mesh++) {
+		myMoveable* bez = &bezierAnimations[mesh];
+		data_list[bez->meshindex]->hide = true;
+		
+		for (int i = 0; i < bez->CPs.size(); i++)
+			data_list[bez->CPs[i]]->hide = true;
+	}
+		
+}
+void Project::unhide_editor() {
+	for (int mesh = 0; mesh < Cameras.size(); mesh++)
+		data_list[abs(Cameras[mesh])]->hide = false;
+	for (int mesh = 0; mesh < bezierAnimations.size(); mesh++) {
+		myMoveable* bez = &bezierAnimations[mesh];
+		data_list[bez->meshindex]->hide = false;
+
+		for (int i = 0; i < bez->CPs.size(); i++)
+			data_list[bez->CPs[i]]->hide = false;
+	}
+}
 void Project::changelayer(int layer, int objectindex)
 {
 	data_list[objectindex]->layer = layer;
@@ -488,6 +640,18 @@ int Project::addCamera(Eigen::Vector3f pos) {
 	ShapeTransformation(yTranslate, pos.y(), 0);
 	ShapeTransformation(zTranslate, pos.z(), 0); 
 	Cameras.push_back(Camera);
+	selected_data_index = temp;
+	return Camera;
+}
+int Project::addCamera2(Eigen::Vector3f pos) {
+	int temp = selected_data_index;
+	int Camera = LoadMesh(Cube, 4, 2);
+	selected_data_index = Camera;
+	//ShapeTransformation(scaleAll, 0.3, 0);
+	ShapeTransformation(xTranslate, pos.x(), 0);
+	ShapeTransformation(yTranslate, pos.y(), 0);
+	ShapeTransformation(zTranslate, pos.z(), 0); 
+	Cameras.push_back(-Camera);
 	selected_data_index = temp;
 	return Camera;
 }
@@ -518,6 +682,7 @@ void Project::Init()
 		AddTexture("textures/grass.bmp", 2),
 		AddTexture("textures/water.bmp", 2),
 		AddTexture("textures/Camera.png", 2),
+		AddTexture("textures/Camera2.png", 2),
 	};
 
 	unsigned int cubeMapTextureIDs[] = { 
@@ -555,7 +720,7 @@ void Project::Init()
 	current_Camera = Cameras.size() - 1;
 
 	//add camera 2
-	selected_data_index = addCamera(Eigen::Vector3f(5, 0, 0));
+	selected_data_index = addCamera2(Eigen::Vector3f(5, 0, 0));
 
 	//add camera with bezier
 	int camera3 = addCamera(Eigen::Vector3f(-4, 3, 0));
@@ -576,33 +741,33 @@ void Project::Init()
 //yadern
 
 	//add a plane for multipick
-	int id2 = AddShape(Plane, -2, TRIANGLES, 1);
-	SetShapeShader(id2, transparentshader);
-	SetShapeMaterial(id2, 0);
-	
-	selected_data_index = id2;
-	ShapeTransformation(zTranslate, -1.1, 1);
-    	SetShapeStatic(id2);
-
-
-	// attempt to load a transparent object
-	int id3 = AddShape(Plane, -1, TRIANGLES);
-	idBlend = id3;
-	//data_list[id3]->AddViewport(3);
-	SetShapeShader(id3, 2);
-	SetShapeMaterial(id3, 0);
-	selected_data_index = id3;
-	ShapeTransformation(xTranslate, 2, 1);
-	ShapeTransformation(yTranslate, 2, 1);
+	//int id2 = AddShape(Plane, -2, TRIANGLES, 1);
+	//SetShapeShader(id2, transparentshader);
+	//SetShapeMaterial(id2, 0);
+	//
+	//selected_data_index = id2;
 	//ShapeTransformation(zTranslate, -1.1, 1);
-	//std::cout << idBlend << std::endl;
+ //   	SetShapeStatic(id2);
 
-	int id4 = AddShape(Cube, -1, TRIANGLES);
-	SetShapeShader(id4, 2);
-	SetShapeMaterial(id4, 0);
-	selected_data_index = id4;
-	ShapeTransformation(xTranslate, -2, 1);
-	ShapeTransformation(yTranslate, -2, 1);
+
+	//// attempt to load a transparent object
+	//int id3 = AddShape(Plane, -1, TRIANGLES);
+	//idBlend = id3;
+	////data_list[id3]->AddViewport(3);
+	//SetShapeShader(id3, 2);
+	//SetShapeMaterial(id3, 0);
+	//selected_data_index = id3;
+	//ShapeTransformation(xTranslate, 2, 1);
+	//ShapeTransformation(yTranslate, 2, 1);
+	////ShapeTransformation(zTranslate, -1.1, 1);
+	////std::cout << idBlend << std::endl;
+
+	//int id4 = AddShape(Cube, -1, TRIANGLES);
+	//SetShapeShader(id4, 2);
+	//SetShapeMaterial(id4, 0);
+	//selected_data_index = id4;
+	//ShapeTransformation(xTranslate, -2, 1);
+	//ShapeTransformation(yTranslate, -2, 1);
 	
 
 //natai    
@@ -712,17 +877,19 @@ void Project::Animate() {
 	{
 
 		int temp = selected_data_index;
+		selected_data_index = -1;
 		mytime += tick;
 		for (int i = 0; i < data_list.size(); i++)
 			if (data_list[i]->animtoinindex >= 0)
 				Animate_obj(i, data_list[i]->animtoinindex, mytime);
 
-		selected_data_index = temp;
+		
 		//std::cout << "animate isactive" << std::endl;
 		ticksCounter += 1;
 		
-		if(selected_data_index > 0 )
-			data()->MyRotate(Eigen::Vector3d(0, 1, 0), 0.01);
+		//if(selected_data_index > 0 )
+			//data()->MyRotate(Eigen::Vector3d(0, 1, 0), 0.01);
+		selected_data_index = temp;
 	}
 
 	//std::cout << "animate out of if" << std::endl;

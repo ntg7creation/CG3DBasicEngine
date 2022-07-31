@@ -44,7 +44,7 @@ public:
 	void WhenTranslate();
 	void Animate() override;
 	void ScaleAllShapes(float amt, int viewportIndx);
-	
+	int Project::get_CP0(int mesh);
 	~Project(void);
 
 	//---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -64,6 +64,7 @@ public:
 
 	};
 	std::vector<myMoveable> bezierAnimations;
+	
 
 
 	void Connect_Controls(myMoveable);
@@ -86,6 +87,7 @@ public:
 	void translateControl(int mesh_index,bool preserve);
 	void translateControl_no_update(int type, float amt, myMoveable obj,int cpnum, bool preserve);
 	void connect_bezier_to_mesh(int meshindex, int animetionindex);
+	void fix_bezier_to_mesh(int meshindex);
 	int addbezier(int meshindex);
 
 	void Animate_obj(int object_index, int animetionindex,float time);
@@ -97,7 +99,8 @@ public:
 	int unhidelayer(int layer);
 
 	int testloadcostomemesh();
-
+	void hide_editor();
+	void unhide_editor();
 
 	void moveCamera(Eigen::Vector3d pos);
 
@@ -107,6 +110,7 @@ public:
 	/// <param name="pos"></param>
 	/// <returns>Camera ID</returns>
 	int addCamera(Eigen::Vector3f pos);
+	int addCamera2(Eigen::Vector3f pos);//add animtion cam
 
 	/// <summary>
 	/// change view to a diffrent camera

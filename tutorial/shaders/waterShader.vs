@@ -24,13 +24,22 @@ float amplitude = 1; // not used
 vec4 wave1 = vec4(1,0,0.5,20);// direction.x direction.y Steepness wave_length
 vec4 wave2 = vec4(0,1,0.25,40);
 vec4 wave3 = vec4(1,1,0.15,20);
+
+vec4 wave4 = vec4(0.7489,0.6391,0.465,17);
+vec4 wave5 = vec4(0.6306,0.5662,0.289,35);
+vec4 wave6 = vec4(0.0663,0.8983,0.481,39);
+vec4 wave7 = vec4(0.4848,0.2276,0.135,41);
+vec4 wave8 = vec4(0.5347,0.0373,0.460,21);
+
+
 //float Steepness = 0.5;  // var3
 //float wave_length = 20;  //var4
 float speed  = 1; // not used
 //vec2 direction = normalize(vec2(0.5,0.5)); // var 1,2
 #define M_PI 3.1415926535897932384626433832795
 #define Earth_G 9.8
-
+float ampControl = 0.7;
+float flatenControl= 0.6;
 float maxAmplitude = 0;
 vec3 GerstnerWave(vec4 wave,vec3 pos,inout vec3 tangent,inout vec3 binormal)
 {
@@ -42,7 +51,7 @@ vec3 GerstnerWave(vec4 wave,vec3 pos,inout vec3 tangent,inout vec3 binormal)
 	float Phase_speed = sqrt(Earth_G / k); // swap in Phase_speed instead of speed for earth like waves
 	vec2 direction = wave.xy;
 	float f = k * (dot(direction,(pos.xz+tranlasion.xz)) - Phase_speed * time);
-	float amplitude = wave.z / k;
+	float amplitude = wave.z *ampControl/ k;
 	maxAmplitude+= amplitude;
 
 	newX = pos.x + wave.x* amplitude * cos(f);
@@ -77,6 +86,12 @@ vec3 vert(vec3 pos)
 		p += GerstnerWave(wave1, gridPoint, tangent, binormal);
 		p += GerstnerWave(wave2, gridPoint, tangent, binormal);
 		p += GerstnerWave(wave3, gridPoint, tangent, binormal);
+		p += GerstnerWave(wave4, gridPoint, tangent, binormal);
+
+		p += GerstnerWave(wave5, gridPoint, tangent, binormal);
+		p += GerstnerWave(wave6, gridPoint, tangent, binormal);
+		p += GerstnerWave(wave7, gridPoint, tangent, binormal);
+		p += GerstnerWave(wave8, gridPoint, tangent, binormal);
 		vec3 normal = normalize(cross(binormal, tangent));
 		newnormal = normal;
 	
@@ -95,7 +110,7 @@ void main()
 	float maxY =position.y +  maxAmplitude;
 	float minY =position.y -  maxAmplitude;
 	float hight_bloom = 0.5 + (position3.y - minY)/(maxY-minY);
-
+	position3 = vec3(position3.x,position3.y*flatenControl,position3.z);
 	texCoord0 = texcoord;
 	//color0 = vec3(Ka);
 	//color0 =  (hight_bloom+ newnormal+vec3(1))/2*vec3(1,1,1);
