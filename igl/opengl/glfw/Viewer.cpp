@@ -437,6 +437,12 @@ IGL_INLINE bool
                 else if (parents[i] == -2) {
                     Model = View.inverse() * Model;
                 }
+                /*if (i == 9) {
+                    glEnable(GL_BLEND);
+                    glBlendFunc(GL_ONE_MINUS_SRC_COLOR, GL_SRC_COLOR);
+                }
+                else
+                    glDisable(GL_BLEND);*/
                 if (!(flgs & 65536))
                 {
                     Update(Proj, View, Model, shape->GetShader(),i);
@@ -652,10 +658,10 @@ IGL_INLINE bool
                 translateControl(xTranslate, -((float)xrel) / 90, idx, false);*/
             for (int p : pShapes) {
                 selected_data_index = p;
-                int idx = selected_data_index;
-                if (data_list[idx]->iscontrolpoint) {
-                    translateControl(xTranslate, -((float)xrel) / 90, idx, false);
-                    translateControl(yTranslate, ((float)yrel) / 90, idx, false);
+                //int idx = selected_data_index;
+                if (data_list[p]->iscontrolpoint) {
+                    translateControl(xTranslate, -((float)xrel) / 90, p, false);
+                    translateControl(yTranslate, ((float)yrel) / 90, p, false);
                 }
                 else {
                     WhenTranslate(scnMat * cameraMat, -((float)xrel / 90), ((float)yrel / 90));
@@ -826,7 +832,13 @@ IGL_INLINE bool
             Eigen::Vector4d pos = MVP * Model * Eigen::Vector4d(0,0,0,1);
             float xpix = (1 + pos.x() / pos.z()) * viewport.z() / 2;
             float ypix = (1 + pos.y() / pos.z()) * viewport.w() / 2;
-            if (data_list[i]->Is2Render(viewportIndx) && xpix < right && xpix > left && ypix < bottom && ypix > up)
+            bool contains = false;
+            for (int p : pShapes) {
+                if (i == p) {
+                    contains = true;
+                }
+            }
+            if (!contains && data_list[i]->isPickable && data_list[i]->Is2Render(viewportIndx) && xpix < right && xpix > left && ypix < bottom && ypix > up)
             {
                 pShapes.push_back(i);
                 data_list[i]->AddViewport(newViewportIndx);

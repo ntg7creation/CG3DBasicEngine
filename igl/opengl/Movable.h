@@ -10,6 +10,7 @@ public:
 	enum{preRot,postRot,phiRot,thetaRot,psiRot,psiPhiRot};
 	int animtoinindex = -1;
 	bool iscontrolpoint = false; 
+	bool isPickable = true;
 	Movable();
 	Movable(const Movable& mov);
 	Eigen::Matrix4f MakeTransScale();

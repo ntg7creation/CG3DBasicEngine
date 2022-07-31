@@ -65,6 +65,7 @@ void Renderer::SwapDrawInfo(int indx1, int indx2)
 
 IGL_INLINE void Renderer::draw_by_info(int info_index){
     DrawInfo* info = drawInfos[info_index];
+    //std::cout << drawInfos.size() << std::endl;
     buffers[info->bufferIndx]->Bind();
     glViewport(viewports[info->viewportIndx].x(), viewports[info->viewportIndx].y(), viewports[info->viewportIndx].z(), viewports[info->viewportIndx].w());
     if (info->flags & scissorTest)
@@ -114,7 +115,7 @@ IGL_INLINE void Renderer::draw_by_info(int info_index){
         }
         else
         {
-            if (info->flags & stencil2 /*& drawHighlight*/)
+            if (info->flags & stencil2)
             {
                 glStencilFunc(GL_EQUAL, 1, 0xFF);
                 glStencilOp(GL_KEEP, GL_KEEP, GL_ZERO);
@@ -137,7 +138,7 @@ IGL_INLINE void Renderer::draw_by_info(int info_index){
     if (info->flags & blend)
     {
         glEnable(GL_BLEND);
-        glBlendFunc(GL_ONE_MINUS_SRC_ALPHA, GL_SRC_ALPHA);
+        glBlendFunc(GL_ONE_MINUS_SRC_COLOR, GL_SRC_COLOR);
     }
     else
         glDisable(GL_BLEND);

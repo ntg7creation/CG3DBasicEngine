@@ -1,4 +1,5 @@
 #include "Project.h"
+#include "igl/frustum.h"
 #include <iostream>
 
 
@@ -179,6 +180,7 @@ void Project::Animate_obj(int object_index, int animetionindex, float time)
 
 }
 int CP2;
+int idBlend;
 int Project::addbezier(int meshindex)
 {
 	if (data_list[meshindex]->animtoinindex < 0) {
@@ -349,6 +351,7 @@ void Project::Init()
 		AddShader("shaders/basicShader");
 		AddShader("shaders/waterShader");
 		AddShader("shaders/pickingShader");
+		AddShader("shaders/basicShader");
 		int textureID = 0;
 		textureID = AddTexture("textures/plane.png", 2);
 		textureID = AddTexture("textures/cubemaps/Daylight Box_", 3);
@@ -387,11 +390,32 @@ void Project::Init()
 	SetShapeShader(id2, 4);
 	SetShapeMaterial(id2, 0);
 	
-
 	selected_data_index = id2;
 	ShapeTransformation(zTranslate, -1.1, 1);
 
 	SetShapeStatic(id2);
+
+	// attempt to load a transparent object
+	int id3 = AddShape(Plane, -1, TRIANGLES, 3);
+	idBlend = id3;
+	//data_list[id3]->AddViewport(3);
+	SetShapeShader(id3, 2);
+	SetShapeMaterial(id3, 0);
+	selected_data_index = id3;
+	ShapeTransformation(xTranslate, 2, 1);
+	ShapeTransformation(yTranslate, 2, 1);
+	//ShapeTransformation(zTranslate, -1.1, 1);
+	//std::cout << idBlend << std::endl;
+
+	int id4 = AddShape(Cube, -1, TRIANGLES, 3);
+	SetShapeShader(id4, 2);
+	SetShapeMaterial(id4, 0);
+	selected_data_index = id4;
+	ShapeTransformation(xTranslate, -2, 1);
+	ShapeTransformation(yTranslate, -2, 1);
+	
+
+	
 
 }
 
@@ -406,6 +430,9 @@ void Project::Update(const Eigen::Matrix4f& Proj, const Eigen::Matrix4f& View, c
 	int g = ((shapeIndx+1) & 0x0000FF00) >>  8;
 	int b = ((shapeIndx+1) & 0x00FF0000) >> 16;
 	//rgb -> id
+
+	//Eigen::Matrix4f _projection;
+	//igl::frustum(-1, 1, -1, 1, 1, 3, _projection);
 
 		s->Bind();
 	s->SetUniformMat4f("Proj", Proj);
