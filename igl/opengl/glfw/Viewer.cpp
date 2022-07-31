@@ -776,6 +776,7 @@ IGL_INLINE bool
         }
         std::cout << index << std::endl;
         selected_data_index = index;
+		lastPickedIndex = index;
         
         /*if (index >= data_list.size())
             return true;
@@ -787,8 +788,10 @@ IGL_INLINE bool
         if (found)
             std::remove(pShapes.begin(), pShapes.end(), index);
         else
-            pShapes.push_back(index);*/
+            pShapes.push_back(index);
 
+
+		selected_data_index = index;*/
 
         return true;
 

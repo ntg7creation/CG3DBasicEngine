@@ -15,9 +15,14 @@
 			Project* scn = (Project*)rndr->GetScene();
 			rndr->UnPick(2);
 			double x2, y2;
-			rndr->isReleased = false;
 			
 			glfwGetCursorPos(window, &x2, &y2);
+
+			rndr->isReleased = false;
+
+			if (x2 < 350) return;
+
+
 			rndr->UpdatePress(x2, y2);
 			if (button == GLFW_MOUSE_BUTTON_RIGHT)
 				rndr->Pressed();
@@ -59,7 +64,7 @@
 		{
 			//rndr->MoveCamera(0, rndr->zTranslate, (float)yoffset);
 
-			rndr->ZoomCamera(0, scn->zTranslate, 0.5f* yoffset);
+			rndr->ZoomCamera(0, scn->zTranslate, 0.5f* -yoffset);
 			scn->moveCamera(rndr->cameras[0]->GetPos2());
 		}
 		

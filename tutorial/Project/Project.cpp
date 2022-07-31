@@ -123,16 +123,20 @@ int Project::InitCubeMap(int matID)
 //}
 void Project::SetCubeMap(int matID) {
 	SetShapeMaterial(cubeMapShapeID, matID + numObjectsTextures);
+	
 }
 void Project::SetMaterialOfPickedObjs(int matID) {
 	//std::cout << "inside SetMaterialOfPickedObjs()" << std::endl;
 
-	pShapes.push_back(2);// TODO : remove debug line
+	//pShapes.push_back(2);// TODO : remove debug line
 
 	// for all picked Shapes (inside pShapes or pickedShapes)
-	for (int index : pShapes) {
+	/*for (int index : pShapes) {
 		std::cout << "calling SetMaterial() for shape id: " << index << std::endl;
 		data_list[index]->SetMaterial(matID);
+	}*/
+	if (lastPickedIndex != -1) {
+		data_list[lastPickedIndex]->SetMaterial(matID);
 	}
 }
 int Project::LoadMesh(shapes Shape, int matID, int shaderID, int parent)

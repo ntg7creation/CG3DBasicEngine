@@ -155,7 +155,7 @@ namespace glfw
     inline void Deactivate() { isActive = false; }
     int AddShader(const std::string& fileName);
 public:
-
+	int lastPickedIndex = -1;
 	Renderer* rndr;
 
     //////////////////////
