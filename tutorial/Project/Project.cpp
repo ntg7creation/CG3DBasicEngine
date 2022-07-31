@@ -1,5 +1,7 @@
 #include "Project.h"
 #include <iostream>
+#include "../../igl/file_dialog_open.h"
+#include "../../igl/file_dialog_save.h"
 
 #define M_PI 3.1415926535897932384626433832795
 static void printMat(const Eigen::Matrix4d& mat)
@@ -434,6 +436,12 @@ int Project::addgridmesh(int resT)
 
 }
 
+
+void Project::addLayer() {
+	numOfLayers += 1;
+}
+
+
 int Project::hidelayer(int layer)
 {
 	int count = 0;
@@ -586,7 +594,8 @@ void Project::Init()
 
 void Project::Update(const Eigen::Matrix4f& Proj, const Eigen::Matrix4f& View, const Eigen::Matrix4f& Model, unsigned int  shaderIndx, unsigned int shapeIndx)
 {
-	
+
+
 	//Animate_obj(cubeID,bezierAnimations[0], mytime);
 	Shader* s = shaders[shaderIndx];
 	int r = ((shapeIndx + 1) & 0x000000FF) >> 0;
@@ -635,9 +644,11 @@ void Project::WhenRotate()
 {
 }
 
+
 void Project::WhenTranslate()
 {
 }
+
 
 void Project::Animate() {
 
@@ -680,7 +691,41 @@ void Project::ScaleAllShapes(float amt,int viewportIndx)
 	}
 }
 
+
 Project::~Project(void)
 {
 }
 
+
+void Project::openDialogLoadSceneInfo() {
+	std::string fname = igl::file_dialog_open("", "Scene file (*.scn)\0*.scn\0All files (*.*)\0*.*");
+
+	if (fname.length() == 0)
+		return;
+
+	this->loadSceneFromFile(fname.c_str());
+	//load_scene(fname);
+}
+
+void Project::openDialogSaveSceneInfo() {
+	char buf[32];
+	sprintf(buf, "scene%d.scn", numOfSaves + 1);
+	std::string fname = igl::file_dialog_save(buf, "Scene file (*.scn)\0*.scn\0All files (*.*)\0*.*");
+
+	if (fname.length() == 0)
+		return;
+
+	this->saveSceneToFile(fname.c_str());
+	//save_scene(fname);
+	numOfSaves += 1;
+}
+
+
+void Project::loadSceneFromFile(const std::string& sceneInfoFileName) {
+	
+}
+
+
+void Project::saveSceneToFile(const std::string& sceneInfoFileName) {
+	
+}

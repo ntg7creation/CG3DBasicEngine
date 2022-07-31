@@ -20,7 +20,7 @@ namespace igl
   // Usage:
   //   char buffer[FILE_DIALOG_MAX_BUFFER];
   //   get_save_file_path(buffer);
-  IGL_INLINE std::string file_dialog_save();
+  IGL_INLINE std::string file_dialog_save(const char* presetFileName = "", const char* filter = "All files (*.*)\0*.*\0");
 }
 
 #ifndef IGL_STATIC_LIBRARY
