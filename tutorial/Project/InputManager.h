@@ -50,12 +50,15 @@
 		
 		if (rndr->IsPicked())
 		{
-			rndr->UpdateZpos((int)yoffset);
-			rndr->MouseProccessing(GLFW_MOUSE_BUTTON_MIDDLE);
+			/*rndr->UpdateZpos((int)yoffset);
+			rndr->MouseProccessing(GLFW_MOUSE_BUTTON_MIDDLE);*/
 		}
 		else
 		{
-			rndr->MoveCamera(0, rndr->zTranslate, (float)yoffset);
+			//rndr->MoveCamera(0, rndr->zTranslate, (float)yoffset);
+
+			rndr->ZoomCamera(0, scn->zTranslate, 0.5f* yoffset);
+			scn->moveCamera(rndr->cameras[0]->GetPos2());
 		}
 		
 	}
