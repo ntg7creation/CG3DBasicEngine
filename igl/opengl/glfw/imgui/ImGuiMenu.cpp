@@ -224,7 +224,7 @@ namespace igl
 
 					ImGui::Indent();
 
-					if ( ! ((Project*)(viewer))->isActive) {
+					if (!((Project*)(viewer))->isActive) {
 						if (ImGui::Button("Play animation", ImVec2(-1, 30))) {
 							((Project*)(viewer))->ticksCounter = 0;
 							((Project*)(viewer))->Activate();
@@ -331,13 +331,17 @@ namespace igl
 
 						ImGui::Indent();
 
+						if (ImGui::Button("Add bezier to object", ImVec2(-1, 0))) {
+							scn->addbezier(scn->lastPickedIndex);
+						}
+
 						static Eigen::Vector3d preZoomPos = scn->data_list[scn->current_Camera]->GetPos();
 						static bool zoomedIn = false;
 
 						if (zoomedIn) {
-							if (ImGui::Button( "Zoom out to default state", ImVec2(-1, 0))) {
+							if (ImGui::Button("Zoom out to default state", ImVec2(-1, 0))) {
 								//std::cout << "Choose Area to Zoom into clicked but not implemented" << std::endl;
-								
+
 								// ???
 								scn->rndr->ZoomCamera(0, preZoomPos);
 								zoomedIn = !zoomedIn;
@@ -352,7 +356,7 @@ namespace igl
 							}
 						}
 
-						
+
 						//scn->moveCamera(rndr->cameras[0]->GetPos2());
 						if (ImGui::Button("Hard zoom into picked object", ImVec2(-1, 0))) {
 							scn->rndr->HardZoomCamera(0, scn->data_list[scn->cubeID]->GetPos(), scn->data_list[scn->lastPickedIndex]->GetRotation());
@@ -366,13 +370,13 @@ namespace igl
 						if (((Project*)(viewer))->lastPickedIndex != -1) {
 
 							int tempLayer = ((Project*)(viewer))->data_list[((Project*)(viewer))->lastPickedIndex]->layer;
-							
-								ImGui::Text(
-									tempLayer != -1 ?
-									std::to_string(tempLayer).c_str() :
-									"N/A"
-								);
-							
+
+							ImGui::Text(
+								tempLayer != -1 ?
+								std::to_string(tempLayer).c_str() :
+								"N/A"
+							);
+
 						}
 
 						static int newLayerIndex = 0;
@@ -408,7 +412,7 @@ namespace igl
 						//const char* items[] = { "AAAA", "BBBB", "CCCC", "DDDD", "EEEE", "FFFF", "GGGG", "HHHH", "IIII", "JJJJ", "KKKK", "LLLLLLL", "MMMM", "OOOOOOO" };
 						static int selectedObjMaterial = 0; //-1; // Here we store our selection data as an index.
 						//const char* combo_label = "";  // Label to preview before opening the combo (technically it could be anything)
-						if (ImGui::BeginCombo("##material index", (selectedObjMaterial == -1 ? "": std::to_string(selectedObjMaterial).c_str())))
+						if (ImGui::BeginCombo("##material index", (selectedObjMaterial == -1 ? "" : std::to_string(selectedObjMaterial).c_str())))
 						{
 							for (int n = 0; n < ((Project*)(viewer))->numObjectsTextures; n++)
 							{
@@ -461,7 +465,7 @@ namespace igl
 						ImGui::Text(
 							std::to_string(scn->current_Camera).c_str()
 						);
-						
+
 						if (ImGui::Button("Move to next camera", ImVec2(-1, 0))) {
 
 							scn->current_Camera++;
@@ -478,8 +482,8 @@ namespace igl
 						ImGui::NewLine();
 
 						//static int selectedCamera = 0; //-1; // Here we store our selection data as an index.
-						static float pos[3] = {0};
-						
+						static float pos[3] = { 0 };
+
 						ImGui::InputFloat3("position of new camera", pos);
 						if (ImGui::Button("Add an animation Camera", ImVec2(-1, 0))) {
 							//std::cout << "Add camera clicked but not implemented" << std::endl;
@@ -495,9 +499,9 @@ namespace igl
 							const float FAR = 120.0f;
 
 							((Project*)(viewer))->rndr->AddCamera(
-								Eigen::Vector3d(0, 0, 3), 
-								CAMERA_ANGLE, 
-								(float)DISPLAY_WIDTH / (float)DISPLAY_HEIGHT / 2, 
+								Eigen::Vector3d(0, 0, 3),
+								CAMERA_ANGLE,
+								(float)DISPLAY_WIDTH / (float)DISPLAY_HEIGHT / 2,
 								NEAR, FAR
 							);
 
@@ -505,7 +509,7 @@ namespace igl
 
 							scn->addCamera(Eigen::Vector3f(pos));
 						}
-						
+
 						//const char* combo_label = "";  // Label to preview before opening the combo (technically it could be anything)
 						//if (ImGui::BeginCombo("##camera index", (selectedCamera == -1 ? "" : std::to_string(selectedCamera).c_str())))
 						//{
@@ -562,7 +566,7 @@ namespace igl
 
 						//ImGui::InputInt("Layer Number", &pickedLayerIndex);
 
-						
+
 						//const char* combo_label = "";  // Label to preview before opening the combo (technically it could be anything)
 						//if (ImGui::BeginCombo("##layer index", (selectedLayer == -1 ? "" : std::to_string(selectedLayer).c_str())))
 						//{
@@ -642,139 +646,139 @@ namespace igl
 
 
 
-/// ********************************** PREVIOUS CODE ********************************
+					/// ********************************** PREVIOUS CODE ********************************
 
-					//ImGui::Begin(
-					//	"Menu", p_open,
-					//	window_flags
-					//);
+										//ImGui::Begin(
+										//	"Menu", p_open,
+										//	window_flags
+										//);
 
-					//ImGui::SetWindowPos(ImVec2((float)0, (float)0), ImGuiCond_Always);
-					//ImGui::SetWindowSize(ImVec2((float)0, (float)0), ImGuiCond_Always);
-					//ImGui::End();
-					//no_move = true;
-					//no_resize = true;
+										//ImGui::SetWindowPos(ImVec2((float)0, (float)0), ImGuiCond_Always);
+										//ImGui::SetWindowSize(ImVec2((float)0, (float)0), ImGuiCond_Always);
+										//ImGui::End();
+										//no_move = true;
+										//no_resize = true;
 
-					//ImGui::Begin(
-					//	"Menu", p_open,
-					//	window_flags
-					//);
+										//ImGui::Begin(
+										//	"Menu", p_open,
+										//	window_flags
+										//);
 
-					//// Mesh
-					//if (ImGui::CollapsingHeader("Mesh", ImGuiTreeNodeFlags_DefaultOpen))
-					//{
-					//	float w = ImGui::GetContentRegionAvailWidth();
-					//	float p = ImGui::GetStyle().FramePadding.x;
-					//	if (ImGui::Button("Load##Mesh", ImVec2((w - p) / 2.f, 0)))
-					//	{
-					//		int savedIndx = viewer->selected_data_index;
-					//		// viewer->selected_data_index = viewer->parents.size();
-					//		// viewer->AddShape(viewer->xCylinder,-1,viewer->TRIANGLES);
-					//		viewer->open_dialog_load_mesh();
-					//		if (viewer->data_list.size() > viewer->parents.size())
-					//		{
+										//// Mesh
+										//if (ImGui::CollapsingHeader("Mesh", ImGuiTreeNodeFlags_DefaultOpen))
+										//{
+										//	float w = ImGui::GetContentRegionAvailWidth();
+										//	float p = ImGui::GetStyle().FramePadding.x;
+										//	if (ImGui::Button("Load##Mesh", ImVec2((w - p) / 2.f, 0)))
+										//	{
+										//		int savedIndx = viewer->selected_data_index;
+										//		// viewer->selected_data_index = viewer->parents.size();
+										//		// viewer->AddShape(viewer->xCylinder,-1,viewer->TRIANGLES);
+										//		viewer->open_dialog_load_mesh();
+										//		if (viewer->data_list.size() > viewer->parents.size())
+										//		{
 
-					//			viewer->parents.push_back(-1);
-					//			viewer->SetShapeViewport(viewer->selected_data_index, 0);
-					//			viewer->SetShapeShader(viewer->selected_data_index, 2);
-					//			viewer->SetShapeMaterial(viewer->selected_data_index, 0);
-					//			//viewer->data_list.back()->set_visible(false, 1);
-					//			//viewer->data_list.back()->set_visible(true, 2);
-					//			viewer->data_list.back()->UnHide();
-					//			viewer->data_list.back()->show_faces = 3;
-					//			viewer->data()->mode = viewer->TRIANGLES;
-					//			viewer->selected_data_index = savedIndx;
-					//		}
-					//	}
-					//	ImGui::SameLine(0, p);
-					//	if (ImGui::Button("Save##Mesh", ImVec2((w - p) / 2.f, 0)))
-					//	{
-					//		viewer->open_dialog_save_mesh();
-					//	}
-					//}
+										//			viewer->parents.push_back(-1);
+										//			viewer->SetShapeViewport(viewer->selected_data_index, 0);
+										//			viewer->SetShapeShader(viewer->selected_data_index, 2);
+										//			viewer->SetShapeMaterial(viewer->selected_data_index, 0);
+										//			//viewer->data_list.back()->set_visible(false, 1);
+										//			//viewer->data_list.back()->set_visible(true, 2);
+										//			viewer->data_list.back()->UnHide();
+										//			viewer->data_list.back()->show_faces = 3;
+										//			viewer->data()->mode = viewer->TRIANGLES;
+										//			viewer->selected_data_index = savedIndx;
+										//		}
+										//	}
+										//	ImGui::SameLine(0, p);
+										//	if (ImGui::Button("Save##Mesh", ImVec2((w - p) / 2.f, 0)))
+										//	{
+										//		viewer->open_dialog_save_mesh();
+										//	}
+										//}
 
-					//// Viewing options
-					//if (ImGui::CollapsingHeader("Viewing Options", ImGuiTreeNodeFlags_DefaultOpen))
-					//{
-					//	if (ImGui::Button("Center object", ImVec2(-1, 0)))
-					//	{
-					//		std::cout << "not implemented yet" << std::endl;
-					//		//      core[1].align_camera_center(viewer->data().V, viewer->data().F); TODO: add function like this to camera
-					//	}
-					//	//if (ImGui::Button("Snap canonical view", ImVec2(-1, 0)))
-					//	//{
-					//	//  core[1].snap_to_canonical_quaternion();
-					//	//}
+										//// Viewing options
+										//if (ImGui::CollapsingHeader("Viewing Options", ImGuiTreeNodeFlags_DefaultOpen))
+										//{
+										//	if (ImGui::Button("Center object", ImVec2(-1, 0)))
+										//	{
+										//		std::cout << "not implemented yet" << std::endl;
+										//		//      core[1].align_camera_center(viewer->data().V, viewer->data().F); TODO: add function like this to camera
+										//	}
+										//	//if (ImGui::Button("Snap canonical view", ImVec2(-1, 0)))
+										//	//{
+										//	//  core[1].snap_to_canonical_quaternion();
+										//	//}
 
-					//	// Zoom
-					//	ImGui::PushItemWidth(80 * menu_scaling());
-					//	if (camera[0]->_ortho)
-					//		ImGui::DragFloat("Zoom", &(camera[0]->_length), 0.05f, 0.1f, 20.0f);
-					//	else
-					//		ImGui::DragFloat("Fov", &(camera[0]->_fov), 0.05f, 30.0f, 90.0f);
+										//	// Zoom
+										//	ImGui::PushItemWidth(80 * menu_scaling());
+										//	if (camera[0]->_ortho)
+										//		ImGui::DragFloat("Zoom", &(camera[0]->_length), 0.05f, 0.1f, 20.0f);
+										//	else
+										//		ImGui::DragFloat("Fov", &(camera[0]->_fov), 0.05f, 30.0f, 90.0f);
 
-					//	// Select rotation type
-					//	static Eigen::Quaternionf trackball_angle = Eigen::Quaternionf::Identity();
-					//	static bool orthographic = true;
+										//	// Select rotation type
+										//	static Eigen::Quaternionf trackball_angle = Eigen::Quaternionf::Identity();
+										//	static bool orthographic = true;
 
-					//	// Orthographic view
-					//	ImGui::Checkbox("Orthographic view", &(camera[0]->_ortho));
-					//	if (camera[0]->_ortho) {
-					//		camera[0]->SetProjection(0, camera[0]->_relationWH);
-					//	}
-					//	else {
-					//		camera[0]->SetProjection(camera[0]->_fov > 0 ? camera[0]->_fov : 45, camera[0]->_relationWH);
-					//	}
+										//	// Orthographic view
+										//	ImGui::Checkbox("Orthographic view", &(camera[0]->_ortho));
+										//	if (camera[0]->_ortho) {
+										//		camera[0]->SetProjection(0, camera[0]->_relationWH);
+										//	}
+										//	else {
+										//		camera[0]->SetProjection(camera[0]->_fov > 0 ? camera[0]->_fov : 45, camera[0]->_relationWH);
+										//	}
 
-					//	ImGui::PopItemWidth();
-					//}
+										//	ImGui::PopItemWidth();
+										//}
 
-					//// Helper for setting viewport specific mesh options
-					//auto make_checkbox = [&](const char* label, unsigned int& option)
-					//{
-					//	return ImGui::Checkbox(label,
-					//		[&]() {
-					//			return drawInfos[1]->is_set(option);
-					//		},
-					//		[&](bool value) {
-					//			return drawInfos[1]->set(option, value);
-					//		}
-					//		);
-					//};
-					//ImGui::ColorEdit4("Background", drawInfos[1]->Clear_RGBA.data(),
-					//	ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_PickerHueWheel);
+										//// Helper for setting viewport specific mesh options
+										//auto make_checkbox = [&](const char* label, unsigned int& option)
+										//{
+										//	return ImGui::Checkbox(label,
+										//		[&]() {
+										//			return drawInfos[1]->is_set(option);
+										//		},
+										//		[&](bool value) {
+										//			return drawInfos[1]->set(option, value);
+										//		}
+										//		);
+										//};
+										//ImGui::ColorEdit4("Background", drawInfos[1]->Clear_RGBA.data(),
+										//	ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_PickerHueWheel);
 
-					//// Draw options
-					//if (ImGui::CollapsingHeader("Draw Options", ImGuiTreeNodeFlags_DefaultOpen))
-					//{
-					//	if (ImGui::Checkbox("Face-based", &(viewer->data()->face_based)))
-					//	{
-					//		viewer->data()->dirty = MeshGL::DIRTY_ALL;
-					//	}
-					//	//
-					//	//    make_checkbox("Show texture", viewer->data().show_texture);
-					//	//    if (ImGui::Checkbox("Invert normals", &(viewer->data().invert_normals)))
-					//	//    {
-					//	//      viewer->data().dirty |= igl::opengl::MeshGL::DIRTY_NORMAL;
-					//	//    }
-					//	make_checkbox("Show overlay", viewer->data()->show_overlay);
-					//	make_checkbox("Show overlay depth", viewer->data()->show_overlay_depth);
+										//// Draw options
+										//if (ImGui::CollapsingHeader("Draw Options", ImGuiTreeNodeFlags_DefaultOpen))
+										//{
+										//	if (ImGui::Checkbox("Face-based", &(viewer->data()->face_based)))
+										//	{
+										//		viewer->data()->dirty = MeshGL::DIRTY_ALL;
+										//	}
+										//	//
+										//	//    make_checkbox("Show texture", viewer->data().show_texture);
+										//	//    if (ImGui::Checkbox("Invert normals", &(viewer->data().invert_normals)))
+										//	//    {
+										//	//      viewer->data().dirty |= igl::opengl::MeshGL::DIRTY_NORMAL;
+										//	//    }
+										//	make_checkbox("Show overlay", viewer->data()->show_overlay);
+										//	make_checkbox("Show overlay depth", viewer->data()->show_overlay_depth);
 
-					//	ImGui::ColorEdit4("Line color", viewer->data()->line_color.data(),
-					//		ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_PickerHueWheel);
-					//	ImGui::PushItemWidth(ImGui::GetWindowWidth() * 0.3f);
-					//	ImGui::DragFloat("Shininess", &(viewer->data()->shininess), 0.05f, 0.0f, 100.0f);
-					//	ImGui::PopItemWidth();
-					//}
+										//	ImGui::ColorEdit4("Line color", viewer->data()->line_color.data(),
+										//		ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_PickerHueWheel);
+										//	ImGui::PushItemWidth(ImGui::GetWindowWidth() * 0.3f);
+										//	ImGui::DragFloat("Shininess", &(viewer->data()->shininess), 0.05f, 0.0f, 100.0f);
+										//	ImGui::PopItemWidth();
+										//}
 
-					//// Overlays
-					//if (ImGui::CollapsingHeader("Overlays", ImGuiTreeNodeFlags_DefaultOpen))
-					//{
-					//	make_checkbox("Wireframe", viewer->data()->show_lines);
-					//	make_checkbox("Fill", viewer->data()->show_faces);
+										//// Overlays
+										//if (ImGui::CollapsingHeader("Overlays", ImGuiTreeNodeFlags_DefaultOpen))
+										//{
+										//	make_checkbox("Wireframe", viewer->data()->show_lines);
+										//	make_checkbox("Fill", viewer->data()->show_faces);
 
-					//}
-					//ImGui::End();
+										//}
+										//ImGui::End();
 				}
 
 
