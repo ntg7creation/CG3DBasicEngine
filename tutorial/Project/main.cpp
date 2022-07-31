@@ -33,13 +33,13 @@ int main(int argc,char *argv[])
 
 
 	// viewport for highlight
-	rndr->AddViewport(0, 0, DISPLAY_WIDTH, DISPLAY_HEIGHT);
+	rndr->AddViewport(MENU_WIDTH, 0, SCENE_WIDTH, DISPLAY_HEIGHT);
 	rndr->CopyDraw(1, rndr->viewport, 1);
 	rndr->ClearDrawFlag(2, rndr->toClear | rndr->stencilTest);
 	rndr->SetDrawFlag(2, rndr->blend | rndr->inAction2 | rndr->scissorTest);
 
 	// viewport for picked shapes
-	rndr->AddViewport(0, 0, DISPLAY_WIDTH, DISPLAY_HEIGHT);
+	rndr->AddViewport(MENU_WIDTH, 0, SCENE_WIDTH, DISPLAY_HEIGHT);
 	rndr->CopyDraw(1, rndr->viewport, 2);
 	rndr->ClearDrawFlag(3, rndr->toClear | rndr->stencilTest);
 	rndr->SetDrawFlag(3, rndr->clearStencil);
@@ -51,7 +51,7 @@ int main(int argc,char *argv[])
 	rndr->AddDraw(1, 0, 0, 0, rndr->depthTest | rndr->stencilTest);
 
 	// viewport for transparancy
-	rndr->AddViewport(0, 0, DISPLAY_WIDTH, DISPLAY_HEIGHT);
+	rndr->AddViewport(0, 0, SCENE_WIDTH, DISPLAY_HEIGHT);
 	rndr->CopyDraw(1, rndr->viewport, 3);
 	rndr->SetDrawFlag(6, rndr->blend);
 	rndr->ClearDrawFlag(6, rndr->toClear);

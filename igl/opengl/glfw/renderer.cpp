@@ -636,7 +636,7 @@ IGL_INLINE void Renderer::Init(igl::opengl::glfw::Viewer* scene, std::list<int>x
             if ((1 << indx) & pickingBits) {
                 DrawInfo* new_draw_info = new DrawInfo(indx, 0, 0, 0,
                                                   1 | inAction | depthTest | stencilTest | passStencil | blackClear |
-                                                  clearStencil | clearDepth | onPicking| blend,
+                                                  clearStencil | clearDepth | onPicking,//blend,
                                                   next_property_id);
                 next_property_id <<= 1;
                 //for (auto& data : scn->data_list)
