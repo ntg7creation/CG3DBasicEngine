@@ -91,7 +91,7 @@ int Project::InitCubeMap(int matID)
 	SetShapeMaterial(shapeID, matID);
 	selected_data_index = shapeID;
 	//float cylinderLen = 1.6f;
-	float s = 60;
+	float s = 160;
 	ShapeTransformation(scaleAll, s, 0);
 	SetShapeStatic(shapeID);
 	return shapeID;
@@ -117,6 +117,8 @@ void Project::SetMaterialOfPickedObjs(int matID) {
 		data_list[index]->SetMaterial(matID);
 	}
 }
+
+
 
 
 int Project::LoadMesh(shapes Shape, int matID, int shaderID, int parent)

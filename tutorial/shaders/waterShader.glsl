@@ -1,7 +1,6 @@
 #version 330
 
 in vec2 texCoord0;
-
 in vec3 normal0;
 in vec3 color0;
 in vec3 position0;
@@ -19,10 +18,10 @@ vec4 tranlasion;
 vec3 newnormal = vec3(0);
 float amplitude = 1; // not used
 vec4 single_wave = vec4(0.5,0.5,0.5,10);// direction.x direction.y Steepness wave_length
+//vec2 direction = normalize(vec2(0.5,0.5)); // var 1,2
 //float Steepness = 0.5;  // var3
 //float wave_length = 20;  //var4
 float speed  = 1; // not used
-//vec2 direction = normalize(vec2(0.5,0.5)); // var 1,2
 #define M_PI 3.1415926535897932384626433832795
 #define Earth_G 9.8
 
