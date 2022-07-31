@@ -574,21 +574,22 @@ void Project::Init()
 
 	//addgrid
 	//int id = addgridmesh(10);
-	//int map = 10;
-	//int sizeofmesh = 7;
-	//float scale = 0.5;
-	//for (int i = 0; i < map; i++)
-	//{
-	//	for (int j = 0; j < map; j++)
-	//	{
-	//		int id = LoadMesh("./data/planegrid.obj", 2, watershader);
-	//		selected_data_index = id;
-	//		//ShapeTransformation(scaleAll, scale, 0);
-	//		ShapeTransformation(xTranslate, (i - map / 2) * sizeofmesh, 0);
-	//		ShapeTransformation(yTranslate, -7, 0);
-	//		ShapeTransformation(zTranslate, -(j - map / 2) * sizeofmesh - 20, 0);
-	//	}
-	//}
+	//add water plane
+	int map = 10;
+	int sizeofmesh = 7;
+	float scale = 0.5;
+	for (int i = 0; i < map; i++)
+	{
+		for (int j = 0; j < map; j++)
+		{
+			int id = LoadMesh("./data/planegrid.obj", 2, watershader);
+			selected_data_index = id;
+			//ShapeTransformation(scaleAll, scale, 0);
+			ShapeTransformation(xTranslate, (i - map / 2) * sizeofmesh, 0);
+			ShapeTransformation(yTranslate, -7, 0);
+			ShapeTransformation(zTranslate, -(j - map / 2) * sizeofmesh - 20, 0);
+		}
+	}
 }
 
 
