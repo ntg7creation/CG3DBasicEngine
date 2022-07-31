@@ -649,11 +649,11 @@ void Project::openDialogSaveSceneInfo() {
 }
 
 
-//void Project::loadSceneFromFile(const std::string& sceneInfoFileName) {
-//	
-//}
-//
-//
-//void Project::saveSceneToFile(const std::string& sceneInfoFileName) {
-//	
-//}
+void Project::loadSceneFromFile(const std::string& sceneInfoFileName) {
+	
+}
+
+
+void Project::saveSceneToFile(const std::string& sceneInfoFileName) {
+	
+}
