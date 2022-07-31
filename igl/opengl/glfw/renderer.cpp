@@ -474,7 +474,7 @@ void Renderer::verfiy_Camera()
 {
     Project* scn = (Project*)GetScene();
     int correntCam = scn->current_Camera;
-    HardZoomCamera(0, scn->data_list[scn->Cameras[correntCam]]->GetPos(), scn->data_list[scn->Cameras[correntCam]]->GetRotation2());
+    HardZoomCamera(0, scn->data_list[abs(scn->Cameras[correntCam])]->GetPos(), scn->data_list[abs(scn->Cameras[correntCam])]->GetRotation2());
 }
 
 void Renderer::HardZoomCamera(int cameraIndx, Eigen::Vector3d pos, Eigen::Matrix3d rot2)

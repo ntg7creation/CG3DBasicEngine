@@ -473,6 +473,29 @@ int Project::unhidelayer(int layer)
 	}
 	return 0;
 }
+void Project::hide_editor() {
+	for (int mesh = 0; mesh < Cameras.size(); mesh++)
+		data_list[abs(Cameras[mesh])]->hide = true;
+	for (int mesh = 0; mesh < bezierAnimations.size(); mesh++) {
+		myMoveable* bez = &bezierAnimations[mesh];
+		data_list[bez->meshindex]->hide = true;
+		
+		for (int i = 0; i < bez->CPs.size(); i++)
+			data_list[bez->CPs[i]]->hide = true;
+	}
+		
+}
+void Project::unhide_editor() {
+	for (int mesh = 0; mesh < Cameras.size(); mesh++)
+		data_list[abs(Cameras[mesh])]->hide = false;
+	for (int mesh = 0; mesh < bezierAnimations.size(); mesh++) {
+		myMoveable* bez = &bezierAnimations[mesh];
+		data_list[bez->meshindex]->hide = false;
+
+		for (int i = 0; i < bez->CPs.size(); i++)
+			data_list[bez->CPs[i]]->hide = false;
+	}
+}
 void Project::changelayer(int layer, int objectindex)
 {
 	data_list[objectindex]->layer = layer;
@@ -488,6 +511,18 @@ int Project::addCamera(Eigen::Vector3f pos) {
 	ShapeTransformation(yTranslate, pos.y(), 0);
 	ShapeTransformation(zTranslate, pos.z(), 0); 
 	Cameras.push_back(Camera);
+	selected_data_index = temp;
+	return Camera;
+}
+int Project::addCamera2(Eigen::Vector3f pos) {
+	int temp = selected_data_index;
+	int Camera = LoadMesh(Cube, 4, 2);
+	selected_data_index = Camera;
+	//ShapeTransformation(scaleAll, 0.3, 0);
+	ShapeTransformation(xTranslate, pos.x(), 0);
+	ShapeTransformation(yTranslate, pos.y(), 0);
+	ShapeTransformation(zTranslate, pos.z(), 0); 
+	Cameras.push_back(-Camera);
 	selected_data_index = temp;
 	return Camera;
 }
@@ -518,6 +553,7 @@ void Project::Init()
 		AddTexture("textures/grass.bmp", 2),
 		AddTexture("textures/water.bmp", 2),
 		AddTexture("textures/Camera.png", 2),
+		AddTexture("textures/Camera2.png", 2),
 	};
 
 	unsigned int cubeMapTextureIDs[] = { 
@@ -555,7 +591,7 @@ void Project::Init()
 	current_Camera = Cameras.size() - 1;
 
 	//add camera 2
-	selected_data_index = addCamera(Eigen::Vector3f(5, 0, 0));
+	selected_data_index = addCamera2(Eigen::Vector3f(5, 0, 0));
 
 	//add camera with bezier
 	int camera3 = addCamera(Eigen::Vector3f(-4, 3, 0));

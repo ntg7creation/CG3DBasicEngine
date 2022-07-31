@@ -97,7 +97,8 @@ public:
 	int unhidelayer(int layer);
 
 	int testloadcostomemesh();
-
+	void hide_editor();
+	void unhide_editor();
 
 	void moveCamera(Eigen::Vector3d pos);
 
@@ -107,6 +108,7 @@ public:
 	/// <param name="pos"></param>
 	/// <returns>Camera ID</returns>
 	int addCamera(Eigen::Vector3f pos);
+	int addCamera2(Eigen::Vector3f pos);//add animtion cam
 
 	/// <summary>
 	/// change view to a diffrent camera
