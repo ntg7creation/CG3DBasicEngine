@@ -186,9 +186,10 @@ int Project::editMesh(IndexedModel& mesh, int index)
 void Project::Animate_obj(int object_index, int animetionindex, float time)
 {
 	myMoveable path = bezierAnimations[animetionindex];
-	if (path.time_start > time || path.time_end < time|| path.bezier->segments.size() == 0)
+	if (path.time_start > time || path.time_end < time|| path.bezier->segments.size() == 0){
 		return;
 	}
+
 	float start = path.time_start;
 	float end = path.time_end;
 	float segmentcount = path.bezier->segments.size();
@@ -326,9 +327,9 @@ void Project::translateControl(int type, float amt,int mesh_index,bool preserve)
 {
 	selected_data_index = mesh_index;
 	ShapeTransformation(type, amt, 0);
-	myMoveable* mybez;
+	myMoveable* mybez = NULL;
 	int CP_num = -1;
-	for(int i =0;i<bezierAnimations.size();i++)
+	for(int i =0;i<bezierAnimations.size() && mybez == NULL;i++)
 	{
 		for(CP_num = 0; CP_num < bezierAnimations[i].CPs.size(); CP_num++)
 		{
@@ -344,7 +345,7 @@ void Project::translateControl(int type, float amt,int mesh_index,bool preserve)
 			// maybe we need to change it to add a flag to mesh_index
 			return;
 		}
-		break;
+		//break;
 	}
 
 
@@ -547,6 +548,7 @@ void Project::Init()
 	AddShader("shaders/cubemapShader");
 	int basicshader =AddShader("shaders/basicShader");
 	watershader = AddShader("shaders/waterShader");
+	transparentshader = AddShader("shaders/transparent");
 
 	//add Camera on start
 	addCamera(Eigen::Vector3f(0, 0, 10));
@@ -572,17 +574,19 @@ void Project::Init()
 	addbezier(cubeID);
 
 //yadern
+
 	//add a plane for multipick
 	int id2 = AddShape(Plane, -2, TRIANGLES, 1);
-	SetShapeShader(id2, 4);
+	SetShapeShader(id2, transparentshader);
 	SetShapeMaterial(id2, 0);
 	
 	selected_data_index = id2;
 	ShapeTransformation(zTranslate, -1.1, 1);
     	SetShapeStatic(id2);
 
+
 	// attempt to load a transparent object
-	int id3 = AddShape(Plane, -1, TRIANGLES, 3);
+	int id3 = AddShape(Plane, -1, TRIANGLES);
 	idBlend = id3;
 	//data_list[id3]->AddViewport(3);
 	SetShapeShader(id3, 2);
@@ -593,7 +597,7 @@ void Project::Init()
 	//ShapeTransformation(zTranslate, -1.1, 1);
 	//std::cout << idBlend << std::endl;
 
-	int id4 = AddShape(Cube, -1, TRIANGLES, 3);
+	int id4 = AddShape(Cube, -1, TRIANGLES);
 	SetShapeShader(id4, 2);
 	SetShapeMaterial(id4, 0);
 	selected_data_index = id4;
@@ -652,7 +656,7 @@ void Project::Update(const Eigen::Matrix4f& Proj, const Eigen::Matrix4f& View, c
 		BindMaterial(s, data_list[shapeIndx]->GetMaterial());
 	}
 	if (shaderIndx == 0)
-		s->SetUniform4f("lightColor", r / 255.0f, g / 255.0f, b / 255.0f, 0.0f);
+		s->SetUniform4f("lightColor",  r / 255.0f, g / 255.0f, b / 255.0f, 0.0f);
 	else if (shaderIndx == watershader)// water shader
 	{
 		s->SetUniform4f("lightColor", 1, 1, 1, 0.0f);
@@ -661,8 +665,12 @@ void Project::Update(const Eigen::Matrix4f& Proj, const Eigen::Matrix4f& View, c
 		//float scale = 2;
 		s->SetUniform4f("tranlasion", data_list[shapeIndx]->GetPos().x(), data_list[shapeIndx]->GetPos().y(),  data_list[shapeIndx]->GetPos().z(), 0);
 	}
+	else if (shaderIndx == transparentshader)// transparent shader
+	{
+		s->SetUniform1f("alpha", 0.5);
+	}
 	else
-		s->SetUniform4f("lightColor", 4 / 100.0f, 60 / 100.0f, 99 / 100.0f, 0.5f);
+		s->SetUniform4f("lightColor",  4 / 100.0f, 60 / 100.0f, 55* 99 / 100.0f, 0.5f);
 	//textures[0]->Bind(0);
 
 

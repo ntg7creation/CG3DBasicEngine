@@ -12,6 +12,7 @@ class Project : public igl::opengl::glfw::Viewer
 	
 public:
 	int watershader;
+	int transparentshader;
 	int cubeMapShapeID;
 	int numObjectsTextures;
 	int numCubeMapTextures;

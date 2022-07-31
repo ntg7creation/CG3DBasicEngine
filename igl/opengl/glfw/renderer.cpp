@@ -68,7 +68,7 @@ IGL_INLINE void Renderer::draw_by_info(int info_index) {
     //std::cout << drawInfos.size() << std::endl;
     buffers[info->bufferIndx]->Bind();
     glViewport(viewports[info->viewportIndx].x(), viewports[info->viewportIndx].y(), viewports[info->viewportIndx].z(), viewports[info->viewportIndx].w());
-    if (info->flags & scissorTest)
+    if ((info->flags & scissorTest  )&& !scn->isActive)
     {
         /*isPicked = true;
         scn->pShapes.clear();
@@ -138,7 +138,7 @@ IGL_INLINE void Renderer::draw_by_info(int info_index) {
     if (info->flags & blend)
     {
         glEnable(GL_BLEND);
-        glBlendFunc(GL_ONE_MINUS_SRC_COLOR, GL_SRC_COLOR);
+        glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     }
     else
         glDisable(GL_BLEND);
@@ -552,10 +552,12 @@ void Renderer::MouseProccessing(int button, int mode, int viewportIndx)
     if (isPicked || button == 0)
     {
 
-		if(button == 2)
+		if(button == 2){
 			scn->MouseProccessing(button, zrel, zrel, CalcMoveCoeff(mode & 7, viewports[viewportIndx].w()), cameras[0]->MakeTransd(), viewportIndx);
-		else
-			scn->MouseProccessing(button, xrel, yrel, CalcMoveCoeff(mode & 7, viewports[viewportIndx].w()), cameras[0]->MakeTransd(), viewportIndx);
+        }
+        else {
+            scn->MouseProccessing(button, xrel, yrel, CalcMoveCoeff(mode & 7, viewports[viewportIndx].w()), cameras[0]->MakeTransd(), viewportIndx);
+        }
     }
 
 }
@@ -614,6 +616,7 @@ IGL_INLINE void Renderer::Init(igl::opengl::glfw::Viewer* scene, std::list<int>x
     menu = _menu;
     MoveCamera(0, zTranslate, 10);
     Eigen::Vector4i viewport;
+   
     glGetIntegerv(GL_VIEWPORT, viewport.data());
     buffers.push_back(new igl::opengl::DrawBuffer());
     maxPixX = viewport.z();
@@ -633,7 +636,7 @@ IGL_INLINE void Renderer::Init(igl::opengl::glfw::Viewer* scene, std::list<int>x
             if ((1 << indx) & pickingBits) {
                 DrawInfo* new_draw_info = new DrawInfo(indx, 0, 0, 0,
                                                   1 | inAction | depthTest | stencilTest | passStencil | blackClear |
-                                                  clearStencil | clearDepth | onPicking ,
+                                                  clearStencil | clearDepth | onPicking| blend,
                                                   next_property_id);
                 next_property_id <<= 1;
                 //for (auto& data : scn->data_list)

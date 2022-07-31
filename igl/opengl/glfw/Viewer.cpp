@@ -423,6 +423,7 @@ IGL_INLINE bool
 
         for (int i = 0; i < data_list.size(); i++)
         {
+            //draw by z buffer from last to most forword 
             auto shape = data_list[i];
             if (shape->Is2Render(viewportIndx))
             {
@@ -656,6 +657,7 @@ IGL_INLINE bool
             WhenTranslate(scnMat * cameraMat, -((float)xrel / 90), ((float)yrel / 90));
             if (data_list[idx]->iscontrolpoint)
                 translateControl(xTranslate, -((float)xrel) / 90, idx, false);*/
+           /*
             for (int p : pShapes) {
                 selected_data_index = p;
                 //int idx = selected_data_index;
@@ -667,6 +669,16 @@ IGL_INLINE bool
                     WhenTranslate(scnMat * cameraMat, -((float)xrel / 90), ((float)yrel / 90));
                 }
             }
+            */
+            
+            int idx = selected_data_index;
+            data_list[idx]->AddViewport(2);
+            if (data_list[idx]->iscontrolpoint) {
+                translateControl(xTranslate, -((float)xrel) / 90, idx, false);
+                translateControl(yTranslate, ((float)yrel) / 90, idx, false);
+            }
+            else
+                WhenTranslate(scnMat * cameraMat, -((float)xrel / 90), ((float)yrel / 90));
         }
         else
         {
@@ -675,7 +687,7 @@ IGL_INLINE bool
             if (button == 0)
             {
 //                if (selected_data_index > 0 )
-                    WhenRotate(scnMat * cameraMat, -((float)xrel/180) / movCoeff, ((float)yrel/180) / movCoeff);
+                   // WhenRotate(scnMat * cameraMat, -((float)xrel/180) / movCoeff, ((float)yrel/180) / movCoeff);
 
             }
             else
