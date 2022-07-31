@@ -1,4 +1,5 @@
 #include "Project.h"
+#include "igl/frustum.h"
 #include <iostream>
 #include "../../igl/file_dialog_open.h"
 #include "../../igl/file_dialog_save.h"
@@ -187,6 +188,7 @@ void Project::Animate_obj(int object_index, int animetionindex, float time)
 	myMoveable path = bezierAnimations[animetionindex];
 	if (path.time_start > time || path.time_end < time|| path.bezier->segments.size() == 0)
 		return;
+	}
 	float start = path.time_start;
 	float end = path.time_end;
 	float segmentcount = path.bezier->segments.size();
@@ -205,6 +207,7 @@ void Project::Animate_obj(int object_index, int animetionindex, float time)
 
 }
 int CP2;
+int idBlend;
 int Project::addbezier(int meshindex)
 {
 	int defaultmat = 0;
@@ -355,6 +358,7 @@ void Project::translateControl(int type, float amt,int mesh_index,bool preserve)
 		//TODO
 	}
 	editMesh(mybez->bezier->GetLine(),mybez->meshindex);
+	selected_data_index = mesh_index;
 }
 void Project::translateControl( int mesh_index, bool preserve)
 {
@@ -567,10 +571,41 @@ void Project::Init()
 	addbezier(cubeID);
 	addbezier(cubeID);
 
+//yadern
+	//add a plane for multipick
+	int id2 = AddShape(Plane, -2, TRIANGLES, 1);
+	SetShapeShader(id2, 4);
+	SetShapeMaterial(id2, 0);
+	
+	selected_data_index = id2;
+	ShapeTransformation(zTranslate, -1.1, 1);
+    	SetShapeStatic(id2);
 
+	// attempt to load a transparent object
+	int id3 = AddShape(Plane, -1, TRIANGLES, 3);
+	idBlend = id3;
+	//data_list[id3]->AddViewport(3);
+	SetShapeShader(id3, 2);
+	SetShapeMaterial(id3, 0);
+	selected_data_index = id3;
+	ShapeTransformation(xTranslate, 2, 1);
+	ShapeTransformation(yTranslate, 2, 1);
+	//ShapeTransformation(zTranslate, -1.1, 1);
+	//std::cout << idBlend << std::endl;
 
+	int id4 = AddShape(Cube, -1, TRIANGLES, 3);
+	SetShapeShader(id4, 2);
+	SetShapeMaterial(id4, 0);
+	selected_data_index = id4;
+	ShapeTransformation(xTranslate, -2, 1);
+	ShapeTransformation(yTranslate, -2, 1);
+	
+
+//natai    
 	addbezier(camera3);
 	connect_bezier_to_mesh(camera3, data_list[camera3]->animtoinindex);
+
+
 
 	//addgrid
 	//int id = addgridmesh(10);
@@ -590,6 +625,9 @@ void Project::Init()
 			ShapeTransformation(zTranslate, -(j - map / 2) * sizeofmesh - 20, 0);
 		}
 	}
+
+	
+
 }
 
 
@@ -653,6 +691,14 @@ void Project::WhenTranslate()
 
 void Project::Animate() {
 
+	//int temp = selected_data_index;
+	//mytime += tick;
+	//for (int i = 0; i < data_list.size(); i++)
+	//	if (data_list[i]->animtoinindex >= 0)
+	//		Animate_obj(i, data_list[i]->animtoinindex, mytime);
+
+	//translateControl(yTranslate, -0.01, CP2, false);
+	//selected_data_index = temp;
 
     if(isActive)
 	{

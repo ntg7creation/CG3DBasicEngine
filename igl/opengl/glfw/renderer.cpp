@@ -65,14 +65,42 @@ void Renderer::SwapDrawInfo(int indx1, int indx2)
 
 IGL_INLINE void Renderer::draw_by_info(int info_index) {
     DrawInfo* info = drawInfos[info_index];
+    //std::cout << drawInfos.size() << std::endl;
     buffers[info->bufferIndx]->Bind();
     glViewport(viewports[info->viewportIndx].x(), viewports[info->viewportIndx].y(), viewports[info->viewportIndx].z(), viewports[info->viewportIndx].w());
     if (info->flags & scissorTest)
     {
+        /*isPicked = true;
+        scn->pShapes.clear();
+        PickMany(0);*/
+        
         glEnable(GL_SCISSOR_TEST);
         int x = std::min(xWhenPress, xold);
         int y = std::min(viewports[info->viewportIndx].w() - yWhenPress, viewports[info->viewportIndx].w() - yold);
-        glScissor(x, y, std::abs(xWhenPress - xold), std::abs( yWhenPress - yold));
+        int xMax = std::max(xWhenPress, xold);
+        int yMax = std::max(viewports[info->viewportIndx].w() - yWhenPress, viewports[info->viewportIndx].w() - yold);
+        glScissor(x, y, std::abs(xWhenPress - xold), std::abs(yWhenPress - yold));
+        scn->AddPickedShapes(cameras[0]->GetViewProjection().cast<double>() * (cameras[0]->MakeTransd()).inverse(), viewports[0], 0, x, xMax, y, yMax, 2);
+        /*if (scn->pShapes.size() > 1) {
+            isMany = true;
+            isPicked = true;
+        }
+        else if (scn->pShapes.size() == 1) {
+            isMany = false;
+            isPicked = true;
+        }
+        else {
+            isMany = false;
+            isPicked = false;
+        }*/
+            
+        /*scn->pickedShapes.clear();
+        for (int p : scn->pShapes)
+        {
+            scn->pickedShapes.push_back(p);
+        }*/
+
+        
     }
     else
         glDisable(GL_SCISSOR_TEST);
@@ -110,7 +138,7 @@ IGL_INLINE void Renderer::draw_by_info(int info_index) {
     if (info->flags & blend)
     {
         glEnable(GL_BLEND);
-        glBlendFunc(GL_ONE_MINUS_SRC_ALPHA, GL_SRC_ALPHA);
+        glBlendFunc(GL_ONE_MINUS_SRC_COLOR, GL_SRC_COLOR);
     }
     else
         glDisable(GL_BLEND);
@@ -157,7 +185,7 @@ IGL_INLINE void Renderer::draw( GLFWwindow* window)
     int indx = 0;
     for (auto& info : drawInfos)
     {
-        if (!(info->flags & (inAction | inAction2)) || ((info->flags & inAction2) && !(info->flags & stencilTest) && isPressed && !isPicked) || ((info->flags & inAction2) && (info->flags & stencilTest)  && isPicked ))
+        if (!(info->flags & (inAction | inAction2)) || ((info->flags & inAction2) && !(info->flags & stencilTest)  && isPressed  && !isPicked) || ((info->flags & inAction2) && (info->flags & stencilTest) && isPicked))
             draw_by_info(indx);
         indx++;
     }
@@ -614,7 +642,7 @@ IGL_INLINE void Renderer::Init(igl::opengl::glfw::Viewer* scene, std::list<int>x
                 //}
                 drawInfos.emplace_back(new_draw_info);
             }
-            DrawInfo* temp = new DrawInfo(indx, 0, 1, 0, (int)(indx < 1) | depthTest | clearDepth ,next_property_id);
+            DrawInfo* temp = new DrawInfo(indx, 0, 1, 0, (int)(indx < 1) | depthTest | clearDepth | stencilTest | passStencil | clearStencil ,next_property_id);
             next_property_id <<= 1;
             drawInfos.emplace_back(temp);
             indx++;
