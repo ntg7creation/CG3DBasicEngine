@@ -383,7 +383,7 @@ namespace igl
 
 						ImGui::NewLine();
 						ImGui::InputInt("new layer index", &newLayerIndex);
-						if (ImGui::Button("Set new layer")) {
+						if (ImGui::Button("Set new layer", ImVec2(-1, 0))) {
 							((Project*)(viewer))->changelayer(newLayerIndex, ((Project*)(viewer))->lastPickedIndex);
 						}
 
