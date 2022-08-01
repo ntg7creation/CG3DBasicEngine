@@ -26,6 +26,8 @@ public:
 	int numOfSaves = 0;
 	void openDialogSaveSceneInfo();
 	void saveSceneToFile(const std::string& sceneInfoFileName);
+	void changeStartTime(float time, int meshIndex);
+	void changeEndTime(float time, int meshIndex);
 
 	int current_Camera = 0;
 	std::vector<int> Cameras; // value is index of mesh represention the camera; if neg it means it animtion camera 

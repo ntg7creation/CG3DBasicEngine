@@ -237,6 +237,14 @@ namespace igl
 						}
 					}
 
+					if (ImGui::Button("Reset time", ImVec2(-1, 30))) {
+						scn->changeTime(0);
+						bool temp = scn->isActive;
+						scn->isActive = true;
+						scn->Animate();
+						scn->isActive = temp;
+					}
+
 					//ImGui::Separator();
 					//ImGui::Separator();
 					//ImGui::NewLine();
@@ -390,7 +398,11 @@ namespace igl
 						ImGui::NewLine();
 						ImGui::InputInt("Animation Duration", &animationDuration);
 						if (ImGui::SliderFloat("Animation delay slider", &timeSliderValue, 0.f, 100.f)) {
-							std::cout << "Time slider changed to value " << timeSliderValue << " but not implemented" << std::endl;
+							//std::cout << "Time slider changed to value " << timeSliderValue << " but not implemented" << std::endl;
+						}
+						if (ImGui::Button("Set timing", ImVec2(-1, 0))) {
+							scn->changeStartTime(timeSliderValue, scn->lastPickedIndex);
+							scn->changeEndTime(timeSliderValue + animationDuration, scn->lastPickedIndex);
 						}
 
 						ImGui::NewLine();

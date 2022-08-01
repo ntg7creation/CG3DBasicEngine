@@ -963,3 +963,19 @@ void Project::loadSceneFromFile(const std::string& sceneInfoFileName) {
 void Project::saveSceneToFile(const std::string& sceneInfoFileName) {
 	
 }
+
+void Project::changeStartTime(float time, int meshIndex) {
+	if (data_list[meshIndex]->animtoinindex < 0) {
+		return;
+	}
+
+	bezierAnimations[data_list[meshIndex]->animtoinindex].time_start = time;
+}
+
+void Project::changeEndTime(float time, int meshIndex) {
+	if (data_list[meshIndex]->animtoinindex < 0) {
+		return;
+	}
+
+	bezierAnimations[data_list[meshIndex]->animtoinindex].time_end = time;
+}
