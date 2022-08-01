@@ -48,7 +48,6 @@ namespace glfw
   class Viewer : public Movable
   {
   public:
-
       enum axis { xAxis, yAxis, zAxis };
       enum transformations { xTranslate, yTranslate, zTranslate, xRotate, yRotate, zRotate, xScale, yScale, zScale,scaleAll,reset };
       enum modes { POINTS, LINES, LINE_LOOP, LINE_STRIP, TRIANGLES, TRIANGLE_STRIP, TRIANGLE_FAN, QUADS };
@@ -64,8 +63,6 @@ namespace glfw
 	virtual Eigen::Vector3d GetCameraForward() { return Eigen::Vector3d(0, 0, -1); }
 	virtual Eigen::Vector3d GetCameraUp() { return Eigen::Vector3d(0, 1, 0); }
 
-
-
 	//IGL_INLINE void init_plugins();
     //IGL_INLINE void shutdown_plugins();
     Viewer();
@@ -77,13 +74,6 @@ namespace glfw
       virtual void WhenTranslate(float dx, float dy) {}
       virtual void WhenRotate(float dx, float dy) {}
       virtual void WhenScroll(float dy) {}
-      virtual void translateControl(int type, float amt, int mesh_index, bool preserve) = 0;
-      virtual void translateControl(int mesh_index, bool preserve) = 0;
-
-      virtual int get_CP0(int mesh) { return -1; }
-
-      virtual void connect_bezier_to_mesh(int mesh_index, int animtion_index) {};
-      virtual void fix_bezier_to_mesh(int meshindex) {};
     // Mesh IO
     IGL_INLINE bool load_mesh_from_file(const std::string & mesh_file_name);
     IGL_INLINE bool save_mesh_to_file(const std::string & mesh_file_name);

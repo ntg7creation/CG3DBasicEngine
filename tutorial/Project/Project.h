@@ -12,7 +12,6 @@ class Project : public igl::opengl::glfw::Viewer
 	
 public:
 	int watershader;
-	int transparentshader;
 	int cubeMapShapeID;
 	int numObjectsTextures;
 	int numCubeMapTextures;
@@ -37,7 +36,7 @@ public:
 	void WhenTranslate();
 	void Animate() override;
 	void ScaleAllShapes(float amt, int viewportIndx);
-	int Project::get_CP0(int mesh);
+	
 	~Project(void);
 
 	//---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -57,7 +56,6 @@ public:
 
 	};
 	std::vector<myMoveable> bezierAnimations;
-	
 
 
 	void Connect_Controls(myMoveable);
@@ -80,7 +78,6 @@ public:
 	void translateControl(int mesh_index,bool preserve);
 	void translateControl_no_update(int type, float amt, myMoveable obj,int cpnum, bool preserve);
 	void connect_bezier_to_mesh(int meshindex, int animetionindex);
-	void fix_bezier_to_mesh(int meshindex);
 	int addbezier(int meshindex);
 
 	void Animate_obj(int object_index, int animetionindex,float time);

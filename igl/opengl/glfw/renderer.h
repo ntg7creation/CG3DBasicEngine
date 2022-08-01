@@ -96,8 +96,6 @@ public:
 	void* callback_key_down_data;
 	void* callback_key_up_data;
 
-    bool isReleased = false;
-
     void verfiy_Camera();
 // Callbacks
 //	 double Picking(double x, double y);

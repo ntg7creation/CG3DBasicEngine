@@ -11,7 +11,6 @@ public:
 	int animtoinindex = -1;
 	bool iscontrolpoint = false; 
 	int layer = -1;
-	bool isPickable = true;
 	Movable();
 	Movable(const Movable& mov);
 	Eigen::Matrix4f MakeTransScale();
