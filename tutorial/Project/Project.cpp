@@ -190,6 +190,9 @@ int Project::editMesh(IndexedModel& mesh, int index)
 }
 void Project::Animate_obj(int object_index, int animetionindex, float time)
 {
+
+
+
 	myMoveable path = bezierAnimations[animetionindex];
 	if (path.time_start > time || path.time_end < time|| path.bezier->segments.size() == 0){
 		return;
@@ -214,6 +217,8 @@ void Project::Animate_obj(int object_index, int animetionindex, float time)
 }
 int CP2;
 int idBlend;
+
+//adds a bezier 
 int Project::addbezier(int meshindex)
 {
 	int defaultmat = 0;
@@ -580,6 +585,7 @@ void Project::addLayer() {
 }
 
 
+
 int Project::hidelayer(int layer)
 {
 	int count = 0;
@@ -606,6 +612,7 @@ int Project::unhidelayer(int layer)
 	}
 	return 0;
 }
+
 void Project::hide_editor() {
 	for (int mesh = 0; mesh < Cameras.size(); mesh++)
 		data_list[abs(Cameras[mesh])]->hide = true;
@@ -629,6 +636,7 @@ void Project::unhide_editor() {
 			data_list[bez->CPs[i]]->hide = false;
 	}
 }
+
 void Project::changelayer(int layer, int objectindex)
 {
 	data_list[objectindex]->layer = layer;
@@ -724,10 +732,10 @@ void Project::Init()
 	current_Camera = Cameras.size() - 1;
 
 	//add camera 2
-	selected_data_index = addCamera2(Eigen::Vector3f(5, 0, 0));
+	selected_data_index = addCamera(Eigen::Vector3f(5, 0, 0));
 
 	//add camera with bezier
-	int camera3 = addCamera(Eigen::Vector3f(-4, 3, 0));
+	int camera3 = addCamera2(Eigen::Vector3f(-4, 3, 0));
 	temp = camera3;
 	selected_data_index = camera3;
 

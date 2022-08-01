@@ -63,6 +63,7 @@ public:
 		myMoveable(int timeS, int timeE, Bezier1D* bezier, int objectindex, int CP1, int CP2, int CP3, int CP4);
 
 	};
+
 	std::vector<myMoveable> bezierAnimations;
 	
 

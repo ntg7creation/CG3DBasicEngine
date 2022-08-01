@@ -190,7 +190,7 @@
 				//scn->moveCamera(rndr->cameras[0]->GetPos2());
 				break;
 			case GLFW_KEY_X:
-				rndr->HardZoomCamera(0, scn->data_list[scn->cubeID]->GetPos(), scn->data_list[scn->cubeID]->GetRotation());
+				//rndr->HardZoomCamera(0, scn->data_list[scn->cubeID]->GetPos(), scn->data_list[scn->cubeID]->GetRotation());
 				//scn->moveCamera(rndr->cameras[0]->GetPos2());
 				break;
 			case GLFW_KEY_F:
@@ -204,10 +204,8 @@
 					scn->hide_editor();
 				else
 					scn->unhide_editor();
-
-
-
 				break;
+
 			case GLFW_KEY_C:
 				scn->changeTime(0);
 				temp = scn->isActive;
