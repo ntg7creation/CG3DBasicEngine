@@ -54,6 +54,10 @@ void Movable::MyRotate(const Eigen::Vector3d& rotAxis, double angle, int mode)
 {
     if(mode == 1)
         RotateInSystem(rotAxis,angle);
+	else if (mode == 2)
+	{
+		Tin.rotate(Eigen::AngleAxisd(angle, Tout.rotation().transpose() * (rotAxis.normalized())));
+	}
     else
         MyRotate(rotAxis,angle);
 }
@@ -73,6 +77,11 @@ void Movable::RotateInSystem(Eigen::Vector3d rotAxis, double angle)
 void Movable::MyRotate(const Eigen::Matrix3d& rot)
 {
 	Tout.rotate(rot);
+}
+
+void Movable::MyRotate2(const Eigen::Matrix3d& rot)
+{
+	Tin.rotate(rot);
 }
 
 void Movable::MyScale(Eigen::Vector3d amt)
