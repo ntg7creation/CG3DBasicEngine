@@ -86,6 +86,8 @@ public:
 	/// <returns>return old layer ID</returns>
 	int changeLayer(int layerNumber);
 
+	//void openDialogLoadSceneInfo();
+
 	/// <summary>
 	/// adds view camera at pos
 	/// </summary>

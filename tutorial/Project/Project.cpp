@@ -207,6 +207,7 @@ int Project::addbezier(int meshindex)
 
 
 		int bezierlineID = LoadMesh(myBezier->GetLine(), 1, 2);
+		data_list[bezierlineID]->isPickable = false;
 		myMoveable tempmove = myMoveable(0, 1, myBezier, bezierlineID, CP0, CP1, CP2, CP3);
 		bezierAnimations.push_back(tempmove);
 		int animtionindex = bezierAnimations.size() - 1;
@@ -372,9 +373,110 @@ void Project::Init()
 		selected_data_index = cubeID;
 		ShapeTransformation(yTranslate, 1, 0);
 	}
+<<<<<<< Updated upstream
+=======
+	return 0;
+}
+void Project::changelayer(int layer, int objectindex)
+{
+	data_list[objectindex]->layer = layer;
+}
+
+
+int Project::addCamera(Eigen::Vector3f pos) {
+	int temp = selected_data_index;
+	int Camera = LoadMesh(Cube, 3, 2);
+	selected_data_index = Camera;
+	//ShapeTransformation(scaleAll, 0.3, 0);
+	ShapeTransformation(xTranslate, pos.x(), 0);
+	ShapeTransformation(yTranslate, pos.y(), 0);
+	ShapeTransformation(zTranslate, pos.z(), 0); 
+	Cameras.push_back(Camera);
+	selected_data_index = temp;
+	return Camera;
+}
+
+void Project::moveCamera(Eigen::Vector3d newpos)
+{
+	int temp = selected_data_index;
+	int Camera_index = Cameras[current_Camera];
+	if (Camera_index < 0)
+		Camera_index *= -1;
+	Movable* Camera_mesh = data_list[Camera_index];
+	selected_data_index = Camera_index;
+	Eigen::Vector3d oldpos = data_list[Camera_index]->GetPos();
+	Eigen::Vector3d diffpos = newpos - oldpos;
+	ShapeTransformation(xTranslate, diffpos.x(), 0);
+	ShapeTransformation(yTranslate, diffpos.y(), 0);
+	ShapeTransformation(zTranslate, diffpos.z(), 0);
+
+	selected_data_index = temp;
+}
+
+
+void Project::Init()
+{
+	
+	unsigned int objectTextureIDs[] = {
+		AddTexture("textures/plane.png", 2),
+		AddTexture("textures/grass.bmp", 2),
+		AddTexture("textures/water.bmp", 2),
+		AddTexture("textures/Camera.png", 2),
+	};
+
+	unsigned int cubeMapTextureIDs[] = { 
+		AddTexture("textures/cubemaps/Daylight Box_", 3),
+		AddTexture("textures/cubemaps/cube3/3_", 3),
+		//AddTexture("textures/cubemaps/cube2/output_skybox_", 3),
+	};
+
+	numObjectsTextures = sizeof(objectTextureIDs) / sizeof(unsigned int);
+	numCubeMapTextures = sizeof(cubeMapTextureIDs) / sizeof(unsigned int);
+
+	int numSlots = numCubeMapTextures + numObjectsTextures;
+	unsigned int *slots = new unsigned int[numSlots];
+
+	for (int i = 0; i < numSlots; ++i) {
+		slots[i] = i;
+	}
+	for (int i = 0; i < numObjectsTextures; ++i) {
+		AddMaterial(objectTextureIDs + i, slots + i, 1);
+	}
+	for (int i = 0, j = numObjectsTextures; i < numCubeMapTextures; ++i) {
+		AddMaterial(cubeMapTextureIDs + i, slots + j, 1);
+	}
+
+	cubeMapShapeID = InitCubeMap(cubeMapTextureIDs[0]);
+
+	AddShader("shaders/pickingShader");
+	AddShader("shaders/cubemapShader");
+	int basicshader =AddShader("shaders/basicShader");
+	watershader = AddShader("shaders/waterShader");
+	transparentshader = AddShader("shaders/transparent");
+	AddShader("shaders/pickingShader");
+	AddShader("shaders/basicShader2");
+
+	//add Camera on start
+	addCamera(Eigen::Vector3f(0, 0, 10));
+	current_Camera = Cameras.size() - 1;
+
+	//add camera 2
+	selected_data_index = addCamera(Eigen::Vector3f(5, 0, 0));
+
+	//add camera with bezier
+	int camera3 = addCamera(Eigen::Vector3f(-4, 3, 0));
+	temp = camera3;
+	selected_data_index = camera3;
+
+	//add cube with bezier 
+	cubeID = LoadMesh(Cube, 0, 2);
+	selected_data_index = cubeID;
+	ShapeTransformation(yTranslate, 3, 0);
+>>>>>>> Stashed changes
 	//add bezier 
 	addbezier(cubeID);
 
+<<<<<<< Updated upstream
 	//moving mesh that is not a control point
 	selected_data_index = cubeID;
 	ShapeTransformation(yTranslate,2, 0);
@@ -415,6 +517,65 @@ void Project::Init()
 	ShapeTransformation(yTranslate, -2, 1);
 	
 
+=======
+//yarden
+
+	//add a plane for multipick
+	int id2 = AddShape(Plane, -2, TRIANGLES, 1);
+	SetShapeShader(id2, 5);
+	SetShapeMaterial(id2, 0);
+	//
+	selected_data_index = id2;
+	ShapeTransformation(zTranslate, -1.1, 1);
+    SetShapeStatic(id2);
+
+
+	// attempt to load a transparent object
+	//int id3 = AddShape(Plane, -1, TRIANGLES);
+	//idBlend = id3;
+	//data_list[id3]->AddViewport(3);
+	//SetShapeShader(id3, 6);
+	//SetShapeMaterial(id3, 0);
+	//selected_data_index = id3;
+	//ShapeTransformation(xTranslate, 2, 1);
+	//ShapeTransformation(yTranslate, 2, 1);
+	////ShapeTransformation(zTranslate, -1.1, 1);
+	////std::cout << idBlend << std::endl;
+
+	//int id4 = AddShape(Cube, -1, TRIANGLES);
+	//SetShapeShader(id4, 2);
+	//SetShapeMaterial(id4, 0);
+	//selected_data_index = id4;
+	//ShapeTransformation(xTranslate, -2, 1);
+	//ShapeTransformation(yTranslate, -2, 1);
+	
+
+//natai    
+	addbezier(camera3);
+	connect_bezier_to_mesh(camera3, data_list[camera3]->animtoinindex);
+
+
+
+	//addgrid
+	//int id = addgridmesh(10);
+	//add water plane
+	int map = 10;
+	int sizeofmesh = 7;
+	float scale = 0.5;
+	for (int i = 0; i < map; i++)
+	{
+		for (int j = 0; j < map; j++)
+		{
+			int id = LoadMesh("planegrid.obj", 2, watershader);
+			selected_data_index = id;
+			//ShapeTransformation(scaleAll, scale, 0);
+			ShapeTransformation(xTranslate, (i - map / 2) * sizeofmesh, 0);
+			ShapeTransformation(yTranslate, -7, 0);
+			ShapeTransformation(zTranslate, -(j - map / 2) * sizeofmesh - 20, 0);
+		}
+	}
+
+>>>>>>> Stashed changes
 	
 
 }
@@ -509,3 +670,39 @@ Project::~Project(void)
 {
 }
 
+<<<<<<< Updated upstream
+=======
+
+//void Project::openDialogLoadSceneInfo() {
+//	std::string fname = igl::file_dialog_open("", "Scene file (*.scn)\0*.scn\0All files (*.*)\0*.*");
+//
+//	if (fname.length() == 0)
+//		return;
+//
+//	this->loadSceneFromFile(fname.c_str());
+//	//load_scene(fname);
+//}
+
+//void Project::openDialogSaveSceneInfo() {
+//	char buf[32];
+//	sprintf(buf, "scene%d.scn", numOfSaves + 1);
+//	std::string fname = igl::file_dialog_save(buf, "Scene file (*.scn)\0*.scn\0All files (*.*)\0*.*");
+//
+//	if (fname.length() == 0)
+//		return;
+//
+//	this->saveSceneToFile(fname.c_str());
+//	//save_scene(fname);
+//	numOfSaves += 1;
+//}
+
+
+//void Project::loadSceneFromFile(const std::string& sceneInfoFileName) {
+//	
+//}
+//
+//
+//void Project::saveSceneToFile(const std::string& sceneInfoFileName) {
+//	
+//}
+>>>>>>> Stashed changes

@@ -667,6 +667,75 @@ IGL_INLINE bool
                     WhenTranslate(scnMat * cameraMat, -((float)xrel / 90), ((float)yrel / 90));
                 }
             }
+<<<<<<< Updated upstream
+=======
+            */
+            
+            int idx = selected_data_index;
+            bool contains = false;
+            for (int p : pShapes) {
+                if (idx == p)
+                    contains = true;
+            }
+            if (contains) {
+                for (int p : pShapes) {
+                    if (data_list[p]->iscontrolpoint) {
+                        selected_data_index = p;
+                        if (pShapes.size() == 1) {
+                            WhenTranslate(scnMat * cameraMat, -((float)xrel / 90), ((float)yrel / 90));
+                            translateControl(p, false);
+                        }
+                        //translateControl(xTranslate, -((float)xrel) / 90, idx, false);
+                        //translateControl(yTranslate, ((float)yrel) / 90, idx, false);
+                    }
+                    else if (data_list[p]->animtoinindex >= 0)
+                    {
+                        selected_data_index = p;
+                        WhenTranslate(scnMat * cameraMat, -((float)xrel / 90), ((float)yrel / 90));
+
+                        //selected_data_index = get_CP0(idx);
+                        //WhenTranslate(scnMat * cameraMat, -((float)xrel / 90), ((float)yrel / 90));
+
+                        fix_bezier_to_mesh(p);
+                    }
+                    else
+                    {
+                        selected_data_index = p;
+                        WhenTranslate(scnMat * cameraMat, -((float)xrel / 90), ((float)yrel / 90));
+
+                    }
+                }
+            }
+            
+            else {
+                ClearPickedShapes(2);
+                pShapes.push_back(idx);
+                data_list[idx]->AddViewport(2);
+                if (data_list[idx]->iscontrolpoint) {
+                    selected_data_index = idx;
+                    WhenTranslate(scnMat * cameraMat, -((float)xrel / 90), ((float)yrel / 90));
+                    translateControl(idx, false);
+                    //translateControl(xTranslate, -((float)xrel) / 90, idx, false);
+                    //translateControl(yTranslate, ((float)yrel) / 90, idx, false);
+                }
+                else if (data_list[idx]->animtoinindex >= 0)
+                {
+                    selected_data_index = idx;
+                    WhenTranslate(scnMat * cameraMat, -((float)xrel / 90), ((float)yrel / 90));
+
+                    //selected_data_index = get_CP0(idx);
+                    //WhenTranslate(scnMat * cameraMat, -((float)xrel / 90), ((float)yrel / 90));
+
+                    fix_bezier_to_mesh(idx);
+                }
+                else
+                {
+                    selected_data_index = idx;
+                    WhenTranslate(scnMat * cameraMat, -((float)xrel / 90), ((float)yrel / 90));
+
+                }
+            }
+>>>>>>> Stashed changes
         }
         else
         {
@@ -749,13 +818,18 @@ IGL_INLINE bool
         selected_data_index = index;
         
         /*if (index >= data_list.size())
-            return true;
-        bool found = false;
+            return true;*/
+        /*bool found = false;
         for (int p : pShapes) {
             if (p == index)
                 found = true;
         }
-        if (found)
+        if (!found) {
+            ClearPickedShapes(2);
+            pShapes.push_back(index);
+            data_list[index]->AddViewport(2);
+        }*/
+            /*if (found)
             std::remove(pShapes.begin(), pShapes.end(), index);
         else
             pShapes.push_back(index);*/

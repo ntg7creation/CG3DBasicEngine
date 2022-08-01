@@ -77,8 +77,8 @@ IGL_INLINE void Renderer::draw_by_info(int info_index){
         glEnable(GL_SCISSOR_TEST);
         int x = std::min(xWhenPress, xold);
         int y = std::min(viewports[info->viewportIndx].w() - yWhenPress, viewports[info->viewportIndx].w() - yold);
-        int xMax = std::max(xWhenPress, xold);
-        int yMax = std::max(viewports[info->viewportIndx].w() - yWhenPress, viewports[info->viewportIndx].w() - yold);
+        int xMax = x + std::abs(xWhenPress - xold);
+        int yMax = y + std::abs(yWhenPress - yold);
         glScissor(x, y, std::abs(xWhenPress - xold), std::abs(yWhenPress - yold));
         scn->AddPickedShapes(cameras[0]->GetViewProjection().cast<double>() * (cameras[0]->MakeTransd()).inverse(), viewports[0], 0, x, xMax, y, yMax, 2);
         /*if (scn->pShapes.size() > 1) {

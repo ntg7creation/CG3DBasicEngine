@@ -4,6 +4,14 @@
 #include "Project.h"
 #include "imgui/imgui.h"
 
+bool contains(int index, std::vector<int, std::allocator<int>> list) {
+	for (int i : list) {
+		if (i == index)
+			return true;
+	}
+	return false;
+}
+
 
 	void glfw_mouse_callback(GLFWwindow* window,int button, int action, int mods)
 	{	
@@ -11,6 +19,10 @@
 		{
 			Renderer* rndr = (Renderer*)glfwGetWindowUserPointer(window);
 			Project* scn = (Project*)rndr->GetScene();
+<<<<<<< Updated upstream
+=======
+			//rndr->UnPick(2);
+>>>>>>> Stashed changes
 			double x2, y2;
 			rndr->isReleased = false;
 			
@@ -23,9 +35,13 @@
 				rndr->UpdatePosition(x2, y2);
 				//if(button == GLFW_MOUSE_BUTTON_LEFT)
 					//rndr->Pressed();
+				int index = scn->selected_data_index;
+				//if (contains(index, scn->pShapes))
+					//rndr->UnPick(2);
 			}
 			else
 			{
+
 				rndr->UnPick(2);
 			}
 		
