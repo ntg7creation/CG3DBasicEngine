@@ -737,7 +737,7 @@ IGL_INLINE bool
 
                 }
             }
->>>>>>> Stashed changes
+
         }
         else
         {

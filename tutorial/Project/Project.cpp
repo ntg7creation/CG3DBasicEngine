@@ -677,7 +677,22 @@ void Project::moveCamera(Eigen::Vector3d newpos)
 		Camera_index *= -1;
 	Movable* Camera_mesh = data_list[Camera_index];
 	selected_data_index = Camera_index;
-	Eigen::Vector3d oldpos = data_list[Camera_index]->GetPos();
+	Eigen::Vector3d oldpos = Camera_mesh->GetPos();
+	Eigen::Vector3d diffpos = newpos - oldpos;
+	ShapeTransformation(xTranslate, diffpos.x(), 0);
+	ShapeTransformation(yTranslate, diffpos.y(), 0);
+	ShapeTransformation(zTranslate, diffpos.z(), 0);
+
+	selected_data_index = temp;
+}
+
+void Project::moveobj(int object,Eigen::Vector3d newpos)
+{
+	int temp = selected_data_index;
+
+	Movable* mesh = data_list[object];
+	selected_data_index = object;
+	Eigen::Vector3d oldpos = mesh->GetPos();
 	Eigen::Vector3d diffpos = newpos - oldpos;
 	ShapeTransformation(xTranslate, diffpos.x(), 0);
 	ShapeTransformation(yTranslate, diffpos.y(), 0);
@@ -811,31 +826,31 @@ void Project::Init()
 	
 
 //natai    
-	addbezier(camera3);
-	connect_bezier_to_mesh(camera3, data_list[camera3]->animtoinindex);
+	//addbezier(camera3);
+	//connect_bezier_to_mesh(camera3, data_list[camera3]->animtoinindex);
 
 
 
-	//addgrid
-	//int id = addgridmesh(10);
-	//add water plane
-	int map = 10;
-	int sizeofmesh = 7;
-	float scale = 0.5;
-	for (int i = 0; i < map; i++)
-	{
-		for (int j = 0; j < map; j++)
-		{
-			int id = LoadMesh("planegrid.obj", 2, watershader);
-			selected_data_index = id;
-			//ShapeTransformation(scaleAll, scale, 0);
-			ShapeTransformation(xTranslate, (i - map / 2) * sizeofmesh, 0);
-			ShapeTransformation(yTranslate, -7, 0);
-			ShapeTransformation(zTranslate, -(j - map / 2) * sizeofmesh - 20, 0);
-		}
-	}
+	////addgrid
+	////int id = addgridmesh(10);
+	////add water plane
+	//int map = 10;
+	//int sizeofmesh = 7;
+	//float scale = 0.5;
+	//for (int i = 0; i < map; i++)
+	//{
+	//	for (int j = 0; j < map; j++)
+	//	{
+	//		int id = LoadMesh("planegrid.obj", 2, watershader);
+	//		selected_data_index = id;
+	//		//ShapeTransformation(scaleAll, scale, 0);
+	//		ShapeTransformation(xTranslate, (i - map / 2) * sizeofmesh, 0);
+	//		ShapeTransformation(yTranslate, -7, 0);
+	//		ShapeTransformation(zTranslate, -(j - map / 2) * sizeofmesh - 20, 0);
+	//	}
+	//}
 
->>>>>>> Stashed changes
+
 	
 
 }
@@ -959,8 +974,7 @@ Project::~Project(void)
 {
 }
 
-<<<<<<< Updated upstream
-=======
+
 
 void Project::openDialogLoadSceneInfo() {
 	std::string fname = igl::file_dialog_open("", "Scene file (*.scn)\0*.scn\0All files (*.*)\0*.*");

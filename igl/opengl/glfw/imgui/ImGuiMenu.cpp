@@ -343,7 +343,7 @@ namespace igl
 							scn->addbezier(scn->lastPickedIndex);
 						}
 
-						static Eigen::Vector3d preZoomPos = scn->data_list[scn->current_Camera]->GetPos();
+						static Eigen::Vector3d preZoomPos = scn->data_list[scn->current_Camera]->GetPos()+ scn->data_list[scn->current_Camera]->GetPos2();
 						static bool zoomedIn = false;
 
 						if (zoomedIn) {
@@ -357,9 +357,9 @@ namespace igl
 						}
 						else {
 							if (ImGui::Button("Zoom into picked object", ImVec2(-1, 0))) {
-								preZoomPos = scn->data_list[scn->current_Camera]->GetPos();
+								preZoomPos = scn->data_list[scn->current_Camera]->GetPos() + scn->data_list[scn->current_Camera]->GetPos2();
 								//std::cout << "Choose Area to Zoom into clicked but not implemented" << std::endl;
-								scn->rndr->ZoomCamera(0, scn->data_list[scn->lastPickedIndex]->GetPos());
+								scn->rndr->ZoomCamera(0, scn->data_list[scn->lastPickedIndex]->GetPos()+ scn->data_list[scn->lastPickedIndex]->GetPos2());
 								zoomedIn = !zoomedIn;
 							}
 						}

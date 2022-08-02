@@ -459,15 +459,28 @@ void Renderer::ZoomCamera(int cameraIndx, int type, float amt)
 
 void Renderer::ZoomCamera(int cameraIndx, Eigen::Vector3d pos)
 {
-    igl::opengl::Camera* c = cameras[cameraIndx];
+    //igl::opengl::Camera* c = cameras[cameraIndx];
     //rotate
 
 
     //translate
-    Eigen::Vector3d V = pos - c->GetPos2();
+    //Eigen::Vector3d V = pos - c->GetPos2();
     //V = V * c->GetRotation().transpose();
-    c->MyTranslate(V, 1);
-    ZoomCamera(cameraIndx, zTranslate, 2);
+    //c->MyTranslate(V, 1);
+
+    //move scn camra mesh
+
+    Project* scn = (Project*)GetScene();
+    scn->current_Camera;
+    int camera_mesh_indx = scn->Cameras[scn->current_Camera];
+    //rndr->ZoomCamera(0, scn->zTranslate, 2.5f);
+    //scn->moveCamera(rndr->cameras[0]->GetPos2());
+    scn->moveobj(abs(camera_mesh_indx), pos);
+
+    verfiy_Camera();
+    ZoomCamera(cameraIndx, scn->zTranslate, 2);
+    scn->moveCamera(cameras[cameraIndx]->GetPos2());
+
 }
 
 void Renderer::verfiy_Camera()
@@ -480,6 +493,9 @@ void Renderer::verfiy_Camera()
 void Renderer::HardZoomCamera(int cameraIndx, Eigen::Vector3d pos, Eigen::Matrix3d rot2)
 {
     igl::opengl::Camera* c = cameras[cameraIndx];
+
+
+
     //c->GetRotation2() = rot2;
     //c->GetRotation() = rot2;
 

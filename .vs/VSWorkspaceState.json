@@ -2,9 +2,8 @@
   "ExpandedNodes": [
     "",
     "\\tutorial",
-    "\\tutorial\\Project",
-    "\\tutorial\\textures"
+    "\\tutorial\\Project"
   ],
-  "SelectedNode": "\\igl",
+  "SelectedNode": "\\tutorial\\Project\\main.cpp",
   "PreviewInSolutionExplorer": false
 }

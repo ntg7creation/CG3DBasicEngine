@@ -21,10 +21,9 @@ bool contains(int index, std::vector<int, std::allocator<int>> list) {
 
 			Renderer* rndr = (Renderer*)glfwGetWindowUserPointer(window);
 			Project* scn = (Project*)rndr->GetScene();
-<<<<<<< Updated upstream
-=======
+
 			//rndr->UnPick(2);
->>>>>>> Stashed changes
+
 			double x2, y2;
 			
 			glfwGetCursorPos(window, &x2, &y2);
@@ -201,13 +200,13 @@ bool contains(int index, std::vector<int, std::allocator<int>> list) {
 				break;
 
 			case GLFW_KEY_Z:
+				
 
 
 				break;
 			case GLFW_KEY_X:
 
-				rndr->ZoomCamera(0, scn->zTranslate, 2.5f);
-				scn->moveCamera(rndr->cameras[0]->GetPos2());
+				rndr->ZoomCamera(0, scn->data_list[scn->cubeID]->GetPos());
 
 				break;
 			case GLFW_KEY_F:

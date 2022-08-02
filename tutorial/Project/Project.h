@@ -116,6 +116,7 @@ public:
 		bezierAnimations[data_list[meshindex]->animtoinindex].time_end = time; }
 
 	void moveCamera(Eigen::Vector3d pos);
+	void moveobj(int object, Eigen::Vector3d newpos);
 
 	//void openDialogLoadSceneInfo();
 
