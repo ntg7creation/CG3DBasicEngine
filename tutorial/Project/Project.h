@@ -11,7 +11,33 @@ class Project : public igl::opengl::glfw::Viewer
 {
 	
 public:
+	int watershader;
+	int transparentshader;
+	int cubeMapShapeID;
+	int numObjectsTextures;
+	int numCubeMapTextures;
+	int InitCubeMap(int matID);
+	void SetCubeMap(int matID);
+	void SetMaterialOfPickedObjs(int matID);
+	int numOfLayers = 1;
+	void addLayer(); 
+	void openDialogLoadSceneInfo();
+	void loadSceneFromFile(const std::string& sceneInfoFileName);
+	int numOfSaves = 0;
+	void openDialogSaveSceneInfo();
+	void saveSceneToFile(const std::string& sceneInfoFileName);
+	void changeStartTime(float time, int meshIndex);
+	void changeEndTime(float time, int meshIndex);
 
+	int current_Camera = 0;
+	std::vector<int> Cameras; // value is index of mesh represention the camera; if neg it means it animtion camera 
+	int temp;
+	float mytime = 0;
+	const float tick = 0.00166 * 3; // asume 1 update a sec time =1 means 1 min
+
+
+	int ticksCounter;
+	int cubeID = -1;
 	Project();
 //	Project(float angle,float relationWH,float near, float far);
 	void Init();
@@ -20,7 +46,7 @@ public:
 	void WhenTranslate();
 	void Animate() override;
 	void ScaleAllShapes(float amt, int viewportIndx);
-	
+	int Project::get_CP0(int mesh);
 	~Project(void);
 
 	//---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -40,17 +66,14 @@ public:
 
 	};
 
+	std::vector<myMoveable> bezierAnimations;
+	
+
+
 	void Connect_Controls(myMoveable);
 
-	/// <summary>
-	/// represent the Camera ID
-	/// </summary>
-	int current_Camera;
-	int tempcontrolindex;
-	float mytime = 0;
-	const float tick = 0.00166; // asume 1 update a sec time =1 means 1 min
 	myMoveable find_Control(int mesh_index);
-	std::vector<myMoveable> bezierAnimations;
+
 	/// <summary>
 	/// load mesh
 	/// </summary>
@@ -58,33 +81,41 @@ public:
 	/// <returns>
 	/// return loaded object id  and -1 if fail
 	/// </returns>
-	int LoadCubeMap(int matID);
 	int LoadMesh(std::string path,int matID,int shaderID,int parent = -1);
 	int LoadMesh(shapes Shape, int matID, int shaderID, int parent = -1);
 	int LoadMesh(IndexedModel &mesh, int matID, int shaderID, int parent = -1);
 
 	int editMesh(IndexedModel& mesh, int index);
 	void translateControl(int type, float amt,int mesh_index,bool preserve);
+	void translateControl(int mesh_index,bool preserve);
 	void translateControl_no_update(int type, float amt, myMoveable obj,int cpnum, bool preserve);
 	void connect_bezier_to_mesh(int meshindex, int animetionindex);
+	void fix_bezier_to_mesh(int meshindex);
 	int addbezier(int meshindex);
 
 	void Animate_obj(int object_index, int animetionindex,float time);
 
 	int addgridmesh(int resT);
-
-
+	
+	void changelayer(int layer,int objectindex);
+	int hidelayer(int layer);
+	int unhidelayer(int layer);
 
 	int testloadcostomemesh();
+	void hide_editor();
+	void unhide_editor();
 
-	/// <summary>
-	/// change object to a diffrent layer 
-	/// if Layer dont exist create one
-	/// if Layer is empty delete it
-	/// </summary>
-	/// <param name="layerNumber"></param>
-	/// <returns>return old layer ID</returns>
-	int changeLayer(int layerNumber);
+	void change_start_time(float time, int meshindex) {
+		if (data_list[meshindex]->animtoinindex < 0)
+			return;
+		bezierAnimations[data_list[meshindex]->animtoinindex].time_start = time;
+	}
+	void change_end_time(float time, int meshindex) {
+		if (data_list[meshindex]->animtoinindex < 0)
+			return;
+		bezierAnimations[data_list[meshindex]->animtoinindex].time_end = time; }
+
+	void moveCamera(Eigen::Vector3d pos);
 
 	//void openDialogLoadSceneInfo();
 
@@ -94,31 +125,22 @@ public:
 	/// <param name="pos"></param>
 	/// <returns>Camera ID</returns>
 	int addCamera(Eigen::Vector3f pos);
+	int addCamera2(Eigen::Vector3f pos);//add animtion cam
 
 	/// <summary>
 	/// change view to a diffrent camera
 	/// </summary>
 	/// <param name="CameraID"></param>
 	/// <returns>old Camera ID</returns>
-	int changeCamera(int CameraID);
+	void changeCamera(int CameraID);
 
 	/// <summary>
 	/// change animtion start time
 	/// for now view will always be at time = 0 due to picking
 	/// </summary>
 	/// <param name="time"></param>
-	void changeTime(int time);
+	void changeTime(float time);
 
-	/// <summary>
-	/// change object apperance
-	/// texture, Matiral 
-	/// </summary>
-	/// <param name="objectID"></param>
-	/// <param name="TextureID"></param>
-	/// <param name="ShaderID"></param>
-	/// <param name="LayerID"></param>
-	/// <returns>true on success and false on fail</returns>
-	bool editobject(int objectID, int TextureID = -1, int MatiralID = -1);
 
 	/// <summary>
 	/// zoom in or out of current Camera 

@@ -37,7 +37,8 @@ public:
         scaleAll,
         xCameraTranslate,
         yCameraTranslate,
-        zCameraTranslate
+        zCameraTranslate,
+        
     };
     enum drawFlags {
         toClear = 1,
@@ -97,9 +98,10 @@ public:
 
     bool isReleased = false;
 
+    void verfiy_Camera();
 // Callbacks
 //	 double Picking(double x, double y);
-	 inline void Animate() { scn->Animate(); };
+    inline void Animate() { scn->Animate(); verfiy_Camera(); };
 	IGL_INLINE bool key_pressed(unsigned int unicode_key, int modifier);
 	IGL_INLINE void resize(GLFWwindow* window,int w, int h); // explicitly set window size
 	IGL_INLINE void post_resize(GLFWwindow* window, int w, int h); // external resize due to user interaction
@@ -133,7 +135,9 @@ public:
     inline void BindViewport2D(int indx) { drawInfos[indx]->SetFlags(is2D); }
 
     void MoveCamera(int cameraIndx, int type, float amt);
-
+    void ZoomCamera(int cameraIndx, int type, float amt);
+    void ZoomCamera(int cameraIndx, Eigen::Vector3d pos);
+    void HardZoomCamera(int cameraIndx, Eigen::Vector3d pos,Eigen::Matrix3d rot);
     bool Picking(int x, int y);
 
     void OutLine();
@@ -182,12 +186,13 @@ public:
     inline bool IsPicked() { return isPicked; }
     inline bool IsMany() const { return isMany; }
     void Init(igl::opengl::glfw::Viewer *scene, std::list<int> xViewport, std::list<int> yViewport, int pickingBits,igl::opengl::glfw::imgui::ImGuiMenu *_menu);
-
+   
+    std::vector<igl::opengl::Camera*> cameras;
 
 private:
     // Stores all the viewing options
 //    std::vector<igl::opengl::ViewerCore> core_list;
-    std::vector<igl::opengl::Camera*> cameras;
+
     igl::opengl::glfw::Viewer* scn;
     std::vector<Eigen::Vector4i> viewports;
     std::vector<DrawInfo *> drawInfos;

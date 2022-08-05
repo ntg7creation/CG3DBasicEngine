@@ -15,8 +15,10 @@ bool contains(int index, std::vector<int, std::allocator<int>> list) {
 
 	void glfw_mouse_callback(GLFWwindow* window,int button, int action, int mods)
 	{	
+		
 		if (action == GLFW_PRESS)
 		{
+
 			Renderer* rndr = (Renderer*)glfwGetWindowUserPointer(window);
 			Project* scn = (Project*)rndr->GetScene();
 <<<<<<< Updated upstream
@@ -24,9 +26,14 @@ bool contains(int index, std::vector<int, std::allocator<int>> list) {
 			//rndr->UnPick(2);
 >>>>>>> Stashed changes
 			double x2, y2;
-			rndr->isReleased = false;
 			
 			glfwGetCursorPos(window, &x2, &y2);
+
+			rndr->isReleased = false;
+
+			if (x2 < 350) return;
+
+
 			rndr->UpdatePress(x2, y2);
 			if (button == GLFW_MOUSE_BUTTON_RIGHT)
 				rndr->Pressed();
@@ -43,6 +50,7 @@ bool contains(int index, std::vector<int, std::allocator<int>> list) {
 			{
 
 				rndr->UnPick(2);
+				
 			}
 		
 		}
@@ -54,6 +62,7 @@ bool contains(int index, std::vector<int, std::allocator<int>> list) {
 				rndr->Pressed();
 			//rndr->UnPick(2);
 		}
+
 	}
 	
 	void glfw_scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
@@ -63,12 +72,15 @@ bool contains(int index, std::vector<int, std::allocator<int>> list) {
 		
 		if (rndr->IsPicked())
 		{
-			rndr->UpdateZpos((int)yoffset);
-			rndr->MouseProccessing(GLFW_MOUSE_BUTTON_MIDDLE);
+			/*rndr->UpdateZpos((int)yoffset);
+			rndr->MouseProccessing(GLFW_MOUSE_BUTTON_MIDDLE);*/
 		}
 		else
 		{
-			rndr->MoveCamera(0, rndr->zTranslate, (float)yoffset);
+			//rndr->MoveCamera(0, rndr->zTranslate, (float)yoffset);
+
+			rndr->ZoomCamera(0, scn->zTranslate, 0.5f* -yoffset);
+			scn->moveCamera(rndr->cameras[0]->GetPos2());
 		}
 		
 	}
@@ -107,19 +119,36 @@ bool contains(int index, std::vector<int, std::allocator<int>> list) {
 		
 	}
 	
+
+	static void printMat(const Eigen::Matrix3d& mat)
+	{
+		std::cout << " matrix:" << std::endl;
+		for (int i = 0; i < 3; i++)
+		{
+			for (int j = 0; j < 3; j++)
+				std::cout << mat(j, i) << " ";
+			std::cout << std::endl;
+		}
+	}
+
 	void glfw_key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
 	{
 		Renderer* rndr = (Renderer*)glfwGetWindowUserPointer(window);
 		Project* scn = (Project*)rndr->GetScene();
+		bool temp;
+		int camera_mesh_indx;
+		int tempholder;
+		Eigen::Vector3d temppos ;
 		//rndr->FreeShapes(2);
 		if (action == GLFW_PRESS || action == GLFW_REPEAT)
 		{
+
 			switch (key)
 			{
 			case GLFW_KEY_ESCAPE:
 				glfwSetWindowShouldClose(window, GLFW_TRUE);
 				break;
-				
+
 			case GLFW_KEY_SPACE:
 				if (scn->IsActive())
 					scn->Deactivate();
@@ -128,42 +157,84 @@ bool contains(int index, std::vector<int, std::allocator<int>> list) {
 				break;
 
 			case GLFW_KEY_UP:
-				rndr->MoveCamera(0, scn->xRotate, 0.05f);
-				
+				rndr->MoveCamera(0, rndr->xRotate, 0.05f);
+
 				break;
 			case GLFW_KEY_DOWN:
 				//scn->shapeTransformation(scn->xGlobalRotate,-5.f);
 				//cout<< "down: "<<endl;
-				rndr->MoveCamera(0, scn->xRotate, -0.05f);
+				rndr->MoveCamera(0, rndr->xRotate, -0.05f);
 				break;
 			case GLFW_KEY_LEFT:
-				rndr->MoveCamera(0, scn->yRotate, 0.05f);
+				rndr->MoveCamera(0, rndr->yRotate, 0.05f);
 				break;
 			case GLFW_KEY_RIGHT:
 				//scn->shapeTransformation(scn->xGlobalRotate,-5.f);
 				//cout<< "down: "<<endl;
-				rndr->MoveCamera(0, scn->yRotate, -0.05f);
+				rndr->MoveCamera(0, rndr->yRotate, -0.05f);
 				break;
-			case GLFW_KEY_U:
-				rndr->MoveCamera(0, scn->yTranslate, 0.25f);
+			case GLFW_KEY_W:
+				rndr->ZoomCamera(0, rndr->yTranslate, 0.25f);
+				scn->moveCamera(rndr->cameras[0]->GetPos2());
 				break;
+			case GLFW_KEY_S:
+				rndr->ZoomCamera(0, rndr->yTranslate, -0.25f);
+				scn->moveCamera(rndr->cameras[0]->GetPos2());
+				break;
+			case GLFW_KEY_A:
+				rndr->ZoomCamera(0, rndr->xTranslate, -0.25f);
+				scn->moveCamera(rndr->cameras[0]->GetPos2());
+				break;
+
 			case GLFW_KEY_D:
-				rndr->MoveCamera(0, scn->yTranslate, -0.25f);
+				rndr->ZoomCamera(0, rndr->xTranslate, 0.25f);
+				scn->moveCamera(rndr->cameras[0]->GetPos2());
 				break;
-			case GLFW_KEY_L:
-				rndr->MoveCamera(0, scn->xTranslate, -0.25f);
+
+			case GLFW_KEY_Q:
+				rndr->ZoomCamera(0, scn->zTranslate, 0.5f);
+				scn->moveCamera(rndr->cameras[0]->GetPos2());
 				break;
-			
-			case GLFW_KEY_R:
-				rndr->MoveCamera(0, scn->xTranslate, 0.25f);
+			case GLFW_KEY_E:
+				rndr->ZoomCamera(0, scn->zTranslate, -0.5f);
+				scn->moveCamera(rndr->cameras[0]->GetPos2());
 				break;
-			
-			case GLFW_KEY_B:
-				rndr->MoveCamera(0, scn->zTranslate, 0.5f);
+
+			case GLFW_KEY_Z:
+
+
+				break;
+			case GLFW_KEY_X:
+
+				rndr->ZoomCamera(0, scn->zTranslate, 2.5f);
+				scn->moveCamera(rndr->cameras[0]->GetPos2());
+
 				break;
 			case GLFW_KEY_F:
-				rndr->MoveCamera(0, scn->zTranslate, -0.5f);
+
+				scn->current_Camera++;
+				if (scn->current_Camera >= scn->Cameras.size())
+					scn->current_Camera = 0;
+				camera_mesh_indx = scn->Cameras[scn->current_Camera];
+				//std::cout << scn->data_list[abs(camera_mesh_indx)]->GetPos().transpose() << std::endl;
+				//rndr->HardZoomCamera(0, scn->data_list[abs(camera_mesh_indx)]->GetPos(), scn->data_list[abs(camera_mesh_indx)]->GetRotation2());
+				if (camera_mesh_indx < 0)
+					scn->hide_editor();
+				else
+					scn->unhide_editor();
 				break;
+
+			case GLFW_KEY_C:
+				scn->changeTime(0);
+				temp = scn->isActive;
+				scn->isActive = true;
+				scn->Animate();
+				scn->isActive = temp;
+				break;
+				//case GLFW_KEY_X:
+				//	rndr->ZoomCamera(0, scn->zTranslate, 0.5f);
+				//	break;
+
 			case GLFW_KEY_1:
 				std::cout << "picked 1\n";
 				scn->selected_data_index = 1;

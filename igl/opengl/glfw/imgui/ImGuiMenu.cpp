@@ -19,6 +19,8 @@
 //#include <imgui_fonts_droid_sans.h>
 //#include <GLFW/glfw3.h>
 #include <iostream>
+#include "../renderer.h"
+#include "../../../../tutorial/Project/Project.h"
 ////////////////////////////////////////////////////////////////////////////////
 
 namespace igl
@@ -52,6 +54,9 @@ namespace igl
 						style.FrameRounding = 5.0f;
 						reload_font();
 					}
+
+					//pickedLayerIndex = 0;
+					animationDuration = 5;
 				}
 
 				IGL_INLINE void ImGuiMenu::reload_font(int font_size)
@@ -113,6 +118,7 @@ namespace igl
 				IGL_INLINE bool ImGuiMenu::mouse_down(GLFWwindow* window, int button, int modifier)
 				{
 					ImGui_ImplGlfw_MouseButtonCallback(window, button, GLFW_PRESS, modifier);
+					std::cout << "mouse_down of imgui";
 					return ImGui::GetIO().WantCaptureMouse;
 				}
 
@@ -181,7 +187,9 @@ namespace igl
 					if (no_bring_to_front)  window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus;
 
 
-					static float timeSliderValue = 0.f;
+					//ImGui::ShowDemoWindow(); // TODO : remove debug
+
+					scn = ((Project*)(viewer));
 
 					ImGui::Begin(
 						"Menu", p_open,
@@ -189,7 +197,7 @@ namespace igl
 					);
 
 					ImGui::SetWindowPos(ImVec2((float)0, (float)0), ImGuiCond_Always);
-					ImGui::SetWindowSize(ImVec2((float)300, (float)800), ImGuiCond_Always);
+					ImGui::SetWindowSize(ImVec2((float)350, (float)800), ImGuiCond_Always);
 
 					// Load an Object
 
@@ -214,12 +222,40 @@ namespace igl
 
 					// swith to camera X
 
+					ImGui::Indent();
 
-					if (ImGui::Button("Load an Object", ImVec2(-1, 0))) {
+					if (!((Project*)(viewer))->isActive) {
+						if (ImGui::Button("Play animation", ImVec2(-1, 30))) {
+							((Project*)(viewer))->ticksCounter = 0;
+							((Project*)(viewer))->Activate();
+
+						}
+					}
+					else {
+						if (ImGui::Button("Stop animation", ImVec2(-1, 30))) {
+							((Project*)(viewer))->Deactivate();
+						}
+					}
+
+					if (ImGui::Button("Reset time", ImVec2(-1, 30))) {
+						scn->changeTime(0);
+						bool temp = scn->isActive;
+						scn->isActive = true;
+						scn->Animate();
+						scn->isActive = temp;
+					}
+
+					//ImGui::Separator();
+					//ImGui::Separator();
+					//ImGui::NewLine();
+
+					if (ImGui::Button("Load an Object", ImVec2(-1, 30))) {
 
 						int savedIndx = viewer->selected_data_index;
 						// viewer->selected_data_index = viewer->parents.size();
 						// viewer->AddShape(viewer->xCylinder,-1,viewer->TRIANGLES);
+
+						//LoadFrom
 						viewer->open_dialog_load_mesh();
 						if (viewer->data_list.size() > viewer->parents.size())
 						{
@@ -237,177 +273,524 @@ namespace igl
 						}
 					}
 
-					if (ImGui::Button("Add a Camera", ImVec2(-1, 0))) {
-						std::cout << "Add camera clicked but not implemented" << std::endl;
+					ImGui::Unindent();
+
+					ImGui::NewLine();
+					ImGui::Separator();
+					ImGui::Separator();
+					ImGui::NewLine();
+
+					if (ImGui::CollapsingHeader("Scene", ImGuiTreeNodeFlags_CollapsingHeader/*ImGuiTreeNodeFlags_DefaultOpen*/)) {
+
+						ImGui::Indent();
+
+						if (ImGui::Button("Load scene from file", ImVec2(-1, 30))) {
+							((Project*)(viewer))->openDialogLoadSceneInfo();
+						}
+
+						if (ImGui::Button("Save current scene to file", ImVec2(-1, 30))) {
+							((Project*)(viewer))->openDialogSaveSceneInfo();
+						}
+
+						ImGui::Unindent();
 					}
 
-					if (ImGui::Button("Add a Layer", ImVec2(-1, 0))) {
-						std::cout << "Add layer clicked but not implemented" << std::endl;
+					if (ImGui::CollapsingHeader("CubeMap", ImGuiTreeNodeFlags_CollapsingHeader/*ImGuiTreeNodeFlags_DefaultOpen*/)) {
+
+						ImGui::Indent();
+
+						static int selectedCubeMapMaterial = 0; //-1; // Here we store our selection data as an index.
+						//const char* combo_label = "";  // Label to preview before opening the combo (technically it could be anything)
+						if (ImGui::BeginCombo("##cubemap index", (selectedCubeMapMaterial == -1 ? "" : std::to_string(selectedCubeMapMaterial).c_str())))
+						{
+							for (int n = 0; n < ((Project*)(viewer))->numCubeMapTextures; n++)
+							{
+								const bool is_selected = (selectedCubeMapMaterial == n);
+
+								char buf[32];
+								sprintf(buf, "Cubemap %d", n);
+
+								if (ImGui::Selectable(buf, is_selected)) {
+									selectedCubeMapMaterial = n;
+								}
+
+								// Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
+								if (is_selected)
+									ImGui::SetItemDefaultFocus();
+							}
+							ImGui::EndCombo();
+						}
+
+						if (ImGui::Button("Set CubeMap", ImVec2(-1, 0))) {
+							((Project*)(viewer))->SetCubeMap(selectedCubeMapMaterial);
+						}
+
+						ImGui::Unindent();
+					}
+					/*ImGui::Text("CubeMap Index");
+					ImGui::SameLine();
+					ImGui::InputInt("", &materialIndex);
+					ImGui::Text("out of");
+					ImGui::SameLine();
+					ImGui::Text(std::to_string(((Project*)(viewer))->numCubeMapTextures).c_str());*/
+
+
+					if (ImGui::CollapsingHeader("Picked Object Config", ImGuiTreeNodeFlags_CollapsingHeader/*ImGuiTreeNodeFlags_DefaultOpen*/)) {
+
+						ImGui::Indent();
+
+						if (ImGui::Button("Add bezier to object", ImVec2(-1, 0))) {
+							scn->addbezier(scn->lastPickedIndex);
+						}
+
+						static Eigen::Vector3d preZoomPos = scn->data_list[scn->current_Camera]->GetPos();
+						static bool zoomedIn = false;
+
+						if (zoomedIn) {
+							if (ImGui::Button("Zoom out to default state", ImVec2(-1, 0))) {
+								//std::cout << "Choose Area to Zoom into clicked but not implemented" << std::endl;
+
+								// ???
+								scn->rndr->ZoomCamera(0, preZoomPos);
+								zoomedIn = !zoomedIn;
+							}
+						}
+						else {
+							if (ImGui::Button("Zoom into picked object", ImVec2(-1, 0))) {
+								preZoomPos = scn->data_list[scn->current_Camera]->GetPos();
+								//std::cout << "Choose Area to Zoom into clicked but not implemented" << std::endl;
+								scn->rndr->ZoomCamera(0, scn->data_list[scn->lastPickedIndex]->GetPos());
+								zoomedIn = !zoomedIn;
+							}
+						}
+
+
+						//scn->moveCamera(rndr->cameras[0]->GetPos2());
+						if (ImGui::Button("Hard zoom into picked object", ImVec2(-1, 0))) {
+							scn->rndr->HardZoomCamera(0, scn->data_list[scn->cubeID]->GetPos(), scn->data_list[scn->lastPickedIndex]->GetRotation());
+						}
+
+						//if (ImGui::SliderInt("Time slider", &timeSliderValue, 0, 100)) {
+
+						ImGui::Text("Object on layer: ");
+						ImGui::SameLine();
+
+						if (((Project*)(viewer))->lastPickedIndex != -1) {
+
+							int tempLayer = ((Project*)(viewer))->data_list[((Project*)(viewer))->lastPickedIndex]->layer;
+
+							ImGui::Text(
+								tempLayer != -1 ?
+								std::to_string(tempLayer).c_str() :
+								"N/A"
+							);
+
+						}
+
+						static int newLayerIndex = 0;
+
+						ImGui::NewLine();
+						ImGui::InputInt("new layer index", &newLayerIndex);
+						if (ImGui::Button("Set new layer", ImVec2(-1, 0))) {
+							((Project*)(viewer))->changelayer(newLayerIndex, ((Project*)(viewer))->lastPickedIndex);
+						}
+
+						ImGui::NewLine();
+						ImGui::InputInt("Animation Duration", &animationDuration);
+						if (ImGui::SliderFloat("Animation delay slider", &timeSliderValue, 0.f, 100.f)) {
+							//std::cout << "Time slider changed to value " << timeSliderValue << " but not implemented" << std::endl;
+						}
+						if (ImGui::Button("Set timing", ImVec2(-1, 0))) {
+							scn->changeStartTime(timeSliderValue, scn->lastPickedIndex);
+							scn->changeEndTime(timeSliderValue + animationDuration, scn->lastPickedIndex);
+						}
+
+						ImGui::NewLine();
+
+						//ImGui::InputInt("Material Index", &materialIndex);
+
+						//if (ImGui::TreeNode("Selection State: Single Selection"))
+						//{
+							/*static int selectedObjMaterial = -1;
+							for (int n = 0; n < ((Project*)(viewer))->numObjectsTextures; n++) {
+								char buf[32];
+								sprintf(buf, "Material %d", n);
+								if (ImGui::Selectable(buf, selectedObjMaterial == n))
+									selectedObjMaterial = n;
+							}*/
+							//ImGui::TreePop();
+						//}
+
+						//const char* items[] = { "AAAA", "BBBB", "CCCC", "DDDD", "EEEE", "FFFF", "GGGG", "HHHH", "IIII", "JJJJ", "KKKK", "LLLLLLL", "MMMM", "OOOOOOO" };
+						static int selectedObjMaterial = 0; //-1; // Here we store our selection data as an index.
+						//const char* combo_label = "";  // Label to preview before opening the combo (technically it could be anything)
+						if (ImGui::BeginCombo("##material index", (selectedObjMaterial == -1 ? "" : std::to_string(selectedObjMaterial).c_str())))
+						{
+							for (int n = 0; n < ((Project*)(viewer))->numObjectsTextures; n++)
+							{
+								const bool is_selected = (selectedObjMaterial == n);
+
+								char buf[32];
+								sprintf(buf, "Material %d", n);
+
+								if (ImGui::Selectable(buf, is_selected)) {
+									selectedObjMaterial = n;
+								}
+
+								// Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
+								if (is_selected)
+									ImGui::SetItemDefaultFocus();
+							}
+							ImGui::EndCombo();
+						}
+						if (ImGui::Button("Set Material", ImVec2(-1, 0))) {
+							//std::cout << "Change Material of Picked Object clicked but not implemented" << std::endl;
+							if (selectedObjMaterial != -1) {
+								((Project*)(viewer))->SetMaterialOfPickedObjs(selectedObjMaterial);
+							}
+						}
+
+						ImGui::NewLine();
+
+						bool transparencyPlaceholder = false;
+						ImGui::Checkbox("Transparent", &transparencyPlaceholder);
+
+						if (ImGui::Button("Set transparency", ImVec2(-1, 0))) {
+							std::cout << "Set transparency of Picked Object clicked but not implemented" << std::endl;
+						}
+						ImGui::SliderFloat("Transp. Value", &transparencySliderValue, 0.f, 100.f);
+
+						ImGui::Unindent();
 					}
 
-					if (ImGui::Button("Play animation", ImVec2(-1, 0))) {
-						std::cout << "Play animation clicked but not implemented" << std::endl;
+
+					if (ImGui::CollapsingHeader("Cameras", ImGuiTreeNodeFlags_CollapsingHeader))
+					{
+						ImGui::Indent();
+
+						static int camera_mesh_indx = -1;
+
+						ImGui::Text("Number of cameras: "); ImGui::SameLine(); ImGui::Text(std::to_string((((Project*)(viewer)))->Cameras.size()).c_str());
+
+						ImGui::Text("Current camera index: ");
+						ImGui::SameLine();
+						ImGui::Text(
+							std::to_string(scn->current_Camera).c_str()
+						);
+
+						if (ImGui::Button("Move to next camera", ImVec2(-1, 0))) {
+
+							scn->current_Camera++;
+							if (scn->current_Camera >= scn->Cameras.size())
+								scn->current_Camera = 0;
+							camera_mesh_indx = scn->Cameras[scn->current_Camera];
+							((Project*)(viewer))->rndr->HardZoomCamera(0, scn->data_list[abs(camera_mesh_indx)]->GetPos(), scn->data_list[abs(camera_mesh_indx)]->GetRotation2());
+							if (camera_mesh_indx < 0)
+								scn->hide_editor();
+							else
+								scn->unhide_editor();
+						}
+
+						ImGui::NewLine();
+
+						//static int selectedCamera = 0; //-1; // Here we store our selection data as an index.
+						static float pos[3] = { 0 };
+
+						ImGui::InputFloat3("position of new camera", pos);
+						if (ImGui::Button("Add an animation Camera", ImVec2(-1, 0))) {
+							//std::cout << "Add camera clicked but not implemented" << std::endl;
+							//((Project*)(viewer))->rndr->AddCamera(Eigen::Vector3d(0, 0, 3), CAMERA_ANGLE, (float)DISPLAY_WIDTH / (float)DISPLAY_HEIGHT / 2, NEAR, FAR);
+
+							/*const int DISPLAY_WIDTH = 1200;
+							const int DISPLAY_HEIGHT = 800;
+							const int MENU_WIDTH = 350;
+							const int SCENE_WIDTH = DISPLAY_WIDTH - MENU_WIDTH;
+
+							const float CAMERA_ANGLE = 45.0f;
+							const float NEAR = 1.0f;
+							const float FAR = 120.0f;
+
+							((Project*)(viewer))->rndr->AddCamera(
+								Eigen::Vector3d(0, 0, 3),
+								CAMERA_ANGLE,
+								(float)DISPLAY_WIDTH / (float)DISPLAY_HEIGHT / 2,
+								NEAR, FAR
+							);
+
+							selectedCamera = ((Project*)(viewer))->rndr->cameras.size() - 1;*/
+
+							scn->addCamera(Eigen::Vector3f(pos));
+						}
+
+						//const char* combo_label = "";  // Label to preview before opening the combo (technically it could be anything)
+						//if (ImGui::BeginCombo("##camera index", (selectedCamera == -1 ? "" : std::to_string(selectedCamera).c_str())))
+						//{
+						//	for (int n = 0; n < ((Project*)(viewer))->rndr->cameras.size(); n++)
+						//	{
+						//		const bool is_selected = (selectedCamera == n);
+
+						//		char buf[32];
+						//		sprintf(buf, "Camera %d", n);
+
+						//		if (ImGui::Selectable(buf, is_selected)) {
+						//			selectedCamera = n;
+						//		}
+
+						//		// Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
+						//		if (is_selected)
+						//			ImGui::SetItemDefaultFocus();
+						//	}
+						//	ImGui::EndCombo();
+						//}
+						//if (ImGui::Button("Switch to camera", ImVec2(-1, 0))) {
+						//	std::cout << "Switch to previous camera clicked but not implemented" << std::endl;
+						//}
+
+						ImGui::Unindent();
 					}
 
-					if (ImGui::Button("Change Material of Picked Object", ImVec2(-1, 0))) {
-						std::cout << "Change Material of Picked Object clicked but not implemented" << std::endl;
+
+					if (ImGui::CollapsingHeader("Layers", ImGuiTreeNodeFlags_CollapsingHeader))
+					{
+						static int selectedLayer = 0;//-1; // Here we store our selection data as an index.
+
+						ImGui::Indent();
+						//ImGui::Text("Number of layers: <NOT IMPLEMENTED>");
+						//if (ImGui::Button("Add a Layer", ImVec2(-1, 0))) {
+						//	//std::cout << "Add layer clicked but not implemented" << std::endl;
+						//	selectedLayer = ((Project*)(viewer))->numOfLayers;
+						//	((Project*)(viewer))->addLayer();
+
+						//}
+
+						ImGui::InputInt("layer index", &selectedLayer);
+						ImGui::NewLine();
+
+						if (ImGui::Button("Hide Layer", ImVec2(-1, 0))) {
+							// std::cout << "Add layer clicked but not implemented" << std::endl;
+							(((Project*)(viewer)))->hidelayer(selectedLayer);
+						}
+
+						if (ImGui::Button("Unhide Layer", ImVec2(-1, 0))) {
+							//std::cout << "Add layer clicked but not implemented" << std::endl;
+							(((Project*)(viewer)))->unhidelayer(selectedLayer);
+						}
+
+						//ImGui::InputInt("Layer Number", &pickedLayerIndex);
+
+
+						//const char* combo_label = "";  // Label to preview before opening the combo (technically it could be anything)
+						//if (ImGui::BeginCombo("##layer index", (selectedLayer == -1 ? "" : std::to_string(selectedLayer).c_str())))
+						//{
+						//	for (int n = 0; n < ((Project*)(viewer))->numOfLayers; n++)
+						//	{
+						//		const bool is_selected = (selectedLayer == n);
+
+						//		char buf[32];
+						//		sprintf(buf, "Layer %d", n);
+
+						//		if (ImGui::Selectable(buf, is_selected)) {
+						//			selectedLayer = n;
+						//		}
+
+						//		// Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
+						//		if (is_selected)
+						//			ImGui::SetItemDefaultFocus();
+						//	}
+						//	ImGui::EndCombo();
+						//}
+
+						/*ImGui::InputInt2();
+						ImGui::InputInt3();
+						ImGui::InputInt4();*/
+
+						/*char buf[256];
+						ImGui::InputTextWithHint("", "", buf, 256);*/
+						ImGui::Unindent();
+
 					}
 
-					if (ImGui::Button("Choose Area to Zoom into", ImVec2(-1, 0))) {
+
+					ImGui::NewLine();
+
+					ImGui::Separator();
+					ImGui::Separator();
+
+					ImGui::NewLine();
+
+					ImGui::Indent();
+
+					/*if (ImGui::Button("btn 1", ImVec2(-1, 0))) {
 						std::cout << "Choose Area to Zoom into clicked but not implemented" << std::endl;
 					}
-
-					//if (ImGui::SliderInt("Time slider", &timeSliderValue, 0, 100)) {
-					if (ImGui::SliderFloat("Time slider", &timeSliderValue, 0.f, 100.f)) {
-						std::cout << "Time slider changed to value " << timeSliderValue << " but not implemented" << std::endl;
+					if (ImGui::Button("btn 2", ImVec2(-1, 0))) {
+						std::cout << "Choose Area to Zoom into clicked but not implemented" << std::endl;
 					}
-
-					if (ImGui::Button("Switch to previous camera", ImVec2(-1, 0))) {
-						std::cout << "Switch to previous camera clicked but not implemented" << std::endl;
+					if (ImGui::Button("btn 3", ImVec2(-1, 0))) {
+						std::cout << "Choose Area to Zoom into clicked but not implemented" << std::endl;
 					}
-
-					if (ImGui::Button("Switch to next camera", ImVec2(-1, 0))) {
-						std::cout << "Switch to next camera clicked but not implemented" << std::endl;
+					if (ImGui::Button("btn 4", ImVec2(-1, 0))) {
+						std::cout << "Choose Area to Zoom into clicked but not implemented" << std::endl;
 					}
+					if (ImGui::Button("btn 5", ImVec2(-1, 0))) {
+						std::cout << "Choose Area to Zoom into clicked but not implemented" << std::endl;
+					}
+					if (ImGui::Button("btn 6", ImVec2(-1, 0))) {
+						std::cout << "Choose Area to Zoom into clicked but not implemented" << std::endl;
+					}
+					if (ImGui::Button("btn 7", ImVec2(-1, 0))) {
+						std::cout << "Choose Area to Zoom into clicked but not implemented" << std::endl;
+					}
+					if (ImGui::Button("btn 8", ImVec2(-1, 0))) {
+						std::cout << "Choose Area to Zoom into clicked but not implemented" << std::endl;
+					}
+					if (ImGui::Button("btn 9", ImVec2(-1, 0))) {
+						std::cout << "Choose Area to Zoom into clicked but not implemented" << std::endl;
+					}
+					if (ImGui::Button("btn 10", ImVec2(-1, 0))) {
+						std::cout << "Choose Area to Zoom into clicked but not implemented" << std::endl;
+					}*/
+
+					ImGui::Unindent();
 
 					ImGui::End();
 
 
 
 
-/// ********************************** PREVIOUS CODE ********************************
+					/// ********************************** PREVIOUS CODE ********************************
 
-					//ImGui::Begin(
-					//	"Menu", p_open,
-					//	window_flags
-					//);
+										//ImGui::Begin(
+										//	"Menu", p_open,
+										//	window_flags
+										//);
 
-					//ImGui::SetWindowPos(ImVec2((float)0, (float)0), ImGuiCond_Always);
-					//ImGui::SetWindowSize(ImVec2((float)0, (float)0), ImGuiCond_Always);
-					//ImGui::End();
-					//no_move = true;
-					//no_resize = true;
+										//ImGui::SetWindowPos(ImVec2((float)0, (float)0), ImGuiCond_Always);
+										//ImGui::SetWindowSize(ImVec2((float)0, (float)0), ImGuiCond_Always);
+										//ImGui::End();
+										//no_move = true;
+										//no_resize = true;
 
-					//ImGui::Begin(
-					//	"Menu", p_open,
-					//	window_flags
-					//);
+										//ImGui::Begin(
+										//	"Menu", p_open,
+										//	window_flags
+										//);
 
-					//// Mesh
-					//if (ImGui::CollapsingHeader("Mesh", ImGuiTreeNodeFlags_DefaultOpen))
-					//{
-					//	float w = ImGui::GetContentRegionAvailWidth();
-					//	float p = ImGui::GetStyle().FramePadding.x;
-					//	if (ImGui::Button("Load##Mesh", ImVec2((w - p) / 2.f, 0)))
-					//	{
-					//		int savedIndx = viewer->selected_data_index;
-					//		// viewer->selected_data_index = viewer->parents.size();
-					//		// viewer->AddShape(viewer->xCylinder,-1,viewer->TRIANGLES);
-					//		viewer->open_dialog_load_mesh();
-					//		if (viewer->data_list.size() > viewer->parents.size())
-					//		{
+										//// Mesh
+										//if (ImGui::CollapsingHeader("Mesh", ImGuiTreeNodeFlags_DefaultOpen))
+										//{
+										//	float w = ImGui::GetContentRegionAvailWidth();
+										//	float p = ImGui::GetStyle().FramePadding.x;
+										//	if (ImGui::Button("Load##Mesh", ImVec2((w - p) / 2.f, 0)))
+										//	{
+										//		int savedIndx = viewer->selected_data_index;
+										//		// viewer->selected_data_index = viewer->parents.size();
+										//		// viewer->AddShape(viewer->xCylinder,-1,viewer->TRIANGLES);
+										//		viewer->open_dialog_load_mesh();
+										//		if (viewer->data_list.size() > viewer->parents.size())
+										//		{
 
-					//			viewer->parents.push_back(-1);
-					//			viewer->SetShapeViewport(viewer->selected_data_index, 0);
-					//			viewer->SetShapeShader(viewer->selected_data_index, 2);
-					//			viewer->SetShapeMaterial(viewer->selected_data_index, 0);
-					//			//viewer->data_list.back()->set_visible(false, 1);
-					//			//viewer->data_list.back()->set_visible(true, 2);
-					//			viewer->data_list.back()->UnHide();
-					//			viewer->data_list.back()->show_faces = 3;
-					//			viewer->data()->mode = viewer->TRIANGLES;
-					//			viewer->selected_data_index = savedIndx;
-					//		}
-					//	}
-					//	ImGui::SameLine(0, p);
-					//	if (ImGui::Button("Save##Mesh", ImVec2((w - p) / 2.f, 0)))
-					//	{
-					//		viewer->open_dialog_save_mesh();
-					//	}
-					//}
+										//			viewer->parents.push_back(-1);
+										//			viewer->SetShapeViewport(viewer->selected_data_index, 0);
+										//			viewer->SetShapeShader(viewer->selected_data_index, 2);
+										//			viewer->SetShapeMaterial(viewer->selected_data_index, 0);
+										//			//viewer->data_list.back()->set_visible(false, 1);
+										//			//viewer->data_list.back()->set_visible(true, 2);
+										//			viewer->data_list.back()->UnHide();
+										//			viewer->data_list.back()->show_faces = 3;
+										//			viewer->data()->mode = viewer->TRIANGLES;
+										//			viewer->selected_data_index = savedIndx;
+										//		}
+										//	}
+										//	ImGui::SameLine(0, p);
+										//	if (ImGui::Button("Save##Mesh", ImVec2((w - p) / 2.f, 0)))
+										//	{
+										//		viewer->open_dialog_save_mesh();
+										//	}
+										//}
 
-					//// Viewing options
-					//if (ImGui::CollapsingHeader("Viewing Options", ImGuiTreeNodeFlags_DefaultOpen))
-					//{
-					//	if (ImGui::Button("Center object", ImVec2(-1, 0)))
-					//	{
-					//		std::cout << "not implemented yet" << std::endl;
-					//		//      core[1].align_camera_center(viewer->data().V, viewer->data().F); TODO: add function like this to camera
-					//	}
-					//	//if (ImGui::Button("Snap canonical view", ImVec2(-1, 0)))
-					//	//{
-					//	//  core[1].snap_to_canonical_quaternion();
-					//	//}
+										//// Viewing options
+										//if (ImGui::CollapsingHeader("Viewing Options", ImGuiTreeNodeFlags_DefaultOpen))
+										//{
+										//	if (ImGui::Button("Center object", ImVec2(-1, 0)))
+										//	{
+										//		std::cout << "not implemented yet" << std::endl;
+										//		//      core[1].align_camera_center(viewer->data().V, viewer->data().F); TODO: add function like this to camera
+										//	}
+										//	//if (ImGui::Button("Snap canonical view", ImVec2(-1, 0)))
+										//	//{
+										//	//  core[1].snap_to_canonical_quaternion();
+										//	//}
 
-					//	// Zoom
-					//	ImGui::PushItemWidth(80 * menu_scaling());
-					//	if (camera[0]->_ortho)
-					//		ImGui::DragFloat("Zoom", &(camera[0]->_length), 0.05f, 0.1f, 20.0f);
-					//	else
-					//		ImGui::DragFloat("Fov", &(camera[0]->_fov), 0.05f, 30.0f, 90.0f);
+										//	// Zoom
+										//	ImGui::PushItemWidth(80 * menu_scaling());
+										//	if (camera[0]->_ortho)
+										//		ImGui::DragFloat("Zoom", &(camera[0]->_length), 0.05f, 0.1f, 20.0f);
+										//	else
+										//		ImGui::DragFloat("Fov", &(camera[0]->_fov), 0.05f, 30.0f, 90.0f);
 
-					//	// Select rotation type
-					//	static Eigen::Quaternionf trackball_angle = Eigen::Quaternionf::Identity();
-					//	static bool orthographic = true;
+										//	// Select rotation type
+										//	static Eigen::Quaternionf trackball_angle = Eigen::Quaternionf::Identity();
+										//	static bool orthographic = true;
 
-					//	// Orthographic view
-					//	ImGui::Checkbox("Orthographic view", &(camera[0]->_ortho));
-					//	if (camera[0]->_ortho) {
-					//		camera[0]->SetProjection(0, camera[0]->_relationWH);
-					//	}
-					//	else {
-					//		camera[0]->SetProjection(camera[0]->_fov > 0 ? camera[0]->_fov : 45, camera[0]->_relationWH);
-					//	}
+										//	// Orthographic view
+										//	ImGui::Checkbox("Orthographic view", &(camera[0]->_ortho));
+										//	if (camera[0]->_ortho) {
+										//		camera[0]->SetProjection(0, camera[0]->_relationWH);
+										//	}
+										//	else {
+										//		camera[0]->SetProjection(camera[0]->_fov > 0 ? camera[0]->_fov : 45, camera[0]->_relationWH);
+										//	}
 
-					//	ImGui::PopItemWidth();
-					//}
+										//	ImGui::PopItemWidth();
+										//}
 
-					//// Helper for setting viewport specific mesh options
-					//auto make_checkbox = [&](const char* label, unsigned int& option)
-					//{
-					//	return ImGui::Checkbox(label,
-					//		[&]() {
-					//			return drawInfos[1]->is_set(option);
-					//		},
-					//		[&](bool value) {
-					//			return drawInfos[1]->set(option, value);
-					//		}
-					//		);
-					//};
-					//ImGui::ColorEdit4("Background", drawInfos[1]->Clear_RGBA.data(),
-					//	ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_PickerHueWheel);
+										//// Helper for setting viewport specific mesh options
+										//auto make_checkbox = [&](const char* label, unsigned int& option)
+										//{
+										//	return ImGui::Checkbox(label,
+										//		[&]() {
+										//			return drawInfos[1]->is_set(option);
+										//		},
+										//		[&](bool value) {
+										//			return drawInfos[1]->set(option, value);
+										//		}
+										//		);
+										//};
+										//ImGui::ColorEdit4("Background", drawInfos[1]->Clear_RGBA.data(),
+										//	ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_PickerHueWheel);
 
-					//// Draw options
-					//if (ImGui::CollapsingHeader("Draw Options", ImGuiTreeNodeFlags_DefaultOpen))
-					//{
-					//	if (ImGui::Checkbox("Face-based", &(viewer->data()->face_based)))
-					//	{
-					//		viewer->data()->dirty = MeshGL::DIRTY_ALL;
-					//	}
-					//	//
-					//	//    make_checkbox("Show texture", viewer->data().show_texture);
-					//	//    if (ImGui::Checkbox("Invert normals", &(viewer->data().invert_normals)))
-					//	//    {
-					//	//      viewer->data().dirty |= igl::opengl::MeshGL::DIRTY_NORMAL;
-					//	//    }
-					//	make_checkbox("Show overlay", viewer->data()->show_overlay);
-					//	make_checkbox("Show overlay depth", viewer->data()->show_overlay_depth);
+										//// Draw options
+										//if (ImGui::CollapsingHeader("Draw Options", ImGuiTreeNodeFlags_DefaultOpen))
+										//{
+										//	if (ImGui::Checkbox("Face-based", &(viewer->data()->face_based)))
+										//	{
+										//		viewer->data()->dirty = MeshGL::DIRTY_ALL;
+										//	}
+										//	//
+										//	//    make_checkbox("Show texture", viewer->data().show_texture);
+										//	//    if (ImGui::Checkbox("Invert normals", &(viewer->data().invert_normals)))
+										//	//    {
+										//	//      viewer->data().dirty |= igl::opengl::MeshGL::DIRTY_NORMAL;
+										//	//    }
+										//	make_checkbox("Show overlay", viewer->data()->show_overlay);
+										//	make_checkbox("Show overlay depth", viewer->data()->show_overlay_depth);
 
-					//	ImGui::ColorEdit4("Line color", viewer->data()->line_color.data(),
-					//		ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_PickerHueWheel);
-					//	ImGui::PushItemWidth(ImGui::GetWindowWidth() * 0.3f);
-					//	ImGui::DragFloat("Shininess", &(viewer->data()->shininess), 0.05f, 0.0f, 100.0f);
-					//	ImGui::PopItemWidth();
-					//}
+										//	ImGui::ColorEdit4("Line color", viewer->data()->line_color.data(),
+										//		ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_PickerHueWheel);
+										//	ImGui::PushItemWidth(ImGui::GetWindowWidth() * 0.3f);
+										//	ImGui::DragFloat("Shininess", &(viewer->data()->shininess), 0.05f, 0.0f, 100.0f);
+										//	ImGui::PopItemWidth();
+										//}
 
-					//// Overlays
-					//if (ImGui::CollapsingHeader("Overlays", ImGuiTreeNodeFlags_DefaultOpen))
-					//{
-					//	make_checkbox("Wireframe", viewer->data()->show_lines);
-					//	make_checkbox("Fill", viewer->data()->show_faces);
+										//// Overlays
+										//if (ImGui::CollapsingHeader("Overlays", ImGuiTreeNodeFlags_DefaultOpen))
+										//{
+										//	make_checkbox("Wireframe", viewer->data()->show_lines);
+										//	make_checkbox("Fill", viewer->data()->show_faces);
 
-					//}
-					//ImGui::End();
+										//}
+										//ImGui::End();
 				}
 
 

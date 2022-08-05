@@ -193,7 +193,7 @@ IGL_INLINE bool
                   //std::cout << "faces normals:  " << corner_normals.row(fNormIndices(k, 0)) << std::endl;
               }
               
-              std::cout << "faces normals: \n" << N << std::endl;
+              //std::cout << "faces normals: \n" << N << std::endl;
              
               normal_read = true;
           }
@@ -284,7 +284,7 @@ IGL_INLINE bool
     return load_scene(fname);
   }
 
-  IGL_INLINE bool Viewer::load_scene(std::string fname)
+  IGL_INLINE bool Viewer::load_scene(std::string &fname)
   {
    // igl::deserialize(core(),"Core",fname.c_str());
     igl::deserialize(*data(),"Data",fname.c_str());
@@ -299,7 +299,7 @@ IGL_INLINE bool
     return save_scene(fname);
   }
 
-  IGL_INLINE bool Viewer::save_scene(std::string fname)
+  IGL_INLINE bool Viewer::save_scene(std::string &fname)
   {
     //igl::serialize(core(),"Core",fname.c_str(),true);
     igl::serialize(data(),"Data",fname.c_str());
@@ -423,6 +423,7 @@ IGL_INLINE bool
 
         for (int i = 0; i < data_list.size(); i++)
         {
+            //draw by z buffer from last to most forword 
             auto shape = data_list[i];
             if (shape->Is2Render(viewportIndx))
             {
@@ -651,11 +652,12 @@ IGL_INLINE bool
             //WhenTranslate(scnMat * cameraMat, -xrel / movCoeff, yrel / movCoeff);
             //movCoeff = 2.0f;
             /*WhenTranslate(scnMat * cameraMat, -((float)xrel / 180) / movCoeff, ((float)yrel / 180) / movCoeff); */
-            std::cout << pShapes.size() << std::endl;
+            //std::cout << pShapes.size() << std::endl;
             /*int idx = selected_data_index;
             WhenTranslate(scnMat * cameraMat, -((float)xrel / 90), ((float)yrel / 90));
             if (data_list[idx]->iscontrolpoint)
                 translateControl(xTranslate, -((float)xrel) / 90, idx, false);*/
+           /*
             for (int p : pShapes) {
                 selected_data_index = p;
                 //int idx = selected_data_index;
@@ -743,7 +745,7 @@ IGL_INLINE bool
 
             if (button == 0)
             {
-//                if (selected_data_index > 0 )
+                if (selected_data_index > 0 )
                     WhenRotate(scnMat * cameraMat, -((float)xrel/180) / movCoeff, ((float)yrel/180) / movCoeff);
 
             }
@@ -816,6 +818,7 @@ IGL_INLINE bool
         }
         std::cout << index << std::endl;
         selected_data_index = index;
+		lastPickedIndex = index;
         
         /*if (index >= data_list.size())
             return true;*/
@@ -832,22 +835,27 @@ IGL_INLINE bool
             /*if (found)
             std::remove(pShapes.begin(), pShapes.end(), index);
         else
-            pShapes.push_back(index);*/
+            pShapes.push_back(index);
 
+
+		selected_data_index = index;*/
 
         return true;
 
     }
 
-    void Viewer::WhenTranslate( const Eigen::Matrix4d& preMat, float dx, float dy)
+    void Viewer::WhenTranslate(const Eigen::Matrix4d& preMat, float dx, float dy)
     {
         Movable* obj;
         if (selected_data_index == 0 || data()->IsStatic())
             obj = (Movable*)this;
-        else  if (selected_data_index > 0) { obj = (Movable *) data(); }
+        else  if (selected_data_index > 0)
+        {
+            obj = (Movable*)data();
+        }
         obj->TranslateInSystem(preMat.block<3, 3>(0, 0), Eigen::Vector3d(dx, 0, 0));
         obj->TranslateInSystem(preMat.block<3, 3>(0, 0), Eigen::Vector3d(0, dy, 0));
-        WhenTranslate(dx,dy);
+        WhenTranslate(dx, dy);
     }
 
     void Viewer::WhenRotate(const Eigen::Matrix4d& preMat, float dx, float dy)

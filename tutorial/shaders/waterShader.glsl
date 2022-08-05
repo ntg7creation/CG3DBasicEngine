@@ -10,7 +10,11 @@ uniform sampler2D sampler1;
 uniform vec4 lightDirection;
 
 out vec4 Color;
+
+
+
 void main()
 {
-	Color = texture2D(sampler1, texCoord0)* vec4(color0,1.0); //you must have gl_FragColor
+	//vec3 temp = vec3(3,1,2)+vec3(1,2,3);
+	Color = texture2D(sampler1, texCoord0)* vec4(color0,0.5); //you must have gl_FragColor
 }

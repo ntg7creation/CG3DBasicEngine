@@ -10,6 +10,7 @@ public:
 	enum{preRot,postRot,phiRot,thetaRot,psiRot,psiPhiRot};
 	int animtoinindex = -1;
 	bool iscontrolpoint = false; 
+	int layer = -1;
 	bool isPickable = true;
 	Movable();
 	Movable(const Movable& mov);
@@ -24,13 +25,15 @@ public:
     void MyRotate(Eigen::Vector3d rotAxis, double angle);
     void RotateInSystem(Eigen::Vector3d rotAxis, double angle);
     void MyRotate(const Eigen::Matrix3d &rot);
+    void MyRotate2(const Eigen::Matrix3d &rot);
     void MyScale(Eigen::Vector3d amt);
 
 	void ZeroTrans();
 		//Eigen::Vector3d GetTranslation const{ return Tout.tranlastion(); }
 	Eigen::Vector3d GetPos() const { return Tin.translation(); }
 	Eigen::Vector3d GetPos2() const { return Tout.translation(); }
-	Eigen::Matrix3d GetRotation() const{ return Tout.rotation().matrix(); }
+	Eigen::Matrix3d GetRotation() { return Tout.rotation().matrix(); }
+	Eigen::Matrix3d GetRotation2() { return Tin.rotation().matrix(); }
 	//	Eigen::Matrix3d GetRotation() const{ return Tout.tranlatoin().matrix(); }
     virtual ~Movable() {}
 private:

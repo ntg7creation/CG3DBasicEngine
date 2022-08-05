@@ -64,7 +64,7 @@ LineVertex Bezier1D::GetVertex(int segment, float t) {
 		(CP0->z() * t * t * t) + (CP2->z() * 3 * t * t * (1 - t)) + (CP2->z() * 3 * t * (1 - t) * (1 - t)) + (CP3->z() * (1 - t) * (1 - t) * (1 - t))  // point z
 		;
 	
-
+	
 	Eigen::Vector3f tempcolor; tempcolor << 0, 0, 1;
 	LineVertex output(thevector, tempcolor);
 	return output;
@@ -152,6 +152,8 @@ LineVertex Bezier1D::GetControlPoint(int seg, int index)
 	//thepoint0 << sector(index,0), sector(index,1),sector(index,2);
 	thepoint0 = sector.row(index).head<3>();
 	
+
+
 	Eigen::Vector3f tempcolor; tempcolor << 0, 0, 1;
 	LineVertex output(thepoint0, tempcolor);
 	return output;

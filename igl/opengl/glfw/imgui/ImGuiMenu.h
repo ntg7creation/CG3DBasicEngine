@@ -19,6 +19,7 @@
 #include <igl/opengl/Camera.h>
 #include "../DrawInfo.h"
 #include <memory>
+#include "../../../../tutorial/Project/Project.h"
 ////////////////////////////////////////////////////////////////////////////////
 
 
@@ -50,7 +51,14 @@ protected:
   ImGuiContext * context_ = nullptr;
 
 public:
-    IGL_INLINE virtual void init(Display* disp);// override;
+	Project* scn;
+	//int pickedLayerIndex;
+	int animationDuration;
+	float timeSliderValue = 0.f;
+	float transparencySliderValue = 100.f;
+	int materialIndex = 0;
+
+	IGL_INLINE virtual void init(Display* disp);// override;
 
   IGL_INLINE virtual void reload_font(int font_size = 13);
 
