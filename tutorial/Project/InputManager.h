@@ -122,6 +122,7 @@
 		Project* scn = (Project*)rndr->GetScene();
 		bool temp;
 		int camera_mesh_indx;
+		int tempholder;
 		Eigen::Vector3d temppos ;
 		//rndr->FreeShapes(2);
 		if (action == GLFW_PRESS || action == GLFW_REPEAT)
@@ -185,13 +186,14 @@
 				break;
 
 			case GLFW_KEY_Z:
-				//TODO change cube ID to pickshape
-				rndr->ZoomCamera(0, scn->data_list[scn->cubeID]->GetPos());
-				//scn->moveCamera(rndr->cameras[0]->GetPos2());
+
+
 				break;
 			case GLFW_KEY_X:
-				//rndr->HardZoomCamera(0, scn->data_list[scn->cubeID]->GetPos(), scn->data_list[scn->cubeID]->GetRotation());
-				//scn->moveCamera(rndr->cameras[0]->GetPos2());
+
+				rndr->ZoomCamera(0, scn->zTranslate, 2.5f);
+				scn->moveCamera(rndr->cameras[0]->GetPos2());
+
 				break;
 			case GLFW_KEY_F:
 
@@ -199,7 +201,8 @@
 				if (scn->current_Camera >= scn->Cameras.size())
 					scn->current_Camera = 0;
 				camera_mesh_indx = scn->Cameras[scn->current_Camera];
-				rndr->HardZoomCamera(0, scn->data_list[abs(camera_mesh_indx)]->GetPos(), scn->data_list[abs(camera_mesh_indx)]->GetRotation2());
+				//std::cout << scn->data_list[abs(camera_mesh_indx)]->GetPos().transpose() << std::endl;
+				//rndr->HardZoomCamera(0, scn->data_list[abs(camera_mesh_indx)]->GetPos(), scn->data_list[abs(camera_mesh_indx)]->GetRotation2());
 				if (camera_mesh_indx < 0)
 					scn->hide_editor();
 				else

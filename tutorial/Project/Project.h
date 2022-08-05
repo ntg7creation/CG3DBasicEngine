@@ -105,6 +105,16 @@ public:
 	void hide_editor();
 	void unhide_editor();
 
+	void change_start_time(float time, int meshindex) {
+		if (data_list[meshindex]->animtoinindex < 0)
+			return;
+		bezierAnimations[data_list[meshindex]->animtoinindex].time_start = time;
+	}
+	void change_end_time(float time, int meshindex) {
+		if (data_list[meshindex]->animtoinindex < 0)
+			return;
+		bezierAnimations[data_list[meshindex]->animtoinindex].time_end = time; }
+
 	void moveCamera(Eigen::Vector3d pos);
 
 	/// <summary>
